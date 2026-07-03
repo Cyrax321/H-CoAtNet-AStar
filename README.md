@@ -27,7 +27,7 @@ The release supports **methodological verification, benchmarking, and reproducib
 
 ---
 
-## 📄 **Associated Paper**
+## 📄 **Associated Paper **
 
 **Hierarchical Hybrid Learning: Enhanced Classification of Ichthyosis Variants in Dermatological Images Using H-CoAtNet **
 
