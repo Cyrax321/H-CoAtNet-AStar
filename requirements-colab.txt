@@ -1,0 +1,17 @@
+# Colab-friendly (uses preinstalled torch, no pin to avoid Python 3.13 break)
+timm
+torchinfo
+thop
+scikit-learn
+matplotlib
+seaborn
+pillow
+tqdm
+roboflow
+ImageHash
+scikit-image
+grad-cam
+statsmodels
+scipy
+pandas
+numpy
