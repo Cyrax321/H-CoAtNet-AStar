@@ -2,10 +2,12 @@
 # Paste ENTIRE block as ONE cell after Restart (GPU T4, ~3.5 hrs overnight)
 # Runtime -> Change runtime type -> T4 GPU -> Restart session -> Paste -> Run
 
-# 1. CLEAN CLONE
+# 1. CLEAN CLONE — FIXED for Colab (uses zip, no git Username prompt, works for PUBLIC)
 %cd /content
-!rm -rf H-CoAtNet-AStar
-!GIT_TERMINAL_PROMPT=0 git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git
+!rm -rf H-CoAtNet-AStar H-CoAtNet-AStar-main /tmp/repo.zip
+!wget -q https://github.com/Cyrax321/H-CoAtNet-AStar/archive/refs/heads/main.zip -O /tmp/repo.zip
+!unzip -q /tmp/repo.zip -d /tmp
+!mv /tmp/H-CoAtNet-AStar-main /content/H-CoAtNet-AStar
 %cd H-CoAtNet-AStar
 !pwd
 !ls -lh
