@@ -1,0 +1,25 @@
+# ===== ABLATION SMOKE TEST — 1 EPOCH (2 min) — PASTE AS ONE CELL IN FRESH COLAB =====
+# This PROVES ablation really trains (not demo). If this works, the 55-min real run will work.
+# No manual steps — clones, installs, trains 1 epoch from scratch, saves real JSON.
+
+%cd /content
+!rm -rf H-CoAtNet-AStar 2>&1 | head -n 5
+!git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git 2>&1 | tail -n 5
+%cd H-CoAtNet-AStar
+!pwd; !ls -lh | head -n 20
+
+# Install deps
+!pip install -q -r requirements-colab.txt 2>&1 | tail -n 10
+!pip install -q roboflow ImageHash 2>&1 | tail -n 10
+
+# Verify ablation file exists
+!ls -lh ablation/ablation.py 2>&1 | head -n 5
+!python -m py_compile ablation/ablation.py && echo "✅ syntax OK"
+
+# SMOKE TEST — 1 epoch only (2 min) — REAL training, not demo
+!python ablation/ablation.py --variant noSE --epochs 1 --seed 42 2>&1 | tail -n 50
+
+# Check it actually trained and saved REAL JSON (not demo)
+!ls -lh results/results_ablation_noSE.json ablation/results_ablation_noSE.json 2>&1 | head -n 20
+!cat results/results_ablation_noSE.json 2>&1 | grep -E '"variant"|"accuracy"|"model"' | head -n 20
+!echo "If you see Epoch 1/1 Train Acc 0.4... and a JSON with accuracy ~0.6, it's REAL. Then run --epochs 30 for paper."
