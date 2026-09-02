@@ -75,3 +75,8 @@ print("\n=== SAVED TO DRIVE — SEPARATE FOLDERS ===")
 !ls -R "{DRIVE_OUT}/diagrams" 2>/dev/null
 !ls -lh "{DRIVE_OUT}/results" | head -n 30
 print(f"\nDone: {DRIVE_OUT} — sleep now, check Drive tomorrow: diagrams/H-CoAtNet/, GFT/, ...")
+
+# 9. VERIFY ALL — 22/22 Reviewer Fixes + 7 Models + Graphs (A* Perfection Check)
+!python tools/verify_all.py
+print("\nIf 41/41 PASS after training → PERFECT (A* ready). Before training 18/18 CODE PASS is normal, 23 results pending until training finishes.")
+
