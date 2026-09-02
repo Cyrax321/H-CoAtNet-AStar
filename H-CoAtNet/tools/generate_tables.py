@@ -28,8 +28,21 @@ def sha256_file(p):
 
 def generate_table8(all_results):
     """All_results: list of dicts with test metrics."""
-    # Sort: H-CoAtNet first, then by accuracy desc
-    all_results = sorted(all_results, key=lambda x: (x["model"].lower() != "h-coatnet", -x["test"]["accuracy"]))
+    # Deduplicate by model (keep first per model, ignore results_final.json duplicate and efficientnet variants)
+    seen = {}
+    deduped = []
+    for r in all_results:
+        name = r.get("model","").lower().replace("-","").replace(" ","")
+        # Normalize: hcoatnet, coatnet, gft, etc.
+        key = name
+        if key == "efficientnetb0":
+            key = "efficientnet"
+        if key not in seen:
+            seen[key] = True
+            deduped.append(r)
+    all_results = deduped
+    # Sort: CoAtNet/H-CoAtNet top by accuracy
+    all_results = sorted(all_results, key=lambda x: -x["test"]["accuracy"])
     rows = []
     for r in all_results:
         t = r["test"]
@@ -48,7 +61,7 @@ def generate_table8(all_results):
 def generate_latex_table8(rows):
     latex = []
     latex.append("\\begin{table*}[t]")
-    latex.append("\\caption{Aggregate performance on frozen test (n=237). Best in bold. CI via bootstrap 1000 (see Table S3).}")
+    latex.append("\\caption{Aggregate performance on frozen test (n=158). Best in bold. CI via bootstrap 1000 (see Table S3).}")
     latex.append("\\label{tab:aggregate}")
     latex.append("\\centering\\small\\begin{tabular}{lccccccc}")
     latex.append("\\toprule Model & Acc & Bal.Acc & Macro F1 & Weighted F1 & $\\kappa$ & MCC & AUROC \\\\")
@@ -109,7 +122,7 @@ def main():
                     continue
                 print(f"  {cls}: P={metrics['precision']:.3f} R={metrics['recall']:.3f} F1={metrics['f1-score']:.3f} support={metrics['support']}")
             # LaTeX Table 9
-            latex9 = ["\\begin{table*}[t]","\\caption{Per-class performance of H-CoAtNet (n=237).}","\\label{tab:perclass}","\\centering\\footnotesize\\begin{tabular}{lcccccc}","\\toprule Class & Prec & Recall & F1 & AUROC & Support \\\\","\\midrule"]
+            latex9 = ["\\begin{table*}[t]","\\caption{Per-class performance of H-CoAtNet (n=158).}","\\label{tab:perclass}","\\centering\\footnotesize\\begin{tabular}{lcccccc}","\\toprule Class & Prec & Recall & F1 & AUROC & Support \\\\","\\midrule"]
             for cls in data.get("classes", []):
                 # Find key (class name may be lower)
                 key = next((k for k in data["per_class"] if k.lower()==cls.lower()), None)

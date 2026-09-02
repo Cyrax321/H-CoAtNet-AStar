@@ -26,7 +26,7 @@ def mcnemar_test(y_true, y_pred_a, y_pred_b):
     a_only = np.sum(a_correct & ~b_correct)
     b_only = np.sum(~a_correct & b_correct)
     both_wrong = np.sum(~a_correct & ~b_correct)
-    table = [[both_correct, a_only],[b_only, both_wrong]]
+    table = [[int(both_correct), int(a_only)],[int(b_only), int(both_wrong)]]
     # Use exact binomial or chi2 with continuity correction
     try:
         from statsmodels.stats.contingency_tables import mcnemar
@@ -131,7 +131,7 @@ def main():
             print(f"{name_ref} vs {name}: McNemar p={pval:.4f} (chi2={chi2:.2f}, table {table}), DeLong-like p={p_delong:.4f} ({delong_note}) {'**' if pval<0.01 else '*' if pval<0.05 else 'ns'}")
             results.append({"comparison": f"{name_ref} vs {name}", "mcnemar_p": float(pval), "mcnemar_chi2": float(chi2), "table": table, "delong_p": float(p_delong) if isinstance(p_delong,float) else None, "note": delong_note})
         with open(args.out, "w") as f:
-            json.dump(results, f, indent=2)
+            json.dump(results, f, indent=2, default=lambda o: int(o) if isinstance(o, (np.integer,)) else o)
         print(f"[OK] Saved {args.out}")
     elif args.a and args.b:
         yt, yp_a, probs_a, name_a = load_results(args.a)
