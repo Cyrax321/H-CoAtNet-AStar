@@ -63,26 +63,39 @@ print("Freeze split from:", DATASET)
 !echo "=== CURVES (train vs val only, no test leakage) ==="
 !ls -1 results/*curves.png 2>/dev/null
 
-# 8. SAVE EVERYTHING TO DRIVE (images + graphs + JSONs + splits + weights) — FIXED no nested results/results
+# 8. SAVE EVERYTHING TO DRIVE — ALL GRAPHS AS SEPARATE PER-MODEL FOLDERS (fair, exact names)
 from google.colab import drive
 drive.mount('/content/drive')
-import datetime, pathlib
+import datetime, pathlib, shutil
 DATE = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 DRIVE_OUT = pathlib.Path(f"/content/drive/MyDrive/HCoAtNet_AStar_{DATE}")
 DRIVE_OUT.mkdir(parents=True, exist_ok=True)
 print(f"Saving to {DRIVE_OUT}")
+# Base
 !mkdir -p "{DRIVE_OUT}/results" "{DRIVE_OUT}/splits" "{DRIVE_OUT}/weights"
 !cp -r results/* "{DRIVE_OUT}/results/" 2>/dev/null
 !cp -r splits/* "{DRIVE_OUT}/splits/" 2>/dev/null
-!find . -maxdepth 4 -name "*.png" -exec cp -n {} "{DRIVE_OUT}/results/" \; 2>/dev/null
+!cp results/tables.tex "{DRIVE_OUT}/results/" 2>/dev/null
+# Per-model separate folders for diagrams (as you asked)
+import pathlib as _pp
+for model in ["H-CoAtNet", "GFT", "CoAtNet", "Swin", "ViT", "CNN", "EfficientNet-B0"]:
+    (_pp.Path(DRIVE_OUT) / "diagrams" / model).mkdir(parents=True, exist_ok=True)
+# Copy each model's PNGs to its own folder (exact names, no A*)
+!cp -n results/confusion_matrix_hcoatnet*.png "{DRIVE_OUT}/diagrams/H-CoAtNet/" 2>/dev/null; cp -n results/hcoatnet*.png "{DRIVE_OUT}/diagrams/H-CoAtNet/" 2>/dev/null
+!cp -n results/confusion_matrix_gft*.png "{DRIVE_OUT}/diagrams/GFT/" 2>/dev/null; cp -n results/gft*.png "{DRIVE_OUT}/diagrams/GFT/" 2>/dev/null
+!cp -n results/confusion_matrix*coatnet*.png "{DRIVE_OUT}/diagrams/CoAtNet/" 2>/dev/null; cp -n results/coatnet*.png "{DRIVE_OUT}/diagrams/CoAtNet/" 2>/dev/null
+!cp -n results/confusion_matrix*swin*.png "{DRIVE_OUT}/diagrams/Swin/" 2>/dev/null; cp -n results/swin*.png "{DRIVE_OUT}/diagrams/Swin/" 2>/dev/null
+!cp -n results/confusion_matrix*vit*.png "{DRIVE_OUT}/diagrams/ViT/" 2>/dev/null; cp -n results/vit*.png "{DRIVE_OUT}/diagrams/ViT/" 2>/dev/null
+!cp -n results/confusion_matrix*cnn*.png "{DRIVE_OUT}/diagrams/CNN/" 2>/dev/null; cp -n results/cnn*.png "{DRIVE_OUT}/diagrams/CNN/" 2>/dev/null
+!cp -n results/confusion_matrix*efficient*.png "{DRIVE_OUT}/diagrams/EfficientNet-B0/" 2>/dev/null; cp -n results/efficient*.png "{DRIVE_OUT}/diagrams/EfficientNet-B0/" 2>/dev/null
+# Also catch any legacy H-CoAtNet/**/*.png (fair, exact names)
+!find H-CoAtNet -maxdepth 3 -name "*.png" -exec cp -n {} "{DRIVE_OUT}/diagrams/H-CoAtNet/" \; 2>/dev/null
+# Weights per model
 !find H-CoAtNet -name "*.pth" -exec cp -n {} "{DRIVE_OUT}/weights/" \; 2>/dev/null
 !find . -maxdepth 2 -name "*.pth" -exec cp -n {} "{DRIVE_OUT}/weights/" \; 2>/dev/null
-!cp results/tables.tex "{DRIVE_OUT}/results/" 2>/dev/null
-print("\n=== SAVED TO DRIVE ===")
-!ls -lh "{DRIVE_OUT}/results" | head -n 60
-!echo "--- Graphs ---"
-!ls -1 "{DRIVE_OUT}/results"/*.png 2>/dev/null
-!echo "--- JSONs ---"
-!ls -1 "{DRIVE_OUT}/results"/*.json 2>/dev/null
+print("\n=== SAVED TO DRIVE — SEPARATE FOLDERS PER MODEL ===")
+!ls -R "{DRIVE_OUT}/diagrams" 2>/dev/null
+!echo "--- All results ---"; ls -lh "{DRIVE_OUT}/results" | head -n 60
+!echo "--- Weights ---"; ls -lh "{DRIVE_OUT}/weights" | head -n 20
 print(f"\nDone: {DRIVE_OUT}")
-print("Check Drive: MyDrive -> HCoAtNet_AStar_... -> results/ -> open images tomorrow")
+print("Check Drive: MyDrive -> HCoAtNet_AStar_... -> diagrams/H-CoAtNet/, diagrams/GFT/, ... -> each has its confusion + curves (exact names, fair)")
