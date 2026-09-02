@@ -35,13 +35,19 @@ import seaborn as sns
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "H-CoAtNet" / "proposed_method"))
-from train_h_coatnet import AblationCoAtNet, seed_everything, train_epoch, evaluate, evaluate_with_probs, compute_ece, API_KEY, TARGET_SIZE, BATCH_SIZE, LEARNING_RATE, WEIGHT_DECAY, DEVICE
-# Prefer AblationCoAtNet full variant but we can also use CoAtGFT; use AblationCoAtNet for fairness toggle
+from train_h_coatnet import seed_everything, train_epoch, evaluate, evaluate_with_probs, compute_ece, API_KEY, TARGET_SIZE, BATCH_SIZE, LEARNING_RATE, WEIGHT_DECAY, DEVICE
+# Prefer AblationCoAtNet full variant for fairness toggle
 try:
-    from ablation.ablation import AblationCoAtNet as HCoAtNet
-except: 
-    # fallback: define inline if ablation not yet pushed
-    HCoAtNet = None
+    sys.path.insert(0, str(REPO_ROOT / "ablation"))
+    from ablation import AblationCoAtNet as HCoAtNet
+    # also try alternative path
+    if HCoAtNet is None:
+        raise ImportError
+    print("Using AblationCoAtNet (fair ablation model)")
+except Exception as e:
+    # fallback to original CoAtGFT
+    print(f"AblationCoAtNet not found ({e}), using CoAtGFT")
+    from train_h_coatnet import CoAtGFT as HCoAtNet
 
 from roboflow import Roboflow
 from tqdm import tqdm
