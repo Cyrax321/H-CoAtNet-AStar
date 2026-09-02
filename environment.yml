@@ -1,0 +1,28 @@
+name: hcoatnet
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pytorch=2.2.0
+  - torchvision=0.17.0
+  - cudatoolkit=12.1
+  - pip:
+    - timm==0.9.12
+    - torchinfo==1.8.0
+    - thop==0.1.1.post2209072238
+    - numpy==1.26.4
+    - pandas==2.2.2
+    - scikit-learn==1.4.2
+    - matplotlib==3.8.4
+    - seaborn==0.13.2
+    - Pillow==10.3.0
+    - tqdm==4.66.4
+    - roboflow==1.1.37
+    - ImageHash==4.3.1
+    - scikit-image==0.23.2
+    - grad-cam==1.5.0
+    - statsmodels==0.14.2
+    - scipy==1.13.0

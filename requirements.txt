@@ -1,4 +1,8 @@
 # H-CoAtNet — Pinned Reproducibility Requirements (A* Edition)
+# Python >=3.9, CUDA 12.1 recommended
+# Install: pip install -r requirements.txt
+# Full env: pip freeze > requirements.lock (add to Zenodo)
+
 torch==2.2.0
 torchvision==0.17.0
 timm==0.9.12
@@ -17,3 +21,8 @@ scikit-image==0.23.2
 grad-cam==1.5.0
 statsmodels==0.14.2
 scipy==1.13.0
+
+# Optional for CLIP audit
+# open-clip-torch==2.24.0
+
+# Verify: python -c "import torch; print(torch.__version__)"

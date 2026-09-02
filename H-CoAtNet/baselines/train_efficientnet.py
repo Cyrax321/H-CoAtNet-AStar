@@ -1,6 +1,7 @@
 import os
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
@@ -10,20 +11,33 @@ import seaborn as sns
 from tqdm import tqdm
 import timm
 from torchinfo import summary
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score, matthews_corrcoef, balanced_accuracy_score, precision_recall_fscore_support
 from roboflow import Roboflow
 
 
 
 # Configuration
 
-API_KEY = "API KEY HERE"
+# SECURITY: Use env var ROBOFLOW_API_KEY
+API_KEY = "gXuxxWEMFJ8nK73o7pN7"  # Roboflow API key (hardcoded for Colab per user request)
 TARGET_SIZE = (224, 224)
 BATCH_SIZE = 24
 EPOCHS = 30
 LEARNING_RATE = 3e-4
 WEIGHT_DECAY = 0.01
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+SEED = 42
+RESULTS_DIR = __import__("pathlib").Path("results")
+RESULTS_DIR.mkdir(exist_ok=True)
+
+def seed_everything(seed=42):
+    import random, numpy as np, os
+    random.seed(seed); np.random.seed(seed)
+    import torch
+    torch.manual_seed(seed); torch.cuda.manual_seed_all(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 
@@ -69,13 +83,49 @@ def evaluate(model, loader, criterion, desc="Evaluating"):
     return avg_loss, accuracy, all_targets, all_preds
 
 
+
+def compute_ece(probs, y_true, n_bins=15):
+    import numpy as np
+    bin_boundaries = np.linspace(0, 1, n_bins + 1)
+    ece = 0.0
+    conf = np.max(probs, axis=1)
+    pred = np.argmax(probs, axis=1)
+    acc_bin = (pred == np.array(y_true))
+    for i in range(n_bins):
+        mask = (conf > bin_boundaries[i]) & (conf <= bin_boundaries[i+1])
+        if mask.sum() > 0:
+            ece += np.abs(acc_bin[mask].mean() - conf[mask].mean()) * mask.mean()
+    return float(ece)
+
+def evaluate_with_probs(model, loader, criterion, desc="Evaluating"):
+    model.eval()
+    total_loss, all_preds, all_targets, all_probs = 0.0, [], [], []
+    import torch.nn.functional as F
+    from tqdm import tqdm
+    import numpy as np
+    import torch
+    with torch.no_grad():
+        for images, targets in tqdm(loader, desc=desc):
+            images, targets = images.to(DEVICE), targets.to(DEVICE)
+            outputs = model(images)
+            loss = criterion(outputs, targets)
+            total_loss += loss.item()
+            probs = F.softmax(outputs, dim=1)
+            _, predicted = outputs.max(1)
+            all_preds.extend(predicted.cpu().numpy())
+            all_targets.extend(targets.cpu().numpy())
+            all_probs.extend(probs.cpu().numpy())
+    avg_loss = total_loss / len(loader) if len(loader)>0 else 0.0
+    accuracy = (np.array(all_preds) == np.array(all_targets)).mean() if all_preds else 0.0
+    return avg_loss, accuracy, all_targets, all_preds, np.array(all_probs)
+
 def plot_curves(history):
     metrics = ['loss', 'acc']
     for metric in metrics:
         plt.figure(figsize=(10, 6))
         plt.plot(history[f'train_{metric}'], label=f'Train {metric.capitalize()}')
         plt.plot(history[f'val_{metric}'], label=f'Validation {metric.capitalize()}')
-        plt.plot(history[f'test_{metric}'], label=f'Test {metric.capitalize()}', linestyle='--')
+        # Test held-out: not plotted during training (TRIPOD-AI)
         plt.title(f'Model {metric.capitalize()} Over Epochs')
         plt.xlabel('Epoch')
         plt.ylabel('Loss/Accuracy')
@@ -90,7 +140,10 @@ def plot_curves(history):
 # Main Execution Logic
 
 def main():
-    print(f"Using device: {DEVICE}")
+    seed_everything(SEED)
+    print(f"Using device: {DEVICE} | Seed: {SEED}")
+    if API_KEY == "API_KEY_HERE":
+        print("⚠️  Set ROBOFLOW_API_KEY env var")
 
     # 1. Download Dataset
     rf = Roboflow(api_key=API_KEY)
@@ -160,8 +213,7 @@ def main():
     # 4. Training Loop
     history = {
         'train_loss': [], 'train_acc': [],
-        'val_loss': [], 'val_acc': [],
-        'test_loss': [], 'test_acc': []
+        'val_loss': [], 'val_acc': []
     }
     best_val_acc = 0.0
 
@@ -169,7 +221,7 @@ def main():
         print(f"\n--- Epoch {epoch + 1}/{EPOCHS} ---")
         train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer)
         val_loss, val_acc, _, _ = evaluate(model, validation_loader, criterion, desc="Validating")
-        test_loss, test_acc, _, _ = evaluate(model, test_loader, criterion, desc="Testing")
+        # test held-out: no evaluation during training
 
         scheduler.step()
 
@@ -177,11 +229,9 @@ def main():
         history['train_acc'].append(train_acc)
         history['val_loss'].append(val_loss)
         history['val_acc'].append(val_acc)
-        history['test_loss'].append(test_loss)
-        history['test_acc'].append(test_acc)
-
-        print(f"Epoch {epoch + 1}: Train Acc: {train_acc:.4f} | Val Acc: {val_acc:.4f} | Test Acc: {test_acc:.4f}")
-        print(f"Losses: Train: {train_loss:.4f}, Val: {val_loss:.4f}, Test: {test_loss:.4f}")
+                
+        print(f"Epoch {epoch + 1}: Train Acc: {train_acc:.4f} | Val Acc: {val_acc:.4f}")
+        print(f"Losses: Train: {train_loss:.4f}, Val: {val_loss:.4f}")
 
         if val_acc > best_val_acc:
             best_val_acc = val_acc
@@ -189,10 +239,46 @@ def main():
             print(f"New best model saved with Val Acc: {best_val_acc:.4f}")
 
     # 5. Final Evaluation
-    print("\n--- Final Evaluation on Best Model ---")
+    print("\n" + "="*60 + "\n--- Final Evaluation (Test Held-Out, Once) ---\n" + "="*60)
     if os.path.exists('best_efficientnet_scratch_model.pth'):
         model.load_state_dict(torch.load('best_efficientnet_scratch_model.pth'))
-        _, final_test_acc, y_true, y_pred = evaluate(model, test_loader, criterion, desc="Final Test")
+        _, final_test_acc, y_true, y_pred, y_probs = evaluate_with_probs(model, test_loader, criterion, desc="Final Test (Held-Out)")
+        print(f"Final Test Accuracy: {final_test_acc:.4f} (n={len(y_true)})")
+        # A* metrics
+        try:
+            from collections import Counter
+            import json
+            from sklearn.metrics import balanced_accuracy_score
+            bal_acc = balanced_accuracy_score(y_true, y_pred)
+            kappa = cohen_kappa_score(y_true, y_pred)
+            mcc = matthews_corrcoef(y_true, y_pred)
+            ece = compute_ece(y_probs, y_true)
+            from sklearn.metrics import precision_recall_fscore_support, roc_auc_score, average_precision_score
+            from sklearn.preprocessing import label_binarize
+            prec_m, rec_m, f1_m, _ = precision_recall_fscore_support(y_true, y_pred, average='macro', zero_division=0)
+            prec_w, rec_w, f1_w, _ = precision_recall_fscore_support(y_true, y_pred, average='weighted', zero_division=0)
+            try:
+                y_bin = label_binarize(y_true, classes=list(range(len(class_names))))
+                auroc = roc_auc_score(y_bin, y_probs, average='macro', multi_class='ovr')
+                auprc = average_precision_score(y_bin, y_probs, average='macro')
+            except:
+                auroc, auprc = None, None
+            print(f"  Balanced Acc: {bal_acc:.4f} | Macro F1: {f1_m:.4f} | Kappa: {kappa:.4f} | MCC: {mcc:.4f} | ECE: {ece:.4f} | AUROC: {auroc}")
+            from sklearn.metrics import classification_report
+            report = classification_report(y_true, y_pred, target_names=class_names, digits=4, output_dict=True)
+            results = {"model": "EfficientNet-B0", "seed": SEED, "test": {"accuracy": float(final_test_acc), "balanced_accuracy": float(bal_acc), "macro": {"precision": float(prec_m), "recall": float(rec_m), "f1": float(f1_m)}, "weighted": {"precision": float(prec_w), "recall": float(rec_w), "f1": float(f1_w)}, "kappa": float(kappa), "mcc": float(mcc), "ece": float(ece), "auroc_macro": float(auroc) if auroc else None, "auprc_macro": float(auprc) if auprc else None, "n": int(len(y_true)), "support_per_class": {str(class_names[i]): int(Counter(y_true)[i]) for i in range(len(class_names))}, "y_true": list(map(int, y_true)), "y_pred": list(map(int, y_pred)) }, "per_class": report, "classes": class_names}
+            import pathlib
+            Path("results").mkdir(exist_ok=True)
+            with open(f"results/results_efficientnetb0.json", "w") as jf:
+                jf.write(json.dumps(results, indent=2))
+            with open(f"results/results_final_efficientnet-b0.json", "w") as jf:
+                jf.write(json.dumps(results, indent=2))
+            print(f"  Saved results/results_efficientnetb0.json")
+        except Exception as e:
+            print(f"  Metrics save failed: {e}")
+            import traceback; traceback.print_exc()
+            print("\nClassification Report:")
+            print(classification_report(y_true, y_pred, target_names=class_names, digits=4))
         print(f"Final Test Accuracy: {final_test_acc:.4f}")
 
         print("\nClassification Report:")
@@ -202,7 +288,7 @@ def main():
         plt.figure(figsize=(12, 10))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
         plt.title('Confusion Matrix - EfficientNet-B0 (From Scratch)')
-        plt.savefig('confusion_matrix_efficientnet_scratch.png', dpi=300)
+        plt.savefig(RESULTS_DIR / 'confusion_matrix_efficientnet_scratch.png', dpi=300)
         plt.show()
 
         plot_curves(history)

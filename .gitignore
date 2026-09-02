@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.pyc
+.DS_Store
+# Results (can be regenerated, but keep empty folder structure)
+results/*.png
+results/*.json
+results/*.log
+results/*.pth
+splits/*.json
+splits/*.csv
+# Keep tools
+!tools/*.py
+!H-CoAtNet/tools/*.py
+# Env
+.env
+.conda/
