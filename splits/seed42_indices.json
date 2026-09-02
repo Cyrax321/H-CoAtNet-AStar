@@ -1,0 +1,68 @@
+{
+  "seed": 42,
+  "dataset_dir": "/content/H-CoAtNet-AStar/ich-s-1",
+  "split_method": "roboflow_provided (stratified 70/15/15 per Roboflow, audited)",
+  "classes": [
+    "Harlequin ichthyosis",
+    "Healthy skin",
+    "Ichthyosis vulgaris",
+    "Lamellar ichthyosis",
+    "Netherton syndrome"
+  ],
+  "class_to_idx": {
+    "Harlequin ichthyosis": 0,
+    "Healthy skin": 1,
+    "Ichthyosis vulgaris": 2,
+    "Lamellar ichthyosis": 3,
+    "Netherton syndrome": 4
+  },
+  "counts": {
+    "train": 2196,
+    "valid": 154,
+    "test": 158
+  },
+  "per_class_counts": {
+    "train": {
+      "Harlequin ichthyosis": 420,
+      "Healthy skin": 507,
+      "Ichthyosis vulgaris": 720,
+      "Lamellar ichthyosis": 324,
+      "Netherton syndrome": 225,
+      "_counts_list": [
+        420,
+        507,
+        720,
+        324,
+        225
+      ]
+    },
+    "valid": {
+      "Harlequin ichthyosis": 32,
+      "Healthy skin": 41,
+      "Ichthyosis vulgaris": 38,
+      "Lamellar ichthyosis": 28,
+      "Netherton syndrome": 15,
+      "_counts_list": [
+        32,
+        41,
+        38,
+        28,
+        15
+      ]
+    },
+    "test": {
+      "Harlequin ichthyosis": 32,
+      "Healthy skin": 45,
+      "Ichthyosis vulgaris": 46,
+      "Lamellar ichthyosis": 22,
+      "Netherton syndrome": 13,
+      "_counts_list": [
+        32,
+        45,
+        46,
+        22,
+        13
+      ]
+    }
+  }
+}

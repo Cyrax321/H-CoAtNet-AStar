@@ -1,0 +1,6 @@
+class,idx,count_test,count_valid,count_train
+Harlequin ichthyosis,0,32,32,420
+Healthy skin,1,45,41,507
+Ichthyosis vulgaris,2,46,38,720
+Lamellar ichthyosis,3,22,28,324
+Netherton syndrome,4,13,15,225

@@ -1,0 +1,104 @@
+[
+  {
+    "comparison": "H-CoAtNet vs CNN",
+    "mcnemar_p": 0.00017812930545546557,
+    "mcnemar_chi2": 14.048780487804878,
+    "table": [
+      [
+        107,
+        33
+      ],
+      [
+        8,
+        10
+      ]
+    ],
+    "delong_p": 0.0,
+    "note": "bootstrap 1000, AUROC diff 0.0212, p~=0.0000"
+  },
+  {
+    "comparison": "H-CoAtNet vs CoAtNet",
+    "mcnemar_p": 0.6891565167793516,
+    "mcnemar_chi2": 0.16,
+    "table": [
+      [
+        129,
+        11
+      ],
+      [
+        14,
+        4
+      ]
+    ],
+    "delong_p": 0.432,
+    "note": "bootstrap 1000, AUROC diff -0.0023, p~=0.4320"
+  },
+  {
+    "comparison": "H-CoAtNet vs EfficientNet",
+    "mcnemar_p": 1.90603767169506e-06,
+    "mcnemar_chi2": 22.6875,
+    "table": [
+      [
+        99,
+        41
+      ],
+      [
+        7,
+        11
+      ]
+    ],
+    "delong_p": 0.0,
+    "note": "bootstrap 1000, AUROC diff 0.0311, p~=0.0000"
+  },
+  {
+    "comparison": "H-CoAtNet vs GFT",
+    "mcnemar_p": 0.583882420770365,
+    "mcnemar_chi2": 0.3,
+    "table": [
+      [
+        123,
+        17
+      ],
+      [
+        13,
+        5
+      ]
+    ],
+    "delong_p": 0.3839999999999999,
+    "note": "bootstrap 1000, AUROC diff 0.0037, p~=0.3840"
+  },
+  {
+    "comparison": "H-CoAtNet vs Swin",
+    "mcnemar_p": 0.0030845709899566254,
+    "mcnemar_chi2": 8.756756756756756,
+    "table": [
+      [
+        112,
+        28
+      ],
+      [
+        9,
+        9
+      ]
+    ],
+    "delong_p": 0.03600000000000003,
+    "note": "bootstrap 1000, AUROC diff 0.0095, p~=0.0360"
+  },
+  {
+    "comparison": "H-CoAtNet vs ViT",
+    "mcnemar_p": 0.014961017675175659,
+    "mcnemar_chi2": 5.921052631578948,
+    "table": [
+      [
+        113,
+        27
+      ],
+      [
+        11,
+        7
+      ]
+    ],
+    "delong_p": 0.016000000000000014,
+    "note": "bootstrap 1000, AUROC diff 0.0126, p~=0.0160"
+  }
+]
