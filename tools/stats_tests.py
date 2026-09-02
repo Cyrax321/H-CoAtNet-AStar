@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-stats_tests.py — Significance tests for A* Table S3: McNemar (Acc) + DeLong (AUROC)
+stats_tests.py -- Significance tests for A* Table S3: McNemar (Acc) + DeLong (AUROC)
 Addresses R1-8, R2-4
 
 Usage:
@@ -92,7 +92,7 @@ def delong_test_placeholder(y_true, probs_a, probs_b):
         prop_pos = np.mean(diffs > 0)
         p = 2 * min(prop_pos, 1-prop_pos)
         p = max(0.0, min(1.0, p))
-        return observed, p, f"bootstrap 1000, AUROC diff {observed:.4f}, p≈{p:.4f}"
+        return observed, p, f"bootstrap 1000, AUROC diff {observed:.4f}, p~={p:.4f}"
 
 def load_results(path):
     with open(path) as f:
@@ -132,7 +132,7 @@ def main():
             results.append({"comparison": f"{name_ref} vs {name}", "mcnemar_p": float(pval), "mcnemar_chi2": float(chi2), "table": table, "delong_p": float(p_delong) if isinstance(p_delong,float) else None, "note": delong_note})
         with open(args.out, "w") as f:
             json.dump(results, f, indent=2)
-        print(f"✅ Saved {args.out}")
+        print(f"[OK] Saved {args.out}")
     elif args.a and args.b:
         yt, yp_a, probs_a, name_a = load_results(args.a)
         _, yp_b, probs_b, name_b = load_results(args.b)
@@ -140,7 +140,7 @@ def main():
         print(f"McNemar {name_a} vs {name_b}: chi2={chi2:.2f}, p={pval:.4f}, table={table}")
         print("  Interpretation: p<0.05 => significant difference in accuracy")
         _, p_delong, note = delong_test_placeholder(yt, probs_a, probs_b) if probs_a is not None and probs_b is not None else (None, 1.0, "no probs")
-        print(f"DeLong-like (bootstrap) AUROC diff p={p_delong:.4f} — {note}")
+        print(f"DeLong-like (bootstrap) AUROC diff p={p_delong:.4f} -- {note}")
     else:
         parser.error("Provide --a and --b, or --all + --reference")
 

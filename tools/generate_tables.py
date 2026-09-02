@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-generate_tables.py — Single source of truth: results_final.json → LaTeX Tables 8, 9, Fig 7
+generate_tables.py -- Single source of truth: results_final.json -> LaTeX Tables 8, 9, Fig 7
 Addresses R1-10 (numerical audit), R2-M4
 
 Usage:
@@ -79,22 +79,22 @@ def main():
         latex = generate_latex_table8(rows)
         Path(args.out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.out).write_text(latex)
-        print(f"✅ Saved LaTeX to {args.out}\n")
+        print(f"[OK] Saved LaTeX to {args.out}\n")
         print(latex)
         # Also save compare JSON
         compare_path = Path(args.out).parent / "compare.json"
         with open(compare_path, "w") as f:
             json.dump(data_list, f, indent=2)
-        print(f"✅ Saved compare to {compare_path}")
+        print(f"[OK] Saved compare to {compare_path}")
         # SHA audit
-        print("\n🔒 SHA256 audit:")
+        print("\n[SHA] SHA256 audit:")
         for p in args.all:
             print(f"  {p}: {sha256_file(p)[:12]}")
         # Check consistency
-        print("\n🔍 Consistency check (Abstract = Table 8 = Conclusion ?):")
+        print("\n[Check] Consistency check (Abstract = Table 8 = Conclusion ?):")
         accs = [d["test"]["accuracy"] for d in data_list]
         print(f"  Acc values: {[f'{a*100:.2f}%' for a in accs]}")
-        print("  Ensure Abstract, §4, Conclusion all use these exact values from results_final.json")
+        print("  Ensure Abstract, Section4, Conclusion all use these exact values from results_final.json")
     elif args.results:
         p = Path(args.results)
         with open(p) as f:
@@ -119,7 +119,7 @@ def main():
             latex9.extend(["\\midrule","\\bottomrule\\end{tabular}\\end{table*}"])
             print("\n" + "\n".join(latex9))
             Path("results/table9.tex").write_text("\n".join(latex9))
-            print("✅ Saved results/table9.tex")
+            print("[OK] Saved results/table9.tex")
     else:
         parser.error("Provide --results or --all")
 

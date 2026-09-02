@@ -358,7 +358,7 @@ def main():
     seed_everything(SEED)
     print(f"Using device: {DEVICE} | Seed: {SEED}")
     if API_KEY == "API_KEY_HERE":
-        print("⚠️  Set ROBOFLOW_API_KEY env var")
+        print("[WARNING]  Set ROBOFLOW_API_KEY env var")
 
     # 1. Download Dataset
     print("Downloading dataset from Roboflow...")
@@ -439,7 +439,7 @@ def main():
     print("\n" + "="*60 + "\n--- Final Evaluation (Test Held-Out, Once) ---\n" + "="*60)
     if os.path.exists('best_swin_from_scratch.pth'):
         model.load_state_dict(torch.load('best_swin_from_scratch.pth'))
-        # A* Final Test (Held-Out, Once) with full metrics — device-aware
+        # A* Final Test (Held-Out, Once) with full metrics -- device-aware
         model.eval()
         import torch.nn.functional as F
         y_true, y_pred, y_probs_list = [], [], []

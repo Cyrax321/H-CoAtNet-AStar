@@ -209,7 +209,7 @@ def plot_curves(history, save_prefix="hcoatnet"):
        plt.figure(figsize=(10, 6))
        plt.plot(history[f'train_{metric}'], label=f'Train {metric.capitalize()}', color='#0072B2', linewidth=2)
        plt.plot(history[f'val_{metric}'], label=f'Validation {metric.capitalize()}', color='#D55E00', linewidth=2)
-       plt.title(f'H-CoAtNet {metric.capitalize()} — Train vs Validation (Test Held-Out)', fontsize=12)
+       plt.title(f'H-CoAtNet {metric.capitalize()} -- Train vs Validation (Test Held-Out)', fontsize=12)
        plt.xlabel('Epoch', fontsize=11)
        plt.ylabel(metric.capitalize(), fontsize=11)
        plt.legend(fontsize=10)
@@ -259,12 +259,12 @@ def main():
    seed_everything(SEED)
    print(f"Using device: {DEVICE} | Seed: {SEED}")
    if API_KEY == "API_KEY_HERE":
-       print("⚠️  ROBOFLOW_API_KEY not set. Set env var: export ROBOFLOW_API_KEY='your_key'")
-       print("   Get key: https://universe.roboflow.com/hi-l9ueo/ich-s-7lnsj → Download → Show download code")
+       print("[WARNING]  ROBOFLOW_API_KEY not set. Set env var: export ROBOFLOW_API_KEY='your_key'")
+       print("   Get key: https://universe.roboflow.com/hi-l9ueo/ich-s-7lnsj -> Download -> Show download code")
  
    # 1. Download Dataset (Roboflow version 1, frozen split via server)
    # NOTE: For A* frozen split, also save local indices to splits/seed42_indices.json via tools/freeze_split.py
-   print("🔄 Downloading dataset from Roboflow...")
+   print("[Downloading] Downloading dataset from Roboflow...")
    rf = Roboflow(api_key=API_KEY)
    project = rf.workspace("hi-l9ueo").project("ich-s-7lnsj")
    dataset = project.version(1).download("folder")
@@ -301,7 +301,7 @@ def main():
  
    class_names = train_dataset.classes
    num_classes = len(class_names)
-   print(f"✅ Found {num_classes} classes: {class_names}")
+   print(f"[OK] Found {num_classes} classes: {class_names}")
  
    # 3. Class Weights
    counts = np.bincount(train_dataset.targets)
@@ -330,7 +330,7 @@ def main():
    except Exception as e:
        print(f"Could not show model summary due to: {e}")
  
-   # 5. Main Training Loop — TRIPOD-AI: test set NOT touched (validation selects model)
+   # 5. Main Training Loop -- TRIPOD-AI: test set NOT touched (validation selects model)
    history = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
    best_val_acc = 0.0
    best_epoch = -1
@@ -346,7 +346,7 @@ def main():
        history['val_loss'].append(val_loss)
        history['val_acc'].append(val_acc)
  
-       print(f"📊 Epoch {epoch + 1}: Train Acc: {train_acc:.4f} | Val Acc: {val_acc:.4f}")
+       print(f"[Metrics] Epoch {epoch + 1}: Train Acc: {train_acc:.4f} | Val Acc: {val_acc:.4f}")
        print(f"   Losses: Train: {train_loss:.4f}, Val: {val_loss:.4f}")
  
        if val_acc > best_val_acc:
@@ -354,22 +354,22 @@ def main():
            best_epoch = epoch + 1
            torch.save(model.state_dict(), 'best_coat_gft_model.pth')
            torch.save(model.state_dict(), RESULTS_DIR / 'best_hcoatnet.pth')
-           print(f"🎉 New best model saved with Val Acc: {best_val_acc:.4f} (epoch {best_epoch})")
+           print(f"[NEW BEST] New best model saved with Val Acc: {best_val_acc:.4f} (epoch {best_epoch})")
  
-   # 6. Final Evaluation — TEST EVALUATED ONCE ON BEST VAL MODEL (no leakage)
+   # 6. Final Evaluation -- TEST EVALUATED ONCE ON BEST VAL MODEL (no leakage)
    print("\n" + "="*60)
    print("--- Final Evaluation on Best Model (Test Held-Out, Once) ---")
-   print(f"   Best val acc {best_val_acc:.4f} at epoch {best_epoch} — now evaluating test ONCE")
+   print(f"   Best val acc {best_val_acc:.4f} at epoch {best_epoch} -- now evaluating test ONCE")
    print("="*60)
    model.load_state_dict(torch.load(RESULTS_DIR / 'best_hcoatnet.pth' if (RESULTS_DIR / 'best_hcoatnet.pth').exists() else 'best_coat_gft_model.pth', map_location=DEVICE))
    _, final_test_acc, y_true, y_pred, y_probs = evaluate_with_probs(model, test_loader, criterion, desc="Final Test (Held-Out)")
-   print(f"✅ Final Test Accuracy: {final_test_acc:.4f} (n={len(y_true)})")
+   print(f"[OK] Final Test Accuracy: {final_test_acc:.4f} (n={len(y_true)})")
    # Per-class support
    from collections import Counter
    print(f"   Test support per class: {Counter(y_true)} | Classes: {class_names}")
  
-   # 7. A* Reports and Plots — Full Metrics Package
-   print("\n🧾 Classification Report (per-class Precision/Recall/F1):")
+   # 7. A* Reports and Plots -- Full Metrics Package
+   print("\n[Report] Classification Report (per-class Precision/Recall/F1):")
    report = classification_report(y_true, y_pred, target_names=class_names, digits=4, output_dict=True)
    print(classification_report(y_true, y_pred, target_names=class_names, digits=4))
    # Balanced accuracy, Kappa, MCC, AUROC, AUPRC, ECE
@@ -391,7 +391,7 @@ def main():
    # Weighted / macro
    prec_macro, rec_macro, f1_macro, _ = precision_recall_fscore_support(y_true, y_pred, average='macro', zero_division=0)
    prec_w, rec_w, f1_w, _ = precision_recall_fscore_support(y_true, y_pred, average='weighted', zero_division=0)
-   print(f"\n📊 A* Aggregate Metrics (n={len(y_true)}):")
+   print(f"\n[Metrics] A* Aggregate Metrics (n={len(y_true)}):")
    print(f"   Accuracy: {final_test_acc:.4f} | Balanced Acc: {bal_acc:.4f}")
    print(f"   Macro  P/R/F1: {prec_macro:.4f}/{rec_macro:.4f}/{f1_macro:.4f}")
    print(f"   Weighted P/R/F1: {prec_w:.4f}/{rec_w:.4f}/{f1_w:.4f}")
@@ -432,7 +432,7 @@ def main():
    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
    plt.xlabel('Predicted Label')
    plt.ylabel('True Label')
-   plt.title('Confusion Matrix — H-CoAtNet (Test Held-Out, n=%d)' % len(y_true))
+   plt.title('Confusion Matrix -- H-CoAtNet (Test Held-Out, n=%d)' % len(y_true))
    plt.tight_layout()
    plt.savefig(RESULTS_DIR / 'confusion_matrix_hcoatnet.png', dpi=300, bbox_inches='tight')
    plt.savefig('confusion_matrix_coat_gft.png', dpi=300)  # compat
@@ -444,14 +444,14 @@ def main():
    sns.heatmap(cm_norm, annot=True, fmt='.2f', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
    plt.xlabel('Predicted Label')
    plt.ylabel('True Label')
-   plt.title('Confusion Matrix (Row-Normalized) — H-CoAtNet')
+   plt.title('Confusion Matrix (Row-Normalized) -- H-CoAtNet')
    plt.tight_layout()
    plt.savefig(RESULTS_DIR / 'confusion_matrix_hcoatnet_norm.png', dpi=300, bbox_inches='tight')
    plt.show()
    plt.close()
  
    plot_curves(history, save_prefix="hcoatnet")
-   print("\n✅ Done. All metrics saved. See REBUTTAL_FIX_README.md for bootstrap CI next step: python tools/bootstrap_ci.py --results results/results_final.json")
+   print("\n[OK] Done. All metrics saved. See REBUTTAL_FIX_README.md for bootstrap CI next step: python tools/bootstrap_ci.py --results results/results_final.json")
  
 
 if __name__ == '__main__':

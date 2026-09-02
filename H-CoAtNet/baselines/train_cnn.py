@@ -180,7 +180,7 @@ def main():
     seed_everything(SEED)
     print(f"Using device: {DEVICE} | Seed: {SEED}")
     if API_KEY == "API_KEY_HERE":
-        print("⚠️  Set ROBOFLOW_API_KEY env var")
+        print("[WARNING]  Set ROBOFLOW_API_KEY env var")
 
     # 1. Download Dataset
     rf = Roboflow(api_key=API_KEY)

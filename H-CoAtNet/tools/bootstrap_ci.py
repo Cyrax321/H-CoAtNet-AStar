@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-bootstrap_ci.py — A* Uncertainty: Bootstrap 95% CIs for Acc, BalAcc, MacroF1, Kappa, MCC, AUROC
+bootstrap_ci.py -- A* Uncertainty: Bootstrap 95% CIs for Acc, BalAcc, MacroF1, Kappa, MCC, AUROC
 Addresses R1-8, R2-4, Table 8, Table S3
 
 Usage:
@@ -11,7 +11,7 @@ Output:
   results/metrics_with_ci.json
   Also prints LaTeX row for Table 8
 
-Method: Stratified bootstrap (resample with replacement, preserve n) — percentile 2.5, 97.5.
+Method: Stratified bootstrap (resample with replacement, preserve n) -- percentile 2.5, 97.5.
         For AUROC, use one-vs-rest macro; if fails, skip.
 """
 
@@ -113,7 +113,7 @@ def main():
             probs = np.load(prob_path)
             print(f"Loaded probs from {prob_path}")
         else:
-            print("⚠️  No y_probs found — AUROC/AUPRC CIs will be skipped. Re-train with evaluate_with_probs to save probs.")
+            print("[WARNING]  No y_probs found -- AUROC/AUPRC CIs will be skipped. Re-train with evaluate_with_probs to save probs.")
 
     print(f"Bootstrapping {model_name} n={len(yt)} n_bootstrap={args.n_bootstrap} seed={args.seed}")
     cis = bootstrap_metrics(yt, yp, probs, n_bootstrap=args.n_bootstrap, seed=args.seed, num_classes=n_classes)
@@ -137,14 +137,14 @@ def main():
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w") as f:
         json.dump({"model": model_name, "n": len(yt), "point": point, "bootstrap": cis, "n_bootstrap": args.n_bootstrap, "seed": args.seed}, f, indent=2)
-    print(f"\n✅ Saved to {out}")
+    print(f"\n[OK] Saved to {out}")
 
     # Print LaTeX row snippet for Table 8
     acc = cis["acc"]
     bal = cis["bal_acc"]
     f1 = cis["macro_f1"]
     kappa = cis["kappa"]
-    print("\n📋 LaTeX row snippet (copy to Table 8):")
+    print("\n[LaTeX] LaTeX row snippet (copy to Table 8):")
     print(f"H-CoAtNet & {point['acc']*100:.2f} [{acc['ci_low']*100:.1f}--{acc['ci_high']*100:.1f}] & {bal['mean']:.3f} [{bal['ci_low']:.3f}--{bal['ci_high']:.3f}] & {f1['mean']:.3f} [{f1['ci_low']:.3f}--{f1['ci_high']:.3f}] & {kappa['mean']:.3f} [{kappa['ci_low']:.3f}--{kappa['ci_high']:.3f}] \\\\")
 
     # Also handle 5-seed aggregation if multiple results files exist
@@ -158,7 +158,7 @@ def main():
             with open(p) as f:
                 d = json.load(f)
                 accs.append(d["test"]["accuracy"] if "test" in d else d["accuracy"])
-        print(f"  5-seed mean±SD: {np.mean(accs):.4f} ± {np.std(accs):.4f}")
+        print(f"  5-seed mean+/-SD: {np.mean(accs):.4f} +/- {np.std(accs):.4f}")
 
 if __name__ == "__main__":
     main()

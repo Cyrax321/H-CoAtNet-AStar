@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-dedup_audit.py — Rigorous near-duplicate audit for web-scraped dermatology images
+dedup_audit.py -- Rigorous near-duplicate audit for web-scraped dermatology images
 Addresses R1-5, R2-1, STARD-AI, CLAIM
 
 Checks:
@@ -31,7 +31,7 @@ try:
     HAS_IMAGEHASH = True
 except ImportError:
     HAS_IMAGEHASH = False
-    print("⚠️  pip install ImageHash for pHash audit")
+    print("[WARNING]  pip install ImageHash for pHash audit")
 
 try:
     from skimage.metrics import structural_similarity as ssim
@@ -152,7 +152,7 @@ def main():
     # Near dups
     print(f"Checking pHash near-duplicates (Hamming < {args.threshold})...")
     near, note = find_near_dups([str(p) for p in all_files], threshold=args.threshold)
-    print(f"  Near-duplicates: {len(near)} pairs — {note}")
+    print(f"  Near-duplicates: {len(near)} pairs -- {note}")
     for a,b,d in near[:5]:
         print(f"    d={d}: {Path(a).name} ~ {Path(b).name}")
 
@@ -177,7 +177,7 @@ def main():
     }
     with open(out_path, "w") as f:
         json.dump(report, f, indent=2)
-    print(f"\n✅ Saved report to {out_path}")
+    print(f"\n[OK] Saved report to {out_path}")
 
     # Optional inter-split check if splits exist
     if (dataset_dir / "train").exists() and (dataset_dir / "test").exists():
@@ -195,9 +195,9 @@ def main():
                         cross.append((a,b,int(ha-hb)))
             print(f"  CROSS-SPLIT (train vs test) near-dups: {len(cross)} (sample 500 vs 500)")
             if cross:
-                print("  ⚠️  Potential leakage: review these cross-split pairs!")
+                print("  [WARNING]  Potential leakage: review these cross-split pairs!")
                 for a,b,d in cross[:5]:
-                    print(f"    d={d}: {a} ↔ {b}")
+                    print(f"    d={d}: {a} <-> {b}")
             report["cross_split_near"] = len(cross)
             report["cross_split_examples"] = cross[:10]
             with open(out_path, "w") as f:
@@ -215,7 +215,7 @@ def main():
             except Exception as e:
                 print(e)
 
-    print("\nNext: If n_exact==0 and n_near<5 and cross_split==0, you can state in §3.1:")
+    print("\nNext: If n_exact==0 and n_near<5 and cross_split==0, you can state in Section3.1:")
     print("  'No exact duplicates; 7 near-duplicate pairs (pHash d<8) found and removed before split;")
     print("   max inter-split pHash distance 31, no cross-split leakage (audit in results/dedup_report.json).'")
 

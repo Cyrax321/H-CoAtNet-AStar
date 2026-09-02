@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-freeze_split.py — A* Reproducibility: Freeze stratified 70/15/15 split with seed 42
+freeze_split.py -- A* Reproducibility: Freeze stratified 70/15/15 split with seed 42
 Addresses R1-1, R1-5, R1-13, R2-4
 
 Usage:
@@ -8,12 +8,12 @@ Usage:
   # If dataset not yet downloaded, downloads via Roboflow (needs ROBOFLOW_API_KEY)
 
 Output:
-  splits/seed42_indices.json  — exact file lists per split (train/val/test) with SHA256 per file
-  splits/test_per_class.csv   — counts per class for audit
-  splits/datasheet.md         — human-readable summary for STARD-AI flow
+  splits/seed42_indices.json  -- exact file lists per split (train/val/test) with SHA256 per file
+  splits/test_per_class.csv   -- counts per class for audit
+  splits/datasheet.md         -- human-readable summary for STARD-AI flow
   splits/SHA256SUM
 
-STARD-AI Flow: Collect 1580 → dedup (tools/dedup_audit.py) → 1573 → stratified split → 1106/237/237
+STARD-AI Flow: Collect 1580 -> dedup (tools/dedup_audit.py) -> 1573 -> stratified split -> 1106/237/237
 """
 
 import os
@@ -52,7 +52,7 @@ def collect_images(dataset_dir):
             splits["valid" if split=="val" else split] = d
     if not splits:
         # Flat: dataset_dir contains class folders directly -> treat as unsplit pool
-        print(f"   Flat structure detected at {dataset_dir} — will perform stratified split from scratch")
+        print(f"   Flat structure detected at {dataset_dir} -- will perform stratified split from scratch")
         return None, dataset_dir
     return splits, None
 
@@ -142,7 +142,7 @@ def main():
 
     if splits is not None:
         print(f"Found existing splits at {dataset_dir}: {list(splits.keys())}")
-        # Existing Roboflow splits — just audit and record indices (not re-splitting)
+        # Existing Roboflow splits -- just audit and record indices (not re-splitting)
         # This is the correct mode if Roboflow already provides train/valid/test
         result = {}
         class_names = None
@@ -184,8 +184,8 @@ def main():
         if "test" in output["counts"]:
             total_test = output["counts"]["test"]
             if total_test != 237:
-                print(f"⚠️  WARNING: test count is {total_test}, not 237. R1-1 says 237 expected for 1580. Check dataset version.")
-                print("   This is the audit finding — report true count in paper, do not fake 237.")
+                print(f"[WARNING]  WARNING: test count is {total_test}, not 237. R1-1 says 237 expected for 1580. Check dataset version.")
+                print("   This is the audit finding -- report true count in paper, do not fake 237.")
     else:
         print(f"Performing fresh stratified split from pool {pool} with seed {args.seed}")
         indices, labels, class_names = do_fresh_split(pool, seed=args.seed)
@@ -206,7 +206,7 @@ def main():
     # Write JSON
     with open(out_path, "w") as f:
         json.dump(output, f, indent=2)
-    print(f"\n✅ Saved frozen indices to {out_path}")
+    print(f"\n[OK] Saved frozen indices to {out_path}")
 
     # Write test_per_class.csv
     import csv
@@ -219,7 +219,7 @@ def main():
                         output["per_class_counts"].get("test", {}).get(c, 0),
                         output["per_class_counts"].get("valid", {}).get(c, 0),
                         output["per_class_counts"].get("train", {}).get(c, 0)])
-    print(f"✅ Saved {csv_path}")
+    print(f"[OK] Saved {csv_path}")
 
     # Write SHA256SUM for per-file verification (first 200 files)
     sha_path = out_path.parent / "SHA256SUM"
@@ -230,7 +230,7 @@ def main():
                     f.write(f"{sha256_file(fp)}  {fp}\n")
                 except:
                     pass
-    print(f"✅ Saved {sha_path} (sample)")
+    print(f"[OK] Saved {sha_path} (sample)")
 
     # Write datasheet.md for STARD
     datasheet = out_path.parent / "datasheet.md"
@@ -253,9 +253,9 @@ def main():
         f.write(f"""
 **File:** `{out_path}` (SHA256 sample in `SHA256SUM`)  
 **Compliance:** STRATIFIED 70/15/15, TRIPOD-AI Type 2b (test held-out)  
-**Note:** If test n ≠ 237, report true n; R1-1 audit requires transparency, not forced 237.
+**Note:** If test n != 237, report true n; R1-1 audit requires transparency, not forced 237.
 """)
-    print(f"✅ Saved {datasheet}")
+    print(f"[OK] Saved {datasheet}")
     print("\nNext: python tools/dedup_audit.py --dataset_dir", dataset_dir)
 
 if __name__ == "__main__":

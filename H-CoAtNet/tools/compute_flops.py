@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-compute_flops.py — A* Efficiency Table: Params, MACs/FLOPs, Latency, Throughput, Peak Mem
+compute_flops.py -- A* Efficiency Table: Params, MACs/FLOPs, Latency, Throughput, Peak Mem
 Addresses R1-9
 
 Usage:
@@ -158,9 +158,9 @@ def main():
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w") as f:
         json.dump({"device": str(device), "pytorch": torch.__version__, "models": results, "input": "224x224", "note": "FLOPs via thop, latency mean 100 runs, same HW/SW for all models. Report both b1 and b32."}, f, indent=2)
-    print(f"\n✅ Saved to {out}")
+    print(f"\n[OK] Saved to {out}")
     # Print LaTeX table
-    print("\n📋 LaTeX Table 4 snippet:")
+    print("\n[LaTeX] LaTeX Table 4 snippet:")
     print("\\begin{tabular}{lccccl}")
     print("\\toprule Model & Params (M) & MACs (G) & Latency b1 (ms) & Throughput & Acc \\\\")
     for r in results:
