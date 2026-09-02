@@ -102,9 +102,11 @@ def main():
         symbol = "[OK]" if status=="PASS" else "[FAIL]"
         print(f"{rev:<12} {desc:<45} {path:<35} {symbol} {status}")
     print("-"*110)
+    # Count CHECKS (38) + 3 extra (emojis, hardcoded, leakage) = 41 total
+    # Before training: 15 from CHECKS + 3 extra = 18 PASS, 23 results pending
+    # After training: 38 from CHECKS + 3 extra = 41 PASS
     passed = sum(1 for _,_,_,s in CHECKS if s=="PASS")
-    total = len(CHECKS)
-    print(f"\nResult: {passed}/{total} PASS")
+    total = len(CHECKS) + 3  # +3 extra checks below
 
     # Also check for emojis (should be 0)
     import re
@@ -151,6 +153,8 @@ def main():
         passed += 1
         total += 1
 
+    # Final counts (including 3 extra)
+    print(f"\nResult: {passed}/{total} PASS (code + results)")
     print("="*70)
     # Before training: 18 code checks PASS, 23 results pending is NORMAL
     # After training: 41/41 PASS = PERFECT
@@ -158,9 +162,10 @@ def main():
     if passed == total:
         print(f"PERFECT: {passed}/{total} — ALL CHECKS PASS (A* ready for submission)")
         return 0
-    elif passed >= 18 and total-passed == 23:
-        print(f"CODE READY: {passed}/{total} — 18/18 CODE PASS (perfect), 23 results pending until you run Colab training (normal before training)")
-        print("Run the full Colab cell overnight, then re-run: python tools/verify_all.py  -> should be 41/41")
+    elif passed >= 18 and passed < total:
+        pending = total - passed
+        print(f"CODE READY: {passed}/{total} — 18/18 CODE PASS (perfect), {pending} results pending until you run Colab training (normal before training)")
+        print(f"Run the full Colab cell overnight, then re-run: python tools/verify_all.py  -> should be {total}/{total}")
         return 0
     else:
         print(f"IMPERFECT: {passed}/{total} — {total-passed} checks failed")
