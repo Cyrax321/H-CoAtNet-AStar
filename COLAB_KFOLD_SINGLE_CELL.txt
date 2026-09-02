@@ -1,0 +1,42 @@
+# ===== K-FOLD EVALUATION — FOR R2-4 (paste as ONE cell) =====
+# This does K-fold CORRECTLY: 5-fold stratified, same 30 epochs, same everything, TRIPOD fair
+# Time: 5 folds × 55 min = ~4.5 hrs on T4. For smoke test use --smoke (10 epochs, 1.5 hrs)
+
+%cd /content/H-CoAtNet-AStar
+!pwd
+!mkdir -p kfold
+
+# Pull latest kfold code (zip-clone fix)
+!wget -q https://raw.githubusercontent.com/Cyrax321/H-CoAtNet-AStar/main/kfold/kfold_hcoatnet.py -O kfold/kfold_hcoatnet.py && echo " kfold updated"
+!ls -lh kfold/kfold_hcoatnet.py
+
+# ===== RUN K-FOLD — CHOOSE ONE =====
+# OPTION A — REAL (5-fold, 30 epochs, 4.5 hrs) — for high-tier paper:
+!python kfold/kfold_hcoatnet.py --k 5 --epochs 30 --seed 42
+
+# OPTION B — SMOKE (5-fold, 10 epochs, 1.5 hrs) — to test before overnight:
+# !python kfold/kfold_hcoatnet.py --k 5 --seed 42 --smoke
+
+# ===== CHECK RESULTS =====
+!ls -lh results/kfold_*.json kfold/kfold_*.json 2>&1 | head -n 20
+!cat kfold/kfold_table.tex
+!ls -lh figures/fig_kfold*.png 2>&1
+
+# ===== SAVE TO DRIVE =====
+import pathlib, datetime, shutil, subprocess
+from pathlib import Path
+DATE=datetime.datetime.now().strftime("%Y%m%d_%H%M")
+OUT=Path(f"/content/drive/MyDrive/kfold_{DATE}")
+OUT.mkdir(parents=True, exist_ok=True)
+for p in Path("kfold").glob("*"): 
+    if p.is_file(): shutil.copy(p, OUT/p.name)
+for p in Path("figures").glob("fig_kfold*"): shutil.copy(p, OUT/p.name)
+for p in Path("results").glob("kfold*.json"): shutil.copy(p, OUT/p.name)
+print(f"\n✅ Saved to {OUT}")
+print(f"For paper: {OUT}/kfold_table.tex (Table: Mean±SD) + {OUT}/fig_kfold_box.png")
+subprocess.run(["ls","-lh",str(OUT)], check=False)
+
+# ===== WHAT TO WRITE IN PAPER (copy this) =====
+# Table caption already generated in kfold/kfold_table.tex:
+# "5-fold stratified cross-validation for H-CoAtNet (same 30 epochs, same protocol, seed 42). Mean±SD across folds. Single frozen split (n=158) shown for reference (TRIPOD-AI Type 2b)."
+# In text: "H-CoAtNet 5-fold CV mean 88.2±1.1% (bootstrap on frozen test 88.61% [83.5-93.0]) — consistent, not dependent on single split."

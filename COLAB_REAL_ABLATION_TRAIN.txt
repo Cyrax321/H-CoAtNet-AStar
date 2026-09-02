@@ -1,0 +1,43 @@
+# ===== REAL ABLATION — TRAINS FROM SCRATCH (for paper, NOT demo) =====
+# Paste ENTIRE block as ONE cell. This TRAINS real models, 55 min per variant.
+# For high-tier paper run "all" overnight (3.5 hrs, 4 variants). For rebuttal run "noSE" only (55 min).
+
+%cd /content/H-CoAtNet-AStar
+!pwd; !ls -lh | head -n 20
+!mkdir -p ablation tools
+
+# Pull latest fair code (zip-clone fix)
+!wget -q https://raw.githubusercontent.com/Cyrax321/H-CoAtNet-AStar/main/ablation/ablation.py -O ablation/ablation.py && echo "✅ ablation.py updated"
+!wget -q https://raw.githubusercontent.com/Cyrax321/H-CoAtNet-AStar/main/tools/generate_all_figures_COMPLETE.py -O tools/generate_all_figures_COMPLETE.py && echo "✅ figure factory updated"
+!ls -lh ablation/ablation.py
+
+# ===== REAL TRAINING — CHOOSE ONE =====
+# OPTION A — REBUTTAL (55 min, proves SE matters, enough for R1-4): 
+!python ablation/ablation.py --variant noSE --epochs 30 --seed 42
+
+# OPTION B — HIGH-TIER PAPER (3.5 hrs overnight, all 4 variants, full Table 5):
+# Uncomment next line and comment OPTION A above if you have time:
+# !python ablation/ablation.py --variant all --epochs 30 --seed 42
+
+# ===== VERIFY REAL RESULTS (not demo) =====
+!ls -lh results/results_ablation_*.json ablation/results_ablation_*.json 2>&1 | head -n 20
+!cat results/results_ablation_noSE.json 2>&1 | grep -E '"accuracy"|"variant"|"model"' | head -n 20
+!cat ablation/ablation_table.tex
+!ls -lh figures/fig_ablation_main.png 2>&1
+
+# ===== SAVE TO DRIVE — REAL ablation with all results =====
+import pathlib, datetime, shutil, subprocess
+from pathlib import Path
+DATE=datetime.datetime.now().strftime("%Y%m%d_%H%M")
+OUT=Path(f"/content/drive/MyDrive/ablation_REAL_{DATE}")
+OUT.mkdir(parents=True, exist_ok=True)
+for p in Path("figures").glob("*"): shutil.copy(p, OUT/p.name)
+for p in Path("ablation").glob("*"): 
+    if p.is_file(): shutil.copy(p, OUT/p.name)
+for p in Path("results").glob("*.json"): shutil.copy(p, OUT/p.name)
+for p in Path("results").glob("*.tex"): shutil.copy(p, OUT/p.name)
+for p in Path("histories").glob("*.json"): 
+    (OUT/"histories").mkdir(exist_ok=True); shutil.copy(p, OUT/"histories"/p.name)
+print(f"\n✅ REAL ablation saved to {OUT}")
+print(f"For paper: {OUT}/ablation_table.tex (Table 5) + {OUT}/fig_ablation_main.png (Fig.5)")
+subprocess.run(["ls","-lh",str(OUT)], check=False)
