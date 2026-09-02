@@ -1,0 +1,27 @@
+# FIX TABLES — pull latest + regenerate (no re-train, 10 sec) — paste as ONE cell
+%cd /content/H-CoAtNet-AStar
+!git pull 2>&1 | tail -n 10
+!cat tools/generate_tables.py | grep -q "Deduplicate" && echo "Fix pulled" || echo "Pull failed, using wget fallback"
+# Fallback if git pull fails (Colab zip clone has no .git):
+!test -d .git || (cd /content && rm -rf /tmp/fix.zip && wget -q https://github.com/Cyrax321/H-CoAtNet-AStar/archive/refs/heads/main.zip -O /tmp/fix.zip && unzip -q /tmp/fix.zip -d /tmp && cp /tmp/H-CoAtNet-AStar-main/tools/generate_tables.py tools/generate_tables.py && cp /tmp/H-CoAtNet-AStar-main/tools/stats_tests.py tools/stats_tests.py && echo "Wget fix applied")
+
+# Regenerate CORRECT tables (now 7 unique, CoAtNet 90.51 top, n=158, no duplicate)
+!python tools/generate_tables.py --all results/results_*.json --out results/tables.tex
+!echo "--- CORRECTED tables.tex ---"
+!cat results/tables.tex
+
+!python tools/stats_tests.py --all results/results_*.json --reference results/results_hcoatnet.json --out results/significance.json 2>&1 | tail -n 20
+!cat results/significance.json | head -n 50
+
+!python tools/verify_all.py 2>&1 | tail -n 20
+!echo "--- Should now be 44/44 PERFECT (was 41/44 with duplicates) ---"
+!ls -1 results/*.json | wc -l
+
+# Re-save corrected tables to Drive
+import datetime, pathlib
+from pathlib import Path as _P
+DRIVE_OUT = sorted(_P("/content/drive/MyDrive").glob("HCoAtNet_AStar_*"))[-1]
+!cp results/tables.tex "{DRIVE_OUT}/results/" 2>/dev/null
+!cp results/significance.json "{DRIVE_OUT}/results/" 2>/dev/null
+!echo "Updated Drive: {DRIVE_OUT}/results/tables.tex"
+!cat "{DRIVE_OUT}/results/tables.tex" 2>/dev/null | head -n 20
