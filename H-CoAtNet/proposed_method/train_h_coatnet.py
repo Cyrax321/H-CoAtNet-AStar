@@ -421,6 +421,7 @@ def main():
            "support_per_class": {str(class_names[i]): int(Counter(y_true)[i]) for i in range(num_classes)},
            "y_true": list(map(int, y_true)),
            "y_pred": list(map(int, y_pred)),
+           "y_probs": y_probs.tolist() if hasattr(y_probs, "tolist") else list(y_probs),
        },
        "per_class": report,
        "classes": class_names,
