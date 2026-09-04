@@ -1,4 +1,5 @@
 import os
+import argparse
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -18,7 +19,7 @@ from roboflow import Roboflow
 # Configuration
 
 # SECURITY: Use env var ROBOFLOW_API_KEY
-API_KEY = "gXuxxWEMFJ8nK73o7pN7"  # Roboflow API key (hardcoded for Colab per user request)
+API_KEY = os.getenv("ROBOFLOW_API_KEY", "")  # env only, no hardcode
 TARGET_SIZE = (224, 224)
 BATCH_SIZE = 24
 EPOCHS = 30
@@ -156,6 +157,9 @@ def plot_curves(history):
 # Main Execution Logic
 
 def main():
+    global SEED
+    _ap = argparse.ArgumentParser(); _ap.add_argument("--seed", type=int, default=SEED); _a,_ = _ap.parse_known_args(); SEED = _a.seed
+    SUFFIX = "" if SEED==42 else f"_seed{SEED}"
     seed_everything(SEED)
     print(f"Using device: {DEVICE} | Seed: {SEED}")
     if API_KEY == "API_KEY_HERE":
@@ -271,12 +275,12 @@ def main():
             print(f"  Balanced Acc: {bal_acc:.4f} | Macro F1: {f1_m:.4f} | Kappa: {kappa:.4f} | MCC: {mcc:.4f} | ECE: {ece:.4f} | AUROC: {auroc}")
             from sklearn.metrics import classification_report
             report = classification_report(y_true, y_pred, target_names=class_names, digits=4, output_dict=True)
-            results = {"model": "CoAtNet", "seed": SEED, "test": {"accuracy": float(final_test_acc), "balanced_accuracy": float(bal_acc), "macro": {"precision": float(prec_m), "recall": float(rec_m), "f1": float(f1_m)}, "weighted": {"precision": float(prec_w), "recall": float(rec_w), "f1": float(f1_w)}, "kappa": float(kappa), "mcc": float(mcc), "ece": float(ece), "auroc_macro": float(auroc) if auroc else None, "auprc_macro": float(auprc) if auprc else None, "n": int(len(y_true)), "support_per_class": {str(class_names[i]): int(Counter(y_true)[i]) for i in range(len(class_names))}, "y_true": list(map(int, y_true)), "y_pred": list(map(int, y_pred)) }, "per_class": report, "classes": class_names}
+            results = {"model": "CoAtNet", "seed": SEED, "test": {"accuracy": float(final_test_acc), "balanced_accuracy": float(bal_acc), "macro": {"precision": float(prec_m), "recall": float(rec_m), "f1": float(f1_m)}, "weighted": {"precision": float(prec_w), "recall": float(rec_w), "f1": float(f1_w)}, "kappa": float(kappa), "mcc": float(mcc), "ece": float(ece), "auroc_macro": float(auroc) if auroc is not None else None, "auprc_macro": float(auprc) if auprc is not None else None, "n": int(len(y_true)), "support_per_class": {str(class_names[i]): int(Counter(y_true)[i]) for i in range(len(class_names))}, "y_true": list(map(int, y_true)), "y_pred": list(map(int, y_pred)) }, "per_class": report, "classes": class_names}
             import pathlib
-            Path("results").mkdir(exist_ok=True)
-            with open(f"results/results_coatnet.json", "w") as jf:
+            pathlib.Path("results").mkdir(exist_ok=True)
+            with open(f"results/results_coatnet{SUFFIX}.json", "w") as jf:
                 jf.write(json.dumps(results, indent=2))
-            with open(f"results/results_final_coatnet.json", "w") as jf:
+            with open(f"results/results_final_coatnet{SUFFIX}.json", "w") as jf:
                 jf.write(json.dumps(results, indent=2))
             print(f"  Saved results/results_coatnet.json")
         except Exception as e:
@@ -297,6 +301,17 @@ def main():
         plt.title('Confusion Matrix - CoAtNet Baseline')
         plt.savefig(RESULTS_DIR / 'confusion_matrix_coatnet.png', dpi=300)
         plt.show()
+
+        try:
+            import sys; sys.path.insert(0, "tools")
+            try:
+                from in_train_figures import save_in_train_figures
+            except ImportError:
+                sys.path.insert(0, "H-CoAtNet/tools")
+                from in_train_figures import save_in_train_figures
+            save_in_train_figures(y_true, y_probs, class_names, f"coatnet{SUFFIX}")
+        except Exception as e:
+            print(f"  [Fig] in-train figures skip: {e}")
 
         plot_curves(history)
     else:

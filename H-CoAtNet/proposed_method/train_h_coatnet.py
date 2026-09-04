@@ -1,4 +1,5 @@
 import os
+import argparse
 import random
 import json
 import time
@@ -31,8 +32,8 @@ def seed_everything(seed=42):
     torch.backends.cudnn.benchmark = False
  
 # === Configuration ===
-# SECURITY: Do not hardcode Roboflow API keys. Set env var ROBOFLOW_API_KEY.
-API_KEY = "gXuxxWEMFJ8nK73o7pN7"  # Roboflow API key (hardcoded for Colab per user request)
+# Roboflow key via env only (no hardcode for release).
+API_KEY = os.getenv("ROBOFLOW_API_KEY", "")
 TARGET_SIZE = (224, 224)
 BATCH_SIZE = 24
 EPOCHS = 30
@@ -83,10 +84,10 @@ class HierarchicalSE(nn.Module):
 # =======================================================
 # H-CoAtNet: Hierarchical Hybrid ConvNeXt + Transformer (Liu et al. ConvNeXt CVPR'22)
 # Architecture: ConvNeXt-Tiny [3,3,9,3] dims [96,192,384,768] + 2 ViT Blocks + HierarchicalSE 49->36->24
-# Canonical citations: ConvNeXt (Liu CVPR'22), ViT (Dosovitskiy ICLR'21), SE (Hu et al. CVPR'18)
+# Canonical citations: ConvNeXt (Liu et al. CVPR'22), CoAtNet (Dai et al. NeurIPS'21), ViT (Dosovitskiy et al. ICLR'21), Swin (Liu et al. ICCV'21), EfficientNet (Tan & Le ICML'19), SE (Hu et al. CVPR'18)
 # GFT baseline is separate (see train_gft.py: 8 ViT blocks + 3 GALA 75%->50%->25%)
 # =======================================================
-class CoAtGFT(nn.Module):  # TODO: rename to HCoAtNet in next major version; kept for checkpoint compat
+class HCoAtNet(nn.Module):
    def __init__(self, base_model='convnext_tiny', num_classes=5, vit_blocks=2, pretrained=True):
        super().__init__()
  
@@ -162,7 +163,8 @@ class CoAtGFT(nn.Module):  # TODO: rename to HCoAtNet in next major version; kep
  
        x = current_tokens.mean(dim=1)
        return self.classifier(x)
- 
+
+CoAtGFT = HCoAtNet  # backward compat alias for old checkpoints/imports
 
 # ===========================
 # Training, Evaluation, and Plotting (Unchanged)
@@ -256,11 +258,13 @@ def evaluate_with_probs(model, loader, criterion, desc="Evaluating"):
 # Main Training Logic (TRIPOD-AI Compliant: Test Held-Out)
 # ===========================
 def main():
+   global SEED
+   _ap = argparse.ArgumentParser(); _ap.add_argument("--seed", type=int, default=SEED); _a,_ = _ap.parse_known_args(); SEED = _a.seed
+   SUFFIX = "" if SEED==42 else f"_seed{SEED}"
    seed_everything(SEED)
    print(f"Using device: {DEVICE} | Seed: {SEED}")
-   if API_KEY == "API_KEY_HERE":
-       print("[WARNING]  ROBOFLOW_API_KEY not set. Set env var: export ROBOFLOW_API_KEY='your_key'")
-       print("   Get key: https://universe.roboflow.com/hi-l9ueo/ich-s-7lnsj -> Download -> Show download code")
+   if not API_KEY:
+       raise ValueError("Set ROBOFLOW_API_KEY env var (export ROBOFLOW_API_KEY='your_key'). Get key: https://universe.roboflow.com/hi-l9ueo/ich-s-7lnsj -> Download -> Show download code")
  
    # 1. Download Dataset (Roboflow version 1, frozen split via server)
    # NOTE: For A* frozen split, also save local indices to splits/seed42_indices.json via tools/freeze_split.py
@@ -311,7 +315,7 @@ def main():
  
    # 4. Initialize Model, Loss, Optimizer (Protocol Table 3)
    # H-CoAtNet: convnext_tiny pretrained (ImageNet-1K), AdamW 5e-5, Cosine T=30, WD 0.01, 30 epochs
-   model = CoAtGFT(num_classes=num_classes, pretrained=True).to(DEVICE)
+   model = HCoAtNet(num_classes=num_classes, pretrained=True).to(DEVICE)
    criterion = nn.CrossEntropyLoss(weight=class_weights, label_smoothing=0.1)
    optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=EPOCHS)
@@ -421,9 +425,9 @@ def main():
        "per_class": report,
        "classes": class_names,
    }
-   with open(RESULTS_DIR / "results_hcoatnet.json", "w") as f:
+   with open(RESULTS_DIR / f"results_hcoatnet{SUFFIX}.json", "w") as f:
        json.dump(results, f, indent=2)
-   with open(RESULTS_DIR / "results_final.json", "w") as f:
+   with open(RESULTS_DIR / ("results_final.json" if SEED==42 else f"results_final{SUFFIX}.json"), "w") as f:
        json.dump(results, f, indent=2)
    print(f"   Saved: {RESULTS_DIR / 'results_final.json'}")
    # Confusion Matrix (raw + normalized)
@@ -434,8 +438,7 @@ def main():
    plt.ylabel('True Label')
    plt.title('Confusion Matrix -- H-CoAtNet (Test Held-Out, n=%d)' % len(y_true))
    plt.tight_layout()
-   plt.savefig(RESULTS_DIR / 'confusion_matrix_hcoatnet.png', dpi=300, bbox_inches='tight')
-   plt.savefig('confusion_matrix_coat_gft.png', dpi=300)  # compat
+   plt.savefig(RESULTS_DIR / f'confusion_matrix_hcoatnet{SUFFIX}.png', dpi=300, bbox_inches='tight')
    plt.show()
    plt.close()
    # Normalized
@@ -446,11 +449,19 @@ def main():
    plt.ylabel('True Label')
    plt.title('Confusion Matrix (Row-Normalized) -- H-CoAtNet')
    plt.tight_layout()
-   plt.savefig(RESULTS_DIR / 'confusion_matrix_hcoatnet_norm.png', dpi=300, bbox_inches='tight')
+   plt.savefig(RESULTS_DIR / f'confusion_matrix_hcoatnet_norm{SUFFIX}.png', dpi=300, bbox_inches='tight')
    plt.show()
    plt.close()
  
-   plot_curves(history, save_prefix="hcoatnet")
+   # In-training figures: ROC/PR + reliability (never breaks training)
+   try:
+       import sys; sys.path.insert(0, "tools")
+       from in_train_figures import save_in_train_figures
+       save_in_train_figures(y_true, y_probs, class_names, f"hcoatnet{SUFFIX}")
+   except Exception as e:
+       print(f"  [Fig] in-train figures skip: {e}")
+
+   plot_curves(history, save_prefix=f"hcoatnet{SUFFIX}")
    print("\n[OK] Done. All metrics saved. See REBUTTAL_FIX_README.md for bootstrap CI next step: python tools/bootstrap_ci.py --results results/results_final.json")
  
 
