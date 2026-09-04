@@ -1,0 +1,19 @@
+# ===== OVERNIGHT — all data/figs, show + Drive (paste as ONE Colab cell, T4 GPU) =====
+%cd /content
+!rm -rf H-CoAtNet-Rebuttal-Clean
+!git clone https://github.com/Cyrax321/H-CoAtNet-Rebuttal-Clean.git
+%cd H-CoAtNet-Rebuttal-Clean
+!pip -q install -r requirements-colab.txt
+import os
+os.environ["ROBOFLOW_API_KEY"] = "gXuxxWEMFJ8nK73o7pN7"
+from google.colab import drive; drive.mount('/content/drive')
+!python H-CoAtNet/proposed_method/train_h_coatnet.py --seed 42
+!python H-CoAtNet/baselines/train_gft.py --seed 42
+!python H-CoAtNet/baselines/train_coatnet.py --seed 42
+!python H-CoAtNet/baselines/train_swin.py --seed 42
+!python H-CoAtNet/baselines/train_vit.py --seed 42
+!python H-CoAtNet/baselines/train_cnn.py --seed 42
+!python H-CoAtNet/baselines/train_efficientnet.py --seed 42
+!python tools/finalize_after_training.py
+!ls -lh results/ | head -n 30
+!ls -lh figures/*.png | head -n 40
