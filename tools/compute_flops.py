@@ -52,8 +52,8 @@ def get_model(name, num_classes=5):
     if name in ["hcoatnet", "h-coatnet", "h_coatnet"]:
         import sys
         sys.path.insert(0, "H-CoAtNet/proposed_method")
-        from train_h_coatnet import CoAtGFT
-        return CoAtGFT(num_classes=num_classes, pretrained=False)
+        from train_h_coatnet import HCoAtNet
+        return HCoAtNet(num_classes=num_classes, pretrained=False)
     elif name == "gft":
         import sys
         sys.path.insert(0, "H-CoAtNet/baselines")
@@ -76,8 +76,8 @@ def get_model(name, num_classes=5):
     elif name == "cnn":
         import sys
         sys.path.insert(0, "H-CoAtNet/baselines")
-        from train_cnn import FairCNN
-        return FairCNN(num_classes=num_classes)
+        from train_cnn import BaselineCNN
+        return BaselineCNN(num_classes=num_classes)
     else:
         raise ValueError(f"Unknown model {name}")
 
