@@ -122,7 +122,7 @@ def main():
             print("Downloading from Roboflow (version 1)...")
             try:
                 from roboflow import Roboflow
-                api_key = os.getenv("ROBOFLOW_API_KEY", "gXuxxWEMFJ8nK73o7pN7")  # hardcoded fallback
+                api_key = os.getenv("ROBOFLOW_API_KEY", "")  # env-only, no hardcode
                 if api_key == "API_KEY_HERE":
                     raise ValueError("Set ROBOFLOW_API_KEY env var")
                 rf = Roboflow(api_key=api_key)
