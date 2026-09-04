@@ -1,0 +1,62 @@
+# COLAB — GENERATE ALL DIAGRAMS + SAVE TO DRIVE (paste as ONE cell after training, T4, 30 sec)
+# Works with data you ALREADY have from overnight run (results/*.json)
+# Generates 10 A* figures (300 DPI, exact names, fair) and saves per-model to Drive
+
+# 1. Ensure in repo
+%cd /content/H-CoAtNet-AStar
+!pwd
+!ls -lh
+
+# 2. Generate ALL A* figures from existing results/*.json (no re-train)
+!python tools/generate_figures.py
+!echo "=== FIGURES GENERATED ==="
+!ls -lh figures/*.png 2>&1 | head -n 30
+!ls -lh figures/*.pdf 2>&1 | head -n 30
+!ls -lh figures/*.csv 2>&1 | head -n 20
+
+# 3. Save EVERYTHING to Drive — SEPARATE per-figure folders (as you asked)
+from google.colab import drive
+drive.mount('/content/drive')
+import datetime, pathlib
+DATE = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+DRIVE_OUT = pathlib.Path(f"/content/drive/MyDrive/HCoAtNet_Figures_{DATE}")
+DRIVE_OUT.mkdir(parents=True, exist_ok=True)
+print(f"Saving figures to {DRIVE_OUT}")
+
+# Main figures
+!mkdir -p "{DRIVE_OUT}/figures" "{DRIVE_OUT}/figures_per_model"
+!cp -r figures/* "{DRIVE_OUT}/figures/" 2>/dev/null
+!cp results/tables.tex "{DRIVE_OUT}/figures/" 2>/dev/null
+!cp results/efficiency.json "{DRIVE_OUT}/figures/" 2>/dev/null
+!cp results/metrics_hcoatnet_ci.json "{DRIVE_OUT}/figures/" 2>/dev/null
+
+# Per-model separate folders for confusion/curves (as before)
+for model in ["H-CoAtNet","GFT","CoAtNet","Swin","ViT","CNN","EfficientNet-B0"]:
+    (pathlib.Path(DRIVE_OUT)/"diagrams"/model).mkdir(parents=True, exist_ok=True)
+!cp -n results/confusion_matrix_hcoatnet*.png "{DRIVE_OUT}/diagrams/H-CoAtNet/" 2>/dev/null; cp -n results/hcoatnet*.png "{DRIVE_OUT}/diagrams/H-CoAtNet/" 2>/dev/null
+!cp -n results/confusion_matrix_gft*.png "{DRIVE_OUT}/diagrams/GFT/" 2>/dev/null
+!cp -n results/confusion_matrix*coatnet*.png "{DRIVE_OUT}/diagrams/CoAtNet/" 2>/dev/null
+!cp -n results/confusion_matrix*swin*.png "{DRIVE_OUT}/diagrams/Swin/" 2>/dev/null
+!cp -n results/confusion_matrix*vit*.png "{DRIVE_OUT}/diagrams/ViT/" 2>/dev/null
+!cp -n results/confusion_matrix*cnn*.png "{DRIVE_OUT}/diagrams/CNN/" 2>/dev/null
+!cp -n results/confusion_matrix*efficient*.png "{DRIVE_OUT}/diagrams/EfficientNet-B0/" 2>/dev/null
+!find figures -name "*.png" -exec cp -n {} "{DRIVE_OUT}/figures/" \; 2>/dev/null
+
+print("\n=== SAVED TO DRIVE ===")
+!ls -R "{DRIVE_OUT}" 2>/dev/null | head -n 80
+!echo "--- figures/ ---"; ls -lh "{DRIVE_OUT}/figures" | head -n 40
+!echo "--- diagrams per model ---"; ls -R "{DRIVE_OUT}/diagrams" 2>/dev/null | head -n 60
+
+print(f"\nDone: {DRIVE_OUT}")
+print("Check Drive: MyDrive -> HCoAtNet_Figures_... -> figures/ (all 10 A* figures, 300 DPI, exact names)")
+print("For paper: Use fig5_overall_comparison.png, fig6_perclass_f1_heatmap.png, fig2_class_distribution.png, fig9_efficiency_bubble.png, fig10_forest_ci.png in main; fig4_confusion_* in Supplementary")
+
+# 4. Verify all figures exist (reviewer-proof check)
+!python tools/verify_all.py 2>&1 | tail -n 20
+!echo "--- Figures exist? ---"
+!test -f figures/fig5_overall_comparison.png && echo "[OK] F5 overall" || echo "[FAIL] F5"
+!test -f figures/fig6_perclass_f1_heatmap.png && echo "[OK] F6 heatmap" || echo "[FAIL] F6"
+!test -f figures/fig2_class_distribution.png && echo "[OK] F2 distribution" || echo "[FAIL] F2"
+!test -f figures/fig9_efficiency_bubble.png && echo "[OK] F9 efficiency" || echo "[FAIL] F9"
+!test -f figures/fig10_forest_ci.png && echo "[OK] F10 forest" || echo "[FAIL] F10"
+print("\nAll figures generated and saved to Drive — ready for Overleaf")

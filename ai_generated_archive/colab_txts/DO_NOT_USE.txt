@@ -1,0 +1,3 @@
+QUARANTINED — DO NOT PASTE FOR REBUTTAL.
+ALL_FIGURES/PROPER/RECOVERY synthesize y_true; FIX/GENERATE/PASTE/FRESH point to old AStar + hardcode.
+Use: single clean cell in chat (Rebuttal-Clean + finalize_after_training). Smoke test kept at root for ablation later.
