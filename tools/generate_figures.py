@@ -417,10 +417,29 @@ def fig10_forest():
     except Exception as e:
         print(f"[SKIP] Fig10 failed: {e}")
 
+def fig5_mcc_standalone():
+    """Standalone MCC bar for later design (R1-8). Additive only, never touches Fig5."""
+    uniq = load_results()
+    if not uniq:
+        print('[SKIP] MCC standalone: no results'); return
+    import pandas as pd
+    rows=[{'model': d.get('model',k), 'MCC': d.get('test',{}).get('mcc',0)*100} for k,(pp,d) in uniq.items()]
+    df=pd.DataFrame(rows).sort_values('MCC', ascending=False)
+    plt.figure(figsize=(10,4.5))
+    sns.barplot(data=df, x='model', y='MCC', color=COLORS[2])
+    plt.title('MCC per Model (Test n=158) — standalone for design', fontsize=11)
+    plt.ylabel('MCC (%)'); plt.xticks(rotation=15, ha='right'); plt.tight_layout()
+    plt.savefig(FIG_DIR / 'fig5_mcc_standalone.png', bbox_inches='tight')
+    plt.savefig(FIG_DIR / 'fig5_mcc_standalone.pdf', bbox_inches='tight')
+    plt.close()
+    df.to_csv(FIG_DIR / 'fig5_mcc_data.csv', index=False)
+    print('[OK] Fig5-MCC standalone')
+
 def main():
     print("Generating A* figures from existing results...")
     fig2_class_distribution()
     fig5_overall_comparison()
+    fig5_mcc_standalone()
     fig6_perclass_heatmap()
     fig4_confusion_matrices()
     fig7_roc_pr()
