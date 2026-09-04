@@ -426,6 +426,7 @@ def main():
             print(f"  [Fig] in-train figures skip: {e}")
 
         plot_curves(history)
+        import json as _js; _hp = __import__('pathlib').Path('histories'); _hp.mkdir(exist_ok=True); _hp.joinpath(f'history_gft{SUFFIX}.json').write_text(_js.dumps({'model': 'gft', 'history': history}, indent=2))
     else:
         print("No best model was saved. Skipping final evaluation.")
 

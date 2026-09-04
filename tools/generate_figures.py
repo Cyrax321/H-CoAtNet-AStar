@@ -435,9 +435,51 @@ def fig5_mcc_standalone():
     df.to_csv(FIG_DIR / 'fig5_mcc_data.csv', index=False)
     print('[OK] Fig5-MCC standalone')
 
+
+def fig3c_combined_curves():
+    """Paper-style combined comparison: val acc + val loss, all models one axes (no test curve). Web-standard for TMI/MedIA."""
+    import pandas as pd
+    hists = {}
+    for p in sorted(pathlib.Path("histories").glob("history_*.json")):
+        try:
+            d = __import__("json").loads(p.read_text())
+            h = d.get("history", d)
+            m = d.get("model", p.stem)
+            if "val_acc" in h and "epochs" in h or ("train_acc" in h):
+                # normalize epochs
+                if "epochs" not in h:
+                    n = len(h.get("train_acc", [])); h["epochs"] = list(range(1, n+1))
+                hists[m] = h
+        except Exception:
+            pass
+    if not hists:
+        print("[SKIP] Fig3c/d: no histories/*.json (train first)")
+        return
+    COLORS = ["#0072B2","#D55E00","#009E73","#CC79A7","#F0E442","#56B4E9","#E69F00"]
+    import matplotlib.pyplot as plt
+    # val acc comparison
+    plt.figure(figsize=(9,5))
+    for i,(m,h) in enumerate(sorted(hists.items(), key=lambda x: max(x[1].get("val_acc",[0])), reverse=True)):
+        ep = h["epochs"]; va = __import__("numpy").array(h["val_acc"])*100
+        plt.plot(ep, va, label=m, color=COLORS[i%len(COLORS)], lw=2, marker="o", ms=3, markevery=5)
+        bi = int(__import__("numpy").argmax(h["val_acc"]))
+        plt.scatter([ep[bi]],[va[bi]], color=COLORS[i%len(COLORS)], s=60, zorder=5, edgecolors="k")
+    plt.title("Validation Accuracy Comparison — All Models (Test Held-Out, TRIPOD-2b)", fontsize=11)
+    plt.xlabel("Epoch"); plt.ylabel("Validation Accuracy (%)"); plt.grid(alpha=0.3); plt.legend(ncol=2, fontsize=8); plt.tight_layout()
+    plt.savefig(FIG_DIR / "fig3c_combined_val_acc.png", bbox_inches="tight"); plt.savefig(FIG_DIR / "fig3c_combined_val_acc.pdf", bbox_inches="tight"); plt.close()
+    # val loss comparison
+    plt.figure(figsize=(9,5))
+    for i,(m,h) in enumerate(hists.items()):
+        plt.plot(h["epochs"], h["val_loss"], label=m, color=COLORS[i%len(COLORS)], lw=2, marker="s", ms=3, markevery=5)
+    plt.title("Validation Loss Comparison — All Models", fontsize=11)
+    plt.xlabel("Epoch"); plt.ylabel("Loss"); plt.grid(alpha=0.3); plt.legend(fontsize=8); plt.tight_layout()
+    plt.savefig(FIG_DIR / "fig3d_combined_val_loss.png", bbox_inches="tight"); plt.savefig(FIG_DIR / "fig3d_combined_val_loss.pdf", bbox_inches="tight"); plt.close()
+    print("[OK] Fig3c/d combined curves")
+
 def main():
     print("Generating A* figures from existing results...")
     fig2_class_distribution()
+    fig3c_combined_curves()
     fig5_overall_comparison()
     fig5_mcc_standalone()
     fig6_perclass_heatmap()

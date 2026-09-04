@@ -462,6 +462,7 @@ def main():
        print(f"  [Fig] in-train figures skip: {e}")
 
    plot_curves(history, save_prefix=f"hcoatnet{SUFFIX}")
+   import json as _js; _hp = __import__('pathlib').Path('histories'); _hp.mkdir(exist_ok=True); _hp.joinpath(f'history_hcoatnet{SUFFIX}.json').write_text(_js.dumps({'model': 'hcoatnet', 'history': history}, indent=2))
    print("\n[OK] Done. All metrics saved. See REBUTTAL_FIX_README.md for bootstrap CI next step: python tools/bootstrap_ci.py --results results/results_final.json")
  
 
