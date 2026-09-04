@@ -1,0 +1,8 @@
+,Harlequin ichthyosis,Healthy skin,Ichthyosis vulgaris,Lamellar ichthyosis,Netherton syndrome
+CoAtNet,0.9355,0.9783,0.9348,0.7,0.8
+H-CoAtNet,0.9355,0.989,0.9053,0.6667,0.6897
+GFT,0.918,0.9783,0.8817,0.5778,0.72
+ViT,0.8333,0.9462,0.8421,0.4783,0.3636
+Swin,0.8235,0.9072,0.7917,0.4,0.4
+CNN,0.8125,0.913,0.75,0.3182,0.5
+EfficientNet-B0,0.7761,0.8667,0.6818,0.3256,0.2857
