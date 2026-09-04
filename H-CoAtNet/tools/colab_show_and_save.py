@@ -2,7 +2,7 @@
 """Colab inline display + Drive backup. Best-effort, never fails finalize."""
 from pathlib import Path
 
-def show_images(dirs=("results", "figures/gradcam", "figures"), patterns=("confusion*.png", "roc_*.png", "pr_*.png", "reliability_*.png", "gradcam_*.png", "fig*.png"), max_n=24):
+def show_images(dirs=("results", "figures/gradcam", "figures"), patterns=("confusion*.png", "roc_*.png", "pr_*.png", "reliability_*.png", "gradcam_*.png", "fig*.png"), max_n=80):
     try:
         from IPython.display import Image, display
     except Exception:
