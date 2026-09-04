@@ -122,8 +122,8 @@ def main():
             print("Downloading from Roboflow (version 1)...")
             try:
                 from roboflow import Roboflow
-                api_key = os.getenv("ROBOFLOW_API_KEY", "gXuxxWEMFJ8nK73o7pN7")
-                if api_key == "API_KEY_HERE":
+                api_key = os.getenv("ROBOFLOW_API_KEY", "")
+                if not api_key:
                     raise ValueError("Set ROBOFLOW_API_KEY env var")
                 rf = Roboflow(api_key=api_key)
                 project = rf.workspace("hi-l9ueo").project("ich-s-7lnsj")

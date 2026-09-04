@@ -147,18 +147,11 @@ def main():
     print("\n[LaTeX] LaTeX row snippet (copy to Table 8):")
     print(f"H-CoAtNet & {point['acc']*100:.2f} [{acc['ci_low']*100:.1f}--{acc['ci_high']*100:.1f}] & {bal['mean']:.3f} [{bal['ci_low']:.3f}--{bal['ci_high']:.3f}] & {f1['mean']:.3f} [{f1['ci_low']:.3f}--{f1['ci_high']:.3f}] & {kappa['mean']:.3f} [{kappa['ci_low']:.3f}--{kappa['ci_high']:.3f}] \\\\")
 
-    # Also handle 5-seed aggregation if multiple results files exist
-    # Look for results/results_*.json
-    results_dir = Path(args.results).parent
-    all_results = list(results_dir.glob("results_*.json"))
-    if len(all_results) > 1:
-        print(f"\nFound {len(all_results)} result files for 5-seed aggregation: {[p.name for p in all_results]}")
-        accs = []
-        for p in all_results:
-            with open(p) as f:
-                d = json.load(f)
-                accs.append(d["test"]["accuracy"] if "test" in d else d["accuracy"])
-        print(f"  5-seed mean+/-SD: {np.mean(accs):.4f} +/- {np.std(accs):.4f}")
+    # NOTE: Do NOT aggregate different models as "5-seed". A valid 5-seed
+    # requires 5 runs of the SAME model with seeds 42-46. Mixing
+    # results_cnn/swin/vit/hcoatnet gives a meaningless cross-model mean
+    # (this previously printed 0.81 +/- 0.06 and was removed). Run
+    # tools/multiseed-style repeats per model if a 5-seed claim is needed.
 
 if __name__ == "__main__":
     main()

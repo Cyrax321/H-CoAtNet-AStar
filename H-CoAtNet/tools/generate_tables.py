@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-generate_tables.py -- Single source of truth: results_final.json -> LaTeX Tables 8, 9, Fig 7
+generate_tables.py -- Single source of truth: compare.json (from --all) -> LaTeX Tables 8, 9, Fig 7. results_final.json is H-alias only, do not cite as source.
 Addresses R1-10 (numerical audit), R2-M4
 
 Usage:

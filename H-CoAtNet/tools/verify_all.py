@@ -127,14 +127,14 @@ def main():
     else:
         print("[FAIL] Emojis remain")
 
-    # Check hardcoded key (should be present for Colab)
+    # Check no hardcoded key (env-only for release)
     hcoat = (ROOT / "H-CoAtNet/proposed_method/train_h_coatnet.py").read_text()
-    if "gXuxxWEMFJ8nK73o7pN7" in hcoat:
-        print("[OK] Hardcoded API key present (Colab convenience)")
+    if "gXuxxWEMFJ8nK73o7pN7" not in hcoat and 'os.getenv("ROBOFLOW_API_KEY"' in hcoat:
+        print("[OK] No hardcoded key, env-only (release safe)")
         passed += 1
         total += 1
     else:
-        print("[FAIL] Hardcoded key missing")
+        print("[FAIL] Hardcoded key still present")
 
     # Check no test leakage in code (grep)
     import subprocess
