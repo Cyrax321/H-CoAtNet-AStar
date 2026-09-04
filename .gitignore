@@ -19,3 +19,6 @@ splits/*.csv
 # Env
 .env
 .conda/
+
+# Local quarantine — unverified AI artefacts, do not publish
+ai_generated_archive/results/
