@@ -81,6 +81,8 @@ def main():
         ("results/confusion_matrix_coatnet.png", "CoAtNet confusion", "R1-10"),
         ("results/confusion_matrix_swin.png", "Swin confusion", "R1-10"),
         ("results/confusion_matrix_vit.png", "ViT confusion", "R1-10"),
+        ("results/confusion_matrix_cnn.png", "CNN confusion", "R1-10"),
+        ("results/confusion_matrix_efficientnet.png", "EfficientNet confusion", "R1-10"),
     ]
     # Also check per-model curves exist (at least H-CoAtNet)
     for path, desc, rev in graphs:
