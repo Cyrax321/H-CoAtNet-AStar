@@ -1,6 +1,38 @@
 # FULL COLAB RUN - H-CoAtNet ablation
-# If Drive mount fails, use CELL LOCAL below. Paste once in the same runtime, run, sleep.
-# Morning: mount Drive once, then run CELL MORNING-COPY.
+# Drop-safe path after a disconnect: run R1 once, then R2, R3, R4, R5 one at a time.
+# Each backs up to Drive before the next starts, so a drop costs at most one variant.
+#
+# ----- CELL R1: mount and folders, run once after reconnect -----
+from google.colab import drive
+drive.mount("/content/drive")
+!mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" "/content/drive/MyDrive/HCoAtNet_ablation/figures" "/content/drive/MyDrive/HCoAtNet_ablation/histories"
+!ls -lh "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | head -n 20
+#
+# ----- CELL R2: full, about 55 min, then backup -----
+%cd /content/H-CoAtNet-AStar
+!python3 "ablation study/ablation_study.py" --variant full --epochs 30 --seed 42 2>&1 | tail -n 20
+!cp -v results/results_ablation_full.json "ablation study/results/results_ablation_full.json" histories/history_ablation_full.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 5
+#
+# ----- CELL R3: noSE, about 55 min, then backup -----
+!python3 "ablation study/ablation_study.py" --variant noSE --epochs 30 --seed 42 2>&1 | tail -n 20
+!cp -v results/results_ablation_noSE.json "ablation study/results/results_ablation_noSE.json" histories/history_ablation_noSE.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 5
+#
+# ----- CELL R4: noViT, about 55 min, then backup -----
+!python3 "ablation study/ablation_study.py" --variant noViT --epochs 30 --seed 42 2>&1 | tail -n 20
+!cp -v results/results_ablation_noViT.json "ablation study/results/results_ablation_noViT.json" histories/history_ablation_noViT.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 5
+#
+# ----- CELL R5: cnnOnly, about 55 min, then backup -----
+!python3 "ablation study/ablation_study.py" --variant cnnOnly --epochs 30 --seed 42 2>&1 | tail -n 20
+!cp -v results/results_ablation_cnnOnly.json "ablation study/results/results_ablation_cnnOnly.json" histories/history_ablation_cnnOnly.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 5
+#
+# ----- CELL R6: tables plus figures plus final backup, 5 min -----
+!python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
+!python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 10
+!cp -v "ablation study/figures/"*.png "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 5
+!cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 5
+print("DONE - Drive holds all four variants plus tables plus figures")
+#
+# ----- OLD SINGLE CELL BLOCKS BELOW (fresh runtime only) -----
 
 # ----- CELL LOCAL: no Drive, no clone, trains and zips locally -----
 %cd /content/H-CoAtNet-AStar
