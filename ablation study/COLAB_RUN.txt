@@ -1,21 +1,48 @@
 # Fresh Colab, T4 GPU. Copy everything below into ONE cell.
-# Fill your NEW key on the marked line first. Old key is revoked, nothing trains without this.
-# Run once, approve Drive when asked, keep the tab open overnight.
-# Morning check is Drive MyDrive/HCoAtNet_ablation.
+# Fill your NEW key on the marked line first. Old key is revoked, nothing downloads without this.
+# Run once, approve Drive when asked, keep the tab open and the machine awake overnight.
+# Flow: 1 mount Drive, 2 clone plus install, 3 key check, 4 download dataset,
+# 5 train all four, 6 tables, 7 all 12 figures, 8 save everything to Drive.
 
+# STEP 1 - mount Drive first so the log survives even a disconnect
+from google.colab import drive
+drive.mount("/content/drive")
+!mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" "/content/drive/MyDrive/HCoAtNet_ablation/figures" "/content/drive/MyDrive/HCoAtNet_ablation/histories"
+print("STEP 1 DONE - Drive ready")
+
+# STEP 2 - clone plus install
 %cd /content
 !rm -rf H-CoAtNet-AStar
 !git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git
 %cd H-CoAtNet-AStar
 !pip install -q -r requirements-colab.txt 2>&1 | tail -n 3
+print("STEP 2 DONE - code ready")
+
+# STEP 3 - key check, stops here if the key is still the placeholder or revoked
 import os
 os.environ["ROBOFLOW_API_KEY"] = "PASTE_NEW_KEY_HERE"
-from google.colab import drive
-drive.mount("/content/drive")
-!mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" "/content/drive/MyDrive/HCoAtNet_ablation/figures" "/content/drive/MyDrive/HCoAtNet_ablation/histories"
+k = os.environ["ROBOFLOW_API_KEY"]
+assert k != "PASTE_NEW_KEY_HERE", "Fill your NEW key first"
+print("STEP 3 DONE - key present, len", len(k))
+
+# STEP 4 - download plus extract dataset now, before training, so training never waits
+!python3 -c "import os; from roboflow import Roboflow; rf = Roboflow(api_key=os.environ['ROBOFLOW_API_KEY']); d = rf.workspace('hi-l9ueo').project('ich-s-7lnsj').version(1).download('folder'); print('DATASET AT', d.location)" 2>&1 | tail -n 5
+print("STEP 4 DONE - dataset on disk")
+
+# STEP 5 - train all four variants, log streams to Drive live
 !python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tee "/content/drive/MyDrive/HCoAtNet_ablation/train_all.log" | tail -n 30
+print("STEP 5 DONE - training finished")
+
+# STEP 6 - tables
 !python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
+!cat "ablation study/ablation_table.tex"
+print("STEP 6 DONE - table built")
+
+# STEP 7 - all 12 figures from real results
 !python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 10
+print("STEP 7 DONE - figures built")
+
+# STEP 8 - save everything to Drive
 !cp -v results/results_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/results/"
 !cp -rv "ablation study/results/"* "/content/drive/MyDrive/HCoAtNet_ablation/results/"
 !cp -v "ablation study/figures/"*.png "ablation study/figures/"*.pdf figures/fig_ablation_*.png figures/fig_ablation_*.pdf "/content/drive/MyDrive/HCoAtNet_ablation/figures/"
