@@ -1,7 +1,7 @@
-FULL COLAB RUN - H-CoAtNet ablation
-If smoke is done in this runtime, copy CELL GO only. Paste once, run, sleep.
+# FULL COLAB RUN - H-CoAtNet ablation
+# If smoke is done in this runtime, copy CELL GO only. Paste once, run, sleep.
 
------ CELL GO: continuation in same runtime, one paste -----
+# ----- CELL GO: continuation in same runtime, one paste -----
 !python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tee "/content/drive/MyDrive/HCoAtNet_ablation/train_all.log" | tail -n 80
 !python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
 !cat "ablation study/ablation_table.tex"
@@ -21,7 +21,7 @@ for v in ["full", "noSE", "noViT", "cnnOnly"]:
 !zip -r "/content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip" results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png "/content/drive/MyDrive/HCoAtNet_ablation/train_all.log"
 print("DONE - everything is in Drive MyDrive/HCoAtNet_ablation")
 
------ CELL SINGLE: fresh runtime, everything in one paste -----
+# ----- CELL SINGLE: fresh runtime, everything in one paste -----
 %cd /content
 !rm -rf H-CoAtNet-AStar
 !git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git
@@ -45,7 +45,7 @@ drive.mount("/content/drive")
 !zip -r "/content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip" results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png "/content/drive/MyDrive/HCoAtNet_ablation/train_all.log"
 print("DONE - everything is in Drive MyDrive/HCoAtNet_ablation")
 
------ CELL NIGHT: paste once and sleep, full run plus tables plus figures plus backup -----
+# ----- CELL NIGHT: paste once and sleep, full run plus tables plus figures plus backup -----
 import os
 os.environ["ROBOFLOW_API_KEY"] = "PASTE_YOUR_KEY_HERE"
 !python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tee night_train.log | tail -n 80
@@ -64,7 +64,7 @@ os.environ["ROBOFLOW_API_KEY"] = "PASTE_YOUR_KEY_HERE"
 !ls -lh "/content/drive/MyDrive/HCoAtNet_ablation/" "/content/drive/MyDrive/HCoAtNet_ablation/results/" "/content/drive/MyDrive/HCoAtNet_ablation/figures/" | head -n 40
 print("NIGHT DONE - everything is in Drive MyDrive/HCoAtNet_ablation, no download needed")
 
------ CELL 1: clone and install -----
+# ----- CELL 1: clone and install -----
 %cd /content
 !rm -rf H-CoAtNet-AStar
 !git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git
@@ -75,15 +75,15 @@ print("NIGHT DONE - everything is in Drive MyDrive/HCoAtNet_ablation, no downloa
 !python3 -m py_compile "ablation study/ablation_study.py" && echo "compile OK"
 !python3 "ablation study/ablation_study.py" --help | head -n 12
 
------ CELL 2: API key -----
+# ----- CELL 2: API key -----
 import os
 os.environ["ROBOFLOW_API_KEY"] = "PASTE_YOUR_KEY_HERE"
 print("key set:", len(os.environ["ROBOFLOW_API_KEY"]) > 10)
 
-Get the key at https://universe.roboflow.com/hi-l9ueo/ich-s-7lnsj
-Dataset -> Download -> Show download code. Same key as training.
+# Get the key at https://universe.roboflow.com/hi-l9ueo/ich-s-7lnsj
+# Dataset -> Download -> Show download code. Same key as training.
 
------ CELL 2B: manual download check, optional -----
+# ----- CELL 2B: manual download check, optional -----
 !pip install -q roboflow
 from roboflow import Roboflow
 import os
@@ -93,59 +93,59 @@ version = project.version(1)
 dataset = version.download("folder")
 print(dataset.location)
 
------ CELL 1B: Drive backup folder, run once -----
+# ----- CELL 1B: Drive backup folder, run once -----
 from google.colab import drive
 drive.mount("/content/drive")
 !mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" "/content/drive/MyDrive/HCoAtNet_ablation/figures" "/content/drive/MyDrive/HCoAtNet_ablation/histories"
 !ls -lh "/content/drive/MyDrive/HCoAtNet_ablation/"
 
------ CELL 3: smoke, 3 min, must pass -----
+# ----- CELL 3: smoke, 3 min, must pass -----
 !python3 "ablation study/ablation_study.py" --variant smoke --epochs 1 --seed 42 2>&1 | tail -n 30
 !ls -lh "ablation study/results/" results/ 2>&1 | head -n 20
 
------ CELL 4A: minimum, about 55 min -----
+# ----- CELL 4A: minimum, about 55 min -----
 !python3 "ablation study/ablation_study.py" --variant noSE --epochs 30 --seed 42 2>&1 | tail -n 50
 
------ CELL 4B: full Table 5, about 3.5 hr, run overnight -----
+# ----- CELL 4B: full Table 5, about 3.5 hr, run overnight -----
 !python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tail -n 80
 
------ CELL 5: tables, 30 sec -----
+# ----- CELL 5: tables, 30 sec -----
 !python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
 !cat "ablation study/ablation_table.tex"
 !cat "ablation study/ablation_summary.csv"
 
------ CELL 6: 12 figures from real results -----
+# ----- CELL 6: 12 figures from real results -----
 !python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 20
 !ls -lh "ablation study/figures/" | head -n 30
 
------ CELL 7: check metrics in one table -----
+# ----- CELL 7: check metrics in one table -----
 import json
 for v in ["full", "noSE", "noViT", "cnnOnly"]:
     d = json.load(open(f"results/results_ablation_{v}.json"))
     t = d["test"]
     print(v, "acc", round(t["accuracy"]*100,2), "bal", round(t["balanced_accuracy"]*100,2),
-          "macroF1", round(t["macro"]["f1"]*100,2), "kappa", round(t["kappa"]*100,2),
-          "mcc", round(t["mcc"]*100,2), "auroc", round((t.get("auroc_macro") or 0)*100,2),
-          "ece", round(t["ece"]*100,2), "n", t["n"])
+          # "macroF1", round(t["macro"]["f1"]*100,2), "kappa", round(t["kappa"]*100,2),
+          # "mcc", round(t["mcc"]*100,2), "auroc", round((t.get("auroc_macro") or 0)*100,2),
+          # "ece", round(t["ece"]*100,2), "n", t["n"])
 
------ CELL 8: show core figures inline -----
+# ----- CELL 8: show core figures inline -----
 from IPython.display import Image, display
 import glob
 for p in sorted(glob.glob("ablation study/figures/fig_ablation_0*.png"))[:6]:
     print(p)
-    display(Image(p, width=800))
+    # display(Image(p, width=800))
 
------ CELL 9: stats and efficiency -----
+# ----- CELL 9: stats and efficiency -----
 !python3 tools/bootstrap_ci.py --results results/results_ablation_full.json 2>&1 | tail -n 20
 !python3 tools/stats_tests.py --all "results/results_ablation_*.json" --reference results/results_ablation_full.json 2>&1 | tail -n 20
 !python3 tools/compute_flops.py --all 2>&1 | tail -n 20
 
------ CELL 10: download everything -----
+# ----- CELL 10: download everything -----
 !zip -r ablation_outputs.zip results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png
 from google.colab import files
-files.download("ablation_outputs.zip")
+# files.download("ablation_outputs.zip")
 
------ CELL 11: backup to Drive -----
+# ----- CELL 11: backup to Drive -----
 !cp -v results/results_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 10
 !cp -rv "ablation study/results/"* "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 10
 !cp -v "ablation study/figures/"*.png "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 10
