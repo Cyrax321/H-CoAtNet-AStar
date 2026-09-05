@@ -15,9 +15,10 @@ os.environ["ROBOFLOW_API_KEY"] = "PASTE_YOUR_KEY_HERE"
 !cp -v "ablation study/figures/"*.png "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 5
 !cp -v histories/history_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/histories/" 2>&1 | tail -n 5
 !cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 5
-!zip -r ablation_outputs.zip results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" histories/history_ablation_*.json night_train.log
-!ls -lh ablation_outputs.zip "/content/drive/MyDrive/HCoAtNet_ablation/" | head -n 20
-print("NIGHT DONE - download ablation_outputs.zip or check Drive in the morning")
+!zip -r "/content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip" results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png night_train.log
+!cp -v night_train.log "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 3
+!ls -lh "/content/drive/MyDrive/HCoAtNet_ablation/" "/content/drive/MyDrive/HCoAtNet_ablation/results/" "/content/drive/MyDrive/HCoAtNet_ablation/figures/" | head -n 40
+print("NIGHT DONE - everything is in Drive MyDrive/HCoAtNet_ablation, no download needed")
 
 ----- CELL 1: clone and install -----
 %cd /content
