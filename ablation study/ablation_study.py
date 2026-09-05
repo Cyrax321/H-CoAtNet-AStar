@@ -82,6 +82,7 @@ import sys
 import json
 import argparse
 import random
+import gc
 import hashlib
 import time
 from pathlib import Path
@@ -854,8 +855,17 @@ def main():
     ds = resolve_dataset(a.dataset_dir)
     todo = ORDER if a.variant == "all" else [a.variant]
     for v in todo:
+        # Fresh call per variant, then release GPU plus CPU memory before the next.
+        # Without this, CUDA cache fragmentation grows across the four variants in one
+        # process and long Colab sessions get killed mid run with no traceback.
         train_one_variant(v, ds, epochs=a.epochs, seed=a.seed,
                           pretrained=(not a.no_pretrained), out_tag=a.tag)
+        gc.collect()
+        try:
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception:
+            pass
     print("\nGenerating compare from fresh results...")
     generate_compare(tag=a.tag)
     print("\nNext: python tools/bootstrap_ci.py + stats_tests.py + compute_flops.py, then")

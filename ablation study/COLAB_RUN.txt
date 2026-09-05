@@ -4,7 +4,8 @@
 # same aug RRCrop plus HFlip plus Rot15 plus TrivAug plus Erasing, CE plus LS 0.1 plus class weights,
 # AdamW lr 5e-5 WD 0.01 Cosine, batch 24, 30 epochs, IN1K init, deterministic, test evaluated once.
 # Only use_vit and use_se toggle across the four variants. Nothing else differs.
-# Run once, approve Drive if asked, keep the tab open overnight.
+# Each variant runs as its own process with Drive backup right after, so a drop costs at most one variant.
+# Run once, approve Drive when asked, keep the tab open overnight.
 
 %cd /content
 !rm -rf H-CoAtNet-AStar
@@ -13,25 +14,15 @@
 !pip install -q -r requirements-colab.txt 2>&1 | tail -n 3
 import os
 os.environ["ROBOFLOW_API_KEY"] = "PASTE_NEW_KEY_HERE"
-try:
-    from google.colab import drive
-    drive.mount("/content/drive")
-    import pathlib
-    pathlib.Path("/content/drive/MyDrive/HCoAtNet_ablation/results").mkdir(parents=True, exist_ok=True)
-    pathlib.Path("/content/drive/MyDrive/HCoAtNet_ablation/figures").mkdir(parents=True, exist_ok=True)
-    pathlib.Path("/content/drive/MyDrive/HCoAtNet_ablation/histories").mkdir(parents=True, exist_ok=True)
-    print("Drive ready")
-except Exception as e:
-    print("Drive mount skipped, training continues locally:", e)
-!python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tee night_train.log | tail -n 30
+from google.colab import drive
+drive.mount("/content/drive")
+!mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" "/content/drive/MyDrive/HCoAtNet_ablation/figures" "/content/drive/MyDrive/HCoAtNet_ablation/histories"
+!for v in full noSE noViT cnnOnly; do echo "===== TRAIN $v ====="; python3 -u "ablation study/ablation_study.py" --variant $v --epochs 30 --seed 42 2>&1 | tee "/content/drive/MyDrive/HCoAtNet_ablation/train_$v.log" | tail -n 15; cp -v results/results_ablation_$v.json "ablation study/results/results_ablation_$v.json" histories/history_ablation_$v.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 4; done
 !python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
+!cat "ablation study/ablation_table.tex"
 !python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 10
-!zip -r ablation_outputs.zip results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png night_train.log
-!ls -lh ablation_outputs.zip
-!cp -v ablation_outputs.zip "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 3 || echo "Drive copy skipped, zip stays local"
-!cp -v results/results_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 3 || true
-!cp -rv "ablation study/results/"* "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 3 || true
-!cp -v "ablation study/figures/"*.png "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 3 || true
-!cp -v histories/history_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/histories/" 2>&1 | tail -n 3 || true
+!zip -r "/content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip" results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png
+!cp -v "ablation study/figures/"*.png "ablation study/figures/"*.pdf figures/fig_ablation_*.png figures/fig_ablation_*.pdf "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 3 || true
 !cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 3 || true
-print("DONE - zip is local always, Drive holds a copy when mount approved")
+!ls -lh "/content/drive/MyDrive/HCoAtNet_ablation/" "/content/drive/MyDrive/HCoAtNet_ablation/results/" | head -n 20
+print("DONE - Drive holds every finished variant plus tables plus figures")
