@@ -1,0 +1,80 @@
+# FULL COLAB RUN - H-CoAtNet ablation
+# Fresh Colab with T4 GPU. Paste each CELL in order. Do not skip smoke.
+# The folder name has a space, so every python path below is quoted.
+
+# ================= CELL 1: clone and install =================
+# %cd /content
+# !rm -rf H-CoAtNet-AStar
+# !git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git
+# %cd H-CoAtNet-AStar
+# !pwd; !ls -lh | head -n 20
+# !pip install -q -r requirements-colab.txt 2>&1 | tail -n 5
+# !python3 -m py_compile "ablation study/ablation_study.py" && echo "compile OK"
+# !python3 "ablation study/ablation_study.py" --help | head -n 12
+
+# ================= CELL 2: API key =================
+# Get key at https://universe.roboflow.com/hi-l9ueo/ich-s-7lnsj
+# Dataset -> Download -> Show download code. Same key as training.
+# import os
+# os.environ["ROBOFLOW_API_KEY"] = "PASTE_YOUR_KEY_HERE"
+# print("key set:", len(os.environ["ROBOFLOW_API_KEY"]) > 10)
+
+# ================= CELL 3: smoke, 3 min, must pass =================
+# !python3 "ablation study/ablation_study.py" --variant smoke --epochs 1 --seed 42 2>&1 | tail -n 30
+# !ls -lh "ablation study/results/" results/ 2>&1 | head -n 20
+# Expected: Epoch 1/1 with train acc 0.2 to 0.6, JSON saved, no traceback.
+# If this fails, stop here and share the traceback.
+
+# ================= CELL 4: full training, about 3.5 hr =================
+# For a fast rebuttal, run noSE only (about 55 min). For the full set, run all.
+# Option A, minimum:
+# !python3 "ablation study/ablation_study.py" --variant noSE --epochs 30 --seed 42 2>&1 | tail -n 50
+# Option B, full Table 5 (run overnight):
+# !python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tail -n 80
+
+# ================= CELL 5: tables, 30 sec, no GPU =================
+# !python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
+# !cat "ablation study/ablation_table.tex"
+# !cat "ablation study/ablation_summary.csv"
+
+# ================= CELL 6: 12 figures from real results =================
+# !python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 20
+# !ls -lh "ablation study/figures/" | head -n 30
+
+# ================= CELL 7: check metrics in one table =================
+# import json
+# for v in ["full", "noSE", "noViT", "cnnOnly"]:
+#     d = json.load(open(f"results/results_ablation_{v}.json"))
+#     t = d["test"]
+#     print(v, "acc", round(t["accuracy"]*100,2), "bal", round(t["balanced_accuracy"]*100,2),
+#           "macroF1", round(t["macro"]["f1"]*100,2), "kappa", round(t["kappa"]*100,2),
+#           "mcc", round(t["mcc"]*100,2), "auroc", round((t.get("auroc_macro") or 0)*100,2),
+#           "ece", round(t["ece"]*100,2), "n", t["n"])
+
+# ================= CELL 8: show core figures inline =================
+# from IPython.display import Image, display
+# import glob
+# for p in sorted(glob.glob("ablation study/figures/fig_ablation_0*.png"))[:6]:
+#     print(p)
+#     display(Image(p, width=800))
+# for v in ["full", "noSE", "noViT", "cnnOnly"]:
+#     for suf in ["raw", "norm"]:
+#         p = f"ablation study/figures/confusion_{v}_{suf}.png"
+#         print(p)
+#         display(Image(p, width=600))
+
+# ================= CELL 9: stats and efficiency, after training =================
+# !python3 tools/bootstrap_ci.py --results results/results_ablation_full.json 2>&1 | tail -n 20
+# !python3 tools/stats_tests.py --all "results/results_ablation_*.json" --reference results/results_ablation_full.json 2>&1 | tail -n 20
+# !python3 tools/compute_flops.py --all 2>&1 | tail -n 20
+
+# ================= CELL 10: download everything =================
+# !zip -r ablation_outputs.zip results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png
+# from google.colab import files
+# files.download("ablation_outputs.zip")
+
+# Notes:
+# Fairness is locked in code: same frozen split seed 42, same 224 norm, same aug,
+# same CE plus LS 0.1 plus class weights, same AdamW 5e-5 WD 0.01 Cosine, batch 24,
+# 30 epochs, IN1K init, deterministic, test evaluated once. Only use_vit and use_se toggle.
+# Use the printed test n in Table 5 exactly. Do not hand edit numbers.
