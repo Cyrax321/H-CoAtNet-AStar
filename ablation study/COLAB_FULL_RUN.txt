@@ -1,5 +1,23 @@
 FULL COLAB RUN - H-CoAtNet ablation
-Fresh Colab with T4 GPU. Copy each CELL block as is. No edits except the key in Cell 2.
+Fresh Colab with T4 GPU. For overnight, run CELL 1, CELL 2, CELL 1B mount, then CELL NIGHT and sleep.
+
+----- CELL NIGHT: paste once and sleep, full run plus tables plus figures plus backup -----
+import os
+os.environ["ROBOFLOW_API_KEY"] = "PASTE_YOUR_KEY_HERE"
+!python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tee night_train.log | tail -n 80
+!python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
+!cat "ablation study/ablation_table.tex"
+!python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 10
+!python3 tools/bootstrap_ci.py --results results/results_ablation_full.json 2>&1 | tail -n 10
+!python3 tools/compute_flops.py --all 2>&1 | tail -n 10
+!cp -v results/results_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 5
+!cp -rv "ablation study/results/"* "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 5
+!cp -v "ablation study/figures/"*.png "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 5
+!cp -v histories/history_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/histories/" 2>&1 | tail -n 5
+!cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 5
+!zip -r ablation_outputs.zip results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" histories/history_ablation_*.json night_train.log
+!ls -lh ablation_outputs.zip "/content/drive/MyDrive/HCoAtNet_ablation/" | head -n 20
+print("NIGHT DONE - download ablation_outputs.zip or check Drive in the morning")
 
 ----- CELL 1: clone and install -----
 %cd /content
