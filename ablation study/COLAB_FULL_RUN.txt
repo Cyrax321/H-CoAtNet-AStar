@@ -123,17 +123,14 @@ import json
 for v in ["full", "noSE", "noViT", "cnnOnly"]:
     d = json.load(open(f"results/results_ablation_{v}.json"))
     t = d["test"]
-    print(v, "acc", round(t["accuracy"]*100,2), "bal", round(t["balanced_accuracy"]*100,2),
-          # "macroF1", round(t["macro"]["f1"]*100,2), "kappa", round(t["kappa"]*100,2),
-          # "mcc", round(t["mcc"]*100,2), "auroc", round((t.get("auroc_macro") or 0)*100,2),
-          # "ece", round(t["ece"]*100,2), "n", t["n"])
+    print(v, "acc", round(t["accuracy"]*100,2), "bal", round(t["balanced_accuracy"]*100,2), "macroF1", round(t["macro"]["f1"]*100,2), "kappa", round(t["kappa"]*100,2), "mcc", round(t["mcc"]*100,2), "auroc", round((t.get("auroc_macro") or 0)*100,2), "ece", round(t["ece"]*100,2), "n", t["n"])
 
 # ----- CELL 8: show core figures inline -----
 from IPython.display import Image, display
 import glob
 for p in sorted(glob.glob("ablation study/figures/fig_ablation_0*.png"))[:6]:
     print(p)
-    # display(Image(p, width=800))
+    display(Image(p, width=800))
 
 # ----- CELL 9: stats and efficiency -----
 !python3 tools/bootstrap_ci.py --results results/results_ablation_full.json 2>&1 | tail -n 20
@@ -143,7 +140,7 @@ for p in sorted(glob.glob("ablation study/figures/fig_ablation_0*.png"))[:6]:
 # ----- CELL 10: download everything -----
 !zip -r ablation_outputs.zip results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png
 from google.colab import files
-# files.download("ablation_outputs.zip")
+files.download("ablation_outputs.zip")
 
 # ----- CELL 11: backup to Drive -----
 !cp -v results/results_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 10
