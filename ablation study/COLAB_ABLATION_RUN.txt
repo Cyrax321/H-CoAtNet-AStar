@@ -1,0 +1,54 @@
+# COLAB - Ablation Study (H-CoAtNet, fair)
+# Paste cell by cell in a fresh Colab (T4 GPU). Paths with spaces are quoted - do not remove quotes.
+
+# ---------- Cell 1: clone + install (2 min) ----------
+# %cd /content
+# !rm -rf H-CoAtNet-AStar 2>&1 | head -n 3
+# !git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git 2>&1 | tail -n 3
+# %cd H-CoAtNet-AStar
+# !pwd; !ls -lh | head -n 20
+# !pip install -q -r requirements-colab.txt 2>&1 | tail -n 5
+# !python3 -c "import timm, torchvision; print('timm', timm.__version__); print('torchvision', torchvision.__version__)"
+
+# ---------- Cell 2: verify ablation file + parity (30 sec, no GPU) ----------
+# !ls -lh "ablation study/ablation_study.py"
+# !python3 -m py_compile "ablation study/ablation_study.py" && echo "compile OK"
+# !python3 "ablation study/ablation_study.py" --help
+
+# ---------- Cell 3: set key (required) ----------
+# Get key: https://universe.roboflow.com/hi-l9ueo/ich-s-7lnsj -> Dataset -> Download -> Show download code
+# import os
+# os.environ["ROBOFLOW_API_KEY"] = "PASTE_YOUR_KEY_HERE" # same key as training, ich-s-7lnsj v1
+# print("key set:", len(os.environ["ROBOFLOW_API_KEY"]) > 10)
+
+# ---------- Cell 4: SMOKE - 1 epoch noSE (3 min, proves training works) ----------
+# !python3 "ablation study/ablation_study.py" --variant smoke --epochs 1 --seed 42 2>&1 | tail -n 30
+# !ls -lh results/results_ablation_noSE_smoke.json "ablation study/results/results_ablation_noSE_smoke.json" 2>&1 | head
+# Expected: Epoch 1/1 Train Acc ~0.3-0.5, JSON with accuracy, no crash.
+# If smoke fails, STOP and paste the traceback - do not launch full run.
+
+# ---------- Cell 5A: MINIMUM rebuttal - noSE only, 30ep (~55 min T4) ----------
+# !python3 "ablation study/ablation_study.py" --variant noSE --epochs 30 --seed 42 2>&1 | tail -n 50
+
+# ---------- Cell 5B: FULL - all 4 variants, 30ep each (~3.5 hr overnight) ----------
+# !python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tail -n 80
+
+# ---------- Cell 6: compare only - tables + figs, no training (30 sec) ----------
+# !python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
+# !ls -lh "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" figures/fig_ablation_02_main_bar.png figures/fig_ablation_03_drop.png 2>&1 | head
+# !cat "ablation study/ablation_table.tex"
+
+# ---------- Cell 7: all 12 figures (real numbers) ----------
+# !python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 20
+# !ls -lh "ablation study/figures/" | head -n 20
+
+# ---------- Cell 8: stats + efficiency (after training) ----------
+# !python3 tools/bootstrap_ci.py --results results/results_ablation_full.json 2>&1 | tail -n 20
+# !python3 tools/stats_tests.py --all "results/results_ablation_*.json" --reference results/results_ablation_full.json 2>&1 | tail -n 20
+# !python3 tools/compute_flops.py --all 2>&1 | tail -n 20
+
+# Notes:
+# - Fairness: all variants share H-CoAtNet aug (RRCrop+HFlip+Rot15+TrivAug+Erasing), AdamW 5e-5 WD 0.01 Cosine, batch 24, CE+LS0.1+classweight, IN1K pretrained, seed 42, test-once. Only use_vit/use_se toggle.
+# - CoAtNet/GFT baselines in H-CoAtNet/baselines use different aug (ColorJitter / minimal) - that is baseline history, NOT used here. Ablation is internally fair.
+# - Test n comes from your frozen split (expect 237 or 171 - script prints it and warns if inconsistent). Use whatever it prints in Table 5, do not hand-edit.
+# - If timm import fails on Colab latest, the script auto-falls back (vit -> layers.Block). If TrivialAugWide missing, it falls back to AutoAugment and prints WARN - still fair across variants.
