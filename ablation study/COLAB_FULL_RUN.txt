@@ -20,6 +20,16 @@ print("key set:", len(os.environ["ROBOFLOW_API_KEY"]) > 10)
 Get the key at https://universe.roboflow.com/hi-l9ueo/ich-s-7lnsj
 Dataset -> Download -> Show download code. Same key as training.
 
+----- CELL 2B: manual download check, optional -----
+!pip install -q roboflow
+from roboflow import Roboflow
+import os
+rf = Roboflow(api_key=os.environ["ROBOFLOW_API_KEY"])
+project = rf.workspace("hi-l9ueo").project("ich-s-7lnsj")
+version = project.version(1)
+dataset = version.download("folder")
+print(dataset.location)
+
 ----- CELL 3: smoke, 3 min, must pass -----
 !python3 "ablation study/ablation_study.py" --variant smoke --epochs 1 --seed 42 2>&1 | tail -n 30
 !ls -lh "ablation study/results/" results/ 2>&1 | head -n 20
