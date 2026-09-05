@@ -30,6 +30,12 @@ version = project.version(1)
 dataset = version.download("folder")
 print(dataset.location)
 
+----- CELL 1B: Drive backup folder, run once -----
+from google.colab import drive
+drive.mount("/content/drive")
+!mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" "/content/drive/MyDrive/HCoAtNet_ablation/figures" "/content/drive/MyDrive/HCoAtNet_ablation/histories"
+!ls -lh "/content/drive/MyDrive/HCoAtNet_ablation/"
+
 ----- CELL 3: smoke, 3 min, must pass -----
 !python3 "ablation study/ablation_study.py" --variant smoke --epochs 1 --seed 42 2>&1 | tail -n 30
 !ls -lh "ablation study/results/" results/ 2>&1 | head -n 20
@@ -75,3 +81,11 @@ for p in sorted(glob.glob("ablation study/figures/fig_ablation_0*.png"))[:6]:
 !zip -r ablation_outputs.zip results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png
 from google.colab import files
 files.download("ablation_outputs.zip")
+
+----- CELL 11: backup to Drive -----
+!cp -v results/results_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 10
+!cp -rv "ablation study/results/"* "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 10
+!cp -v "ablation study/figures/"*.png "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 10
+!cp -v histories/history_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/histories/" 2>&1 | tail -n 10
+!cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 10
+!ls -lh "/content/drive/MyDrive/HCoAtNet_ablation/" "/content/drive/MyDrive/HCoAtNet_ablation/results/" | head -n 30
