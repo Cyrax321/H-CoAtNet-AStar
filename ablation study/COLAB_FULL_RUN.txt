@@ -1,5 +1,18 @@
 FULL COLAB RUN - H-CoAtNet ablation
-Fresh Colab with T4 GPU. For overnight, run CELL 1, CELL 2, CELL 1B mount, then CELL NIGHT and sleep.
+Single cell overnight is CELL SINGLE below. Copy it as is, fill the key line, run once, approve Drive, sleep.
+
+----- CELL SINGLE: everything in one paste -----
+%cd /content
+!rm -rf H-CoAtNet-AStar
+!git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git
+%cd H-CoAtNet-AStar
+!pip install -q -r requirements-colab.txt 2>&1 | tail -n 3
+import os
+os.environ["ROBOFLOW_API_KEY"] = "PASTE_YOUR_KEY_HERE"
+from google.colab import drive
+drive.mount("/content/drive")
+!mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" "/content/drive/MyDrive/HCoAtNet_ablation/figures" "/content/drive/MyDrive/HCoAtNet_ablation/histories"
+!python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tee "/content/drive/MyDrive/HCoAtNet_ablation/train_all.log" | tail -n 80
 
 ----- CELL NIGHT: paste once and sleep, full run plus tables plus figures plus backup -----
 import os
