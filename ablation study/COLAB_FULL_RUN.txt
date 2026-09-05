@@ -1,7 +1,7 @@
 # Copy everything below into ONE fresh Colab cell with T4 GPU.
 # Fill your NEW key on the marked line first. The old key is revoked (401), nothing trains without this.
 # Get a new key at https://universe.roboflow.com/hi-l9ueo/ich-s-7lnsj under Account then Keys.
-# Run once, keep the tab open overnight.
+# Run once, approve Drive if asked, keep the tab open overnight.
 
 %cd /content
 !rm -rf H-CoAtNet-AStar
@@ -10,9 +10,26 @@
 !pip install -q -r requirements-colab.txt 2>&1 | tail -n 3
 import os
 os.environ["ROBOFLOW_API_KEY"] = "PASTE_NEW_KEY_HERE"
+try:
+    from google.colab import drive
+    drive.mount("/content/drive")
+    import pathlib
+    pathlib.Path("/content/drive/MyDrive/HCoAtNet_ablation/results").mkdir(parents=True, exist_ok=True)
+    pathlib.Path("/content/drive/MyDrive/HCoAtNet_ablation/figures").mkdir(parents=True, exist_ok=True)
+    pathlib.Path("/content/drive/MyDrive/HCoAtNet_ablation/histories").mkdir(parents=True, exist_ok=True)
+    print("Drive ready")
+except Exception as e:
+    print("Drive mount skipped, training continues locally:", e)
 !python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tee night_train.log | tail -n 30
 !python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
 !cat "ablation study/ablation_table.tex"
-!zip -r ablation_outputs.zip results/results_ablation_*.json "ablation study/results/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json night_train.log
+!python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 10
+!zip -r ablation_outputs.zip results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png night_train.log
 !ls -lh ablation_outputs.zip
-print("DONE - download ablation_outputs.zip in the morning")
+!cp -v ablation_outputs.zip "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 3 || echo "Drive zip copy skipped"
+!cp -v results/results_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 3 || true
+!cp -rv "ablation study/results/"* "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 3 || true
+!cp -v "ablation study/figures/"*.png figures/fig_ablation_*.png "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 3 || true
+!cp -v histories/history_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/histories/" 2>&1 | tail -n 3 || true
+!cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" night_train.log "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 3 || true
+print("DONE - zip is local always, Drive holds everything when mount approved")
