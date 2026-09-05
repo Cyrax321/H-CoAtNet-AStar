@@ -1,6 +1,28 @@
 # FULL COLAB RUN - H-CoAtNet ablation
-# If smoke is done in this runtime, copy CELL GO only. Paste once, run, sleep.
+# If Drive mount fails, use CELL LOCAL below. Paste once in the same runtime, run, sleep.
+# Morning: mount Drive once, then run CELL MORNING-COPY.
 
+# ----- CELL LOCAL: no Drive, no clone, trains and zips locally -----
+%cd /content/H-CoAtNet-AStar
+!python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tee night_train.log | tail -n 80
+!python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
+!cat "ablation study/ablation_table.tex"
+!python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 10
+!zip -r ablation_outputs.zip results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png night_train.log
+!ls -lh ablation_outputs.zip
+print("DONE - morning: mount Drive, run CELL MORNING-COPY")
+#
+# ----- CELL MORNING-COPY: mount once, then copy -----
+from google.colab import drive
+drive.mount("/content/drive")
+!mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" "/content/drive/MyDrive/HCoAtNet_ablation/figures" "/content/drive/MyDrive/HCoAtNet_ablation/histories"
+!cp -v ablation_outputs.zip "/content/drive/MyDrive/HCoAtNet_ablation/"
+!cp -v results/results_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/results/"
+!cp -rv "ablation study/results/"* "/content/drive/MyDrive/HCoAtNet_ablation/results/"
+!cp -v "ablation study/figures/"*.png "/content/drive/MyDrive/HCoAtNet_ablation/figures/"
+!cp -v histories/history_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/histories/"
+!cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" night_train.log "/content/drive/MyDrive/HCoAtNet_ablation/"
+#
 # ----- CELL GO: continuation in same runtime, one paste -----
 !python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tee "/content/drive/MyDrive/HCoAtNet_ablation/train_all.log" | tail -n 80
 !python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
