@@ -33,3 +33,25 @@ except Exception as e:
 !cp -v histories/history_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/histories/" 2>&1 | tail -n 3 || true
 !cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" night_train.log "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 3 || true
 print("DONE - zip is local always, Drive holds everything when mount approved")
+
+# ----- CELL DRIVE-ONLY: fresh Colab, one paste, everything to Drive, no local zip -----
+%cd /content
+!rm -rf H-CoAtNet-AStar
+!git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git
+%cd H-CoAtNet-AStar
+!pip install -q -r requirements-colab.txt 2>&1 | tail -n 3
+import os
+os.environ["ROBOFLOW_API_KEY"] = "PASTE_NEW_KEY_HERE"
+from google.colab import drive
+drive.mount("/content/drive")
+!mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" "/content/drive/MyDrive/HCoAtNet_ablation/figures" "/content/drive/MyDrive/HCoAtNet_ablation/histories"
+!python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tee "/content/drive/MyDrive/HCoAtNet_ablation/train_all.log" | tail -n 30
+!python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
+!python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 10
+!cp -v results/results_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/results/"
+!cp -rv "ablation study/results/"* "/content/drive/MyDrive/HCoAtNet_ablation/results/"
+!cp -v "ablation study/figures/"*.png "ablation study/figures/"*.pdf figures/fig_ablation_*.png figures/fig_ablation_*.pdf "/content/drive/MyDrive/HCoAtNet_ablation/figures/"
+!cp -v histories/history_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/histories/"
+!cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" "/content/drive/MyDrive/HCoAtNet_ablation/"
+!ls -lh "/content/drive/MyDrive/HCoAtNet_ablation/" "/content/drive/MyDrive/HCoAtNet_ablation/results/" "/content/drive/MyDrive/HCoAtNet_ablation/figures/"
+print("DONE - everything is in Drive MyDrive/HCoAtNet_ablation")
