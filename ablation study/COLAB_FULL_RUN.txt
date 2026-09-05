@@ -1,7 +1,27 @@
 FULL COLAB RUN - H-CoAtNet ablation
-Single cell overnight is CELL SINGLE below. Copy it as is, fill the key line, run once, approve Drive, sleep.
+If smoke is done in this runtime, copy CELL GO only. Paste once, run, sleep.
 
------ CELL SINGLE: everything in one paste -----
+----- CELL GO: continuation in same runtime, one paste -----
+!python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tee "/content/drive/MyDrive/HCoAtNet_ablation/train_all.log" | tail -n 80
+!python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
+!cat "ablation study/ablation_table.tex"
+!python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 10
+!python3 tools/bootstrap_ci.py --results results/results_ablation_full.json 2>&1 | tail -n 10
+!python3 tools/compute_flops.py --all 2>&1 | tail -n 10
+import json
+for v in ["full", "noSE", "noViT", "cnnOnly"]:
+    d = json.load(open(f"results/results_ablation_{v}.json"))
+    t = d["test"]
+    print(v, "acc", round(t["accuracy"]*100,2), "macroF1", round(t["macro"]["f1"]*100,2), "kappa", round(t["kappa"]*100,2), "n", t["n"])
+!cp -v results/results_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 5
+!cp -rv "ablation study/results/"* "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 5
+!cp -v "ablation study/figures/"*.png "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 5
+!cp -v histories/history_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/histories/" 2>&1 | tail -n 5
+!cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 5
+!zip -r "/content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip" results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png "/content/drive/MyDrive/HCoAtNet_ablation/train_all.log"
+print("DONE - everything is in Drive MyDrive/HCoAtNet_ablation")
+
+----- CELL SINGLE: fresh runtime, everything in one paste -----
 %cd /content
 !rm -rf H-CoAtNet-AStar
 !git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git
