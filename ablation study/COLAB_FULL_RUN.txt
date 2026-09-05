@@ -1,7 +1,36 @@
 # FULL COLAB RUN - H-CoAtNet ablation
-# Drop-safe path after a disconnect: run R1 once, then R2, R3, R4, R5 one at a time.
-# Each backs up to Drive before the next starts, so a drop costs at most one variant.
+# Fresh Colab: copy CELL FRESH only. One paste, fill the key line, run, approve Drive if asked, sleep.
+# Mount failure cannot kill training: Drive copy lines tolerate missing mount, local zip always builds.
 #
+# ----- CELL FRESH: fresh runtime, one paste, mount-safe -----
+%cd /content
+!rm -rf H-CoAtNet-AStar
+!git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git
+%cd H-CoAtNet-AStar
+!pip install -q -r requirements-colab.txt 2>&1 | tail -n 3
+import os
+os.environ["ROBOFLOW_API_KEY"] = "PASTE_YOUR_KEY_HERE"
+try:
+    from google.colab import drive
+    drive.mount("/content/drive")
+    import pathlib
+    pathlib.Path("/content/drive/MyDrive/HCoAtNet_ablation/results").mkdir(parents=True, exist_ok=True)
+    pathlib.Path("/content/drive/MyDrive/HCoAtNet_ablation/figures").mkdir(parents=True, exist_ok=True)
+    pathlib.Path("/content/drive/MyDrive/HCoAtNet_ablation/histories").mkdir(parents=True, exist_ok=True)
+    print("Drive ready")
+except Exception as e:
+    print("Drive mount skipped, training continues locally:", e)
+!python3 "ablation study/ablation_study.py" --variant all --epochs 30 --seed 42 2>&1 | tee night_train.log | tail -n 80
+!python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 20
+!python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 10
+!zip -r ablation_outputs.zip results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json figures/fig_ablation_*.png night_train.log
+!ls -lh ablation_outputs.zip
+!cp -v ablation_outputs.zip results/results_ablation_*.json "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 5 || echo "Drive copy skipped, zip stays local"
+!cp -rv "ablation study/results/"* "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 3 || true
+!cp -v "ablation study/figures/"*.png "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 3 || true
+print("DONE - zip is local always, Drive copy best effort")
+#
+# ----- RESILIENT PER-VARIANT CELLS BELOW (use after a disconnect) -----
 # ----- CELL R1: mount and folders, run once after reconnect -----
 from google.colab import drive
 drive.mount("/content/drive")
