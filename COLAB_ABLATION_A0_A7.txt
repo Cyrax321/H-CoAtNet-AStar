@@ -77,9 +77,16 @@ for v in VARIANTS:
     cmd = ["python3", "-u", "ablation study/ablation_study.py",
            "--variant", v, "--epochs", "30", "--seed", "42"]
     print(f"\n[TRAIN {v}] started at {time.strftime('%H:%M:%S')}")
+    # Stream output to BOTH the log file AND the cell output so epochs are visible live
     with open(log_path, "w") as logf:
-        proc = subprocess.run(cmd, stdout=logf, stderr=subprocess.STDOUT)
-    print(f"[TRAIN {v}] done in {(time.time()-t0)/60:.1f} min (exit={proc.returncode})")
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+        for line in proc.stdout:
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            logf.write(line)
+            logf.flush()
+        proc.wait()
+    print(f"\n[TRAIN {v}] done in {(time.time()-t0)/60:.1f} min (exit={proc.returncode})")
     if proc.returncode == 0:
         for src in [oj_local,
                     f"ablation study/results/results_ablation_{v}.json",
