@@ -1,103 +1,189 @@
-H-CoAtNet ABLATION A0-A7 -- MINIMAL COLAB (one cell, safe)
+H-CoAtNet ABLATION A0-A7 -- WORKING COLAB (5 separate cells)
 =====================================================
-This script is intentionally minimal to avoid Colab OOM/disconnect:
-- Single-process variant training (no background audits)
-- Memory released between variants (gc + torch.cuda.empty_cache)
-- No heavy pre-flight checks (skips tmp/audit_ablation.py)
-- Pre-downloads IN1K once before any training starts
-- Each variant backs up to Drive IMMEDIATELY after finishing
+This version splits into 5 cells. EACH CELL IS 100% PURE PYTHON
+(no `!` magic, no `subprocess shell tricks`). Paste each cell into
+a SEPARATE Colab cell and run them ONE AT A TIME in order.
 
 ESTIMATED TIME on T4: ~7 hours total
 (smoke 3 min + 8 variants x ~50 min + Drive backup)
 
+Before starting:
+  1. Open https://colab.research.google.com -> New Notebook
+  2. Runtime -> Change runtime type -> T4 GPU -> Save
+  3. Runtime -> Restart session (fresh, important)
+
 =====================================================
-COPY FROM HERE (paste all in ONE Colab cell):
+CELL 1 of 5: GPU check, key, clone, install, sanity
 =====================================================
 
-!nvidia-smi -L
-!python -c "import torch; print('torch', torch.__version__, '| cuda:', torch.cuda.is_available())"
+import subprocess, os, sys, time
 
-import os, time
+subprocess.run(["nvidia-smi", "-L"], check=False)
+
+import torch
+print('torch:', torch.__version__, '| cuda:', torch.cuda.is_available())
+
 os.environ["ROBOFLOW_API_KEY"] = "gXuxxWEMFJ8nK73o7pN7"
 print("ROBOFLOW key set:", os.environ["ROBOFLOW_API_KEY"][:4] + "****")
 
-%cd /content
-!rm -rf H-CoAtNet-Ichthyosis
-!git clone --depth 1 https://github.com/Cyrax321/H-CoAtNet-Ichthyosis.git
-%cd H-CoAtNet-Ichthyosis
-!git log --oneline -2
+os.makedirs("/content", exist_ok=True)
+os.chdir("/content")
+subprocess.run(["rm", "-rf", "H-CoAtNet-Ichthyosis"], check=False)
+subprocess.run(["git", "clone", "--depth", "1",
+                "https://github.com/Cyrax321/H-CoAtNet-Ichthyosis.git"], check=True)
+os.chdir("/content/H-CoAtNet-Ichthyosis")
+subprocess.run(["git", "log", "--oneline", "-3"], check=False)
 
-!pip install -q -r requirements-colab.txt
-!python -c "import timm; print('timm OK', timm.__version__)"
+subprocess.run(["pip", "install", "-q", "-r", "requirements-colab.txt"], check=False)
 
-# Quick sanity: compile + import + minimal forward (no full audit; saves RAM)
-!python3 -m py_compile "ablation study/ablation_study.py" && echo "compile OK"
-!python3 -c "
-import sys; sys.path.insert(0, 'ablation study')
-import torch
-from ablation_study import AblationCoAtNet, VARIANTS
-m = AblationCoAtNet(use_vit=True, use_se=True, exec_mode='hierarchical_se', num_classes=5, pretrained=False)
+import timm
+print('timm OK', timm.__version__)
+
+subprocess.run(["python3", "-m", "py_compile", "ablation study/ablation_study.py"], check=True)
+print("compile OK")
+
+sys.path.insert(0, 'ablation study')
+from ablation_study import AblationCoAtNet
+
+m = AblationCoAtNet(use_vit=True, use_se=True, exec_mode='hierarchical_se',
+                    num_classes=5, pretrained=False)
 m.eval()
 with torch.no_grad():
     out = m(torch.randn(1, 3, 224, 224))
 print('A5 forward OK:', tuple(out.shape))
-" 2>&1 | tail -3
+del m
+import gc; gc.collect()
+if torch.cuda.is_available():
+    torch.cuda.empty_cache()
 
-# Drive mount + backup folders
 from google.colab import drive
 drive.mount("/content/drive")
-!mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" \
-         "/content/drive/MyDrive/HCoAtNet_ablation/figures" \
-         "/content/drive/MyDrive/HCoAtNet_ablation/histories" \
-         "/content/drive/MyDrive/HCoAtNet_ablation/logs"
+for sub in ["results", "figures", "histories", "logs"]:
+    os.makedirs(f"/content/drive/MyDrive/HCoAtNet_ablation/{sub}", exist_ok=True)
 print("Drive ready at /content/drive/MyDrive/HCoAtNet_ablation/")
 
-# Pre-download IN1K weights ONCE (avoids repeating ~100MB download per variant)
-!python3 -c "
-import os; os.environ.setdefault('HF_HOME', '/root/.cache/huggingface')
-import timm
+os.environ.setdefault('HF_HOME', '/root/.cache/huggingface')
 print('Pre-downloading convnext_tiny IN1K weights...')
-m = timm.create_model('convnext_tiny', pretrained=True, num_classes=0)
+_t = timm.create_model('convnext_tiny', pretrained=True, num_classes=0)
 print('IN1K cached. Variants will use the local cache.')
-" 2>&1 | tail -5
+del _t
+import gc; gc.collect()
+if torch.cuda.is_available():
+    torch.cuda.empty_cache()
 
-# Smoke test (1 epoch vitOnly, ~3 min)
-print("\n=== SMOKE TEST (1 epoch vitOnly) ===")
+print("CELL 1 DONE")
+
+=====================================================
+CELL 2 of 5: Smoke test (~3 min)
+=====================================================
+
+import time, subprocess
+
+print("=== SMOKE TEST (1 epoch vitOnly) ===")
 t0 = time.time()
-!python3 "ablation study/ablation_study.py" --variant smoke --epochs 1 --seed 42 2>&1 \
-  | tee "/content/drive/MyDrive/HCoAtNet_ablation/logs/smoke.log" \
-  | tail -n 15
-print(f"smoke elapsed: {(time.time()-t0)/60:.1f} min")
 
-# Full A0-A7 ablation (30 epochs each, sequential)
-# Order: A0, A1, A2, A3, A4, A5, A6, A7
-# After each variant: backup JSON + history + checkpoint to Drive.
-# If Colab disconnects mid-way, just re-run from the next variant.
-for v in cnnOnly vitOnly seNoPrune randomPrune directL2 hierarchical hierarchicalRaw noViT; do
-  echo "===== TRAIN $v (30 epochs) ====="
-  t0=$(date +%s)
-  python3 -u "ablation study/ablation_study.py" --variant $v --epochs 30 --seed 42 2>&1 \
-    | tee "/content/drive/MyDrive/HCoAtNet_ablation/logs/train_$v.log" \
-    | tail -n 12
-  mins=$(( ($(date +%s) - t0) / 60 ))
-  echo "$v elapsed: ${mins} min"
-  cp -v results/results_ablation_$v.json \
-        "ablation study/results/results_ablation_$v.json" \
-        histories/history_ablation_$v.json \
-        "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 4 || true
-  cp -v "ablation study/results/best_$v.pth" \
-        "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 2 || true
-done
+with open("/content/drive/MyDrive/HCoAtNet_ablation/logs/smoke.log", "w") as logf:
+    p = subprocess.run(
+        ["python3", "-u", "ablation study/ablation_study.py",
+         "--variant", "smoke", "--epochs", "1", "--seed", "42"],
+        stdout=logf, stderr=subprocess.STDOUT)
 
-# Compare + Table 5
-echo "===== COMPARE + TABLE 5 ====="
-python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 25
-echo "===== TABLE 5 (LaTeX) ====="
-cat "ablation study/ablation_table.tex"
-echo "===== SUMMARY (CSV) ====="
-cat "ablation study/ablation_summary.csv"
+print(f"smoke exit code: {p.returncode}, elapsed: {(time.time()-t0)/60:.1f} min")
 
-# Show 3 key comparison figures inline
+# Show tail of smoke log so we can verify it ran
+with open("/content/drive/MyDrive/HCoAtNet_ablation/logs/smoke.log") as f:
+    lines = f.read().splitlines()
+for line in lines[-15:]:
+    print(line)
+
+print("CELL 2 DONE")
+
+=====================================================
+CELL 3 of 5: Full A0-A7 ablation (~7 hours, sequential)
+# Run this cell and let it run overnight. If Colab disconnects,
+# just re-run this cell: it will skip variants already trained.
+=====================================================
+
+import os, subprocess, time, sys, shutil
+import torch
+
+DRIVE = "/content/drive/MyDrive/HCoAtNet_ablation"
+RESULTS = f"{DRIVE}/results"
+os.makedirs(RESULTS, exist_ok=True)
+
+VARIANTS = ["cnnOnly", "vitOnly", "seNoPrune", "randomPrune",
+            "directL2", "hierarchical", "hierarchicalRaw", "noViT"]
+
+print(f"Starting full A0-A7 ablation at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+overall_start = time.time()
+
+for v in VARIANTS:
+    out_json = f"results/results_ablation_{v}.json"
+    out_json_drive = f"{RESULTS}/results_ablation_{v}.json"
+
+    # Skip if already trained (resume on reconnect)
+    if os.path.exists(out_json) or os.path.exists(out_json_drive):
+        print(f"SKIP {v}: already trained ({out_json_drive} exists)")
+        continue
+
+    print(f"\n===== TRAIN {v} (30 epochs) =====")
+    t0 = time.time()
+    log_path = f"{DRIVE}/logs/train_{v}.log"
+    cmd = ["python3", "-u", "ablation study/ablation_study.py",
+           "--variant", v, "--epochs", "30", "--seed", "42"]
+    with open(log_path, "w") as logf:
+        proc = subprocess.run(cmd, stdout=logf, stderr=subprocess.STDOUT)
+    elapsed = (time.time() - t0) / 60
+    print(f"{v} done in {elapsed:.1f} min (exit={proc.returncode})")
+
+    if proc.returncode == 0:
+        for src in [out_json,
+                    f"ablation study/results/results_ablation_{v}.json",
+                    f"histories/history_ablation_{v}.json"]:
+            if os.path.exists(src):
+                shutil.copy(src, RESULTS)
+        pth = f"ablation study/results/best_{v}.pth"
+        if os.path.exists(pth):
+            shutil.copy(pth, RESULTS)
+        print(f"{v}: backed up to {RESULTS}")
+    else:
+        print(f"{v}: FAILED (exit={proc.returncode}); check {log_path}")
+        break
+
+    import gc; gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+overall_min = (time.time() - overall_start) / 60
+print(f"\nAll variants done in {overall_min:.1f} min total")
+print("CELL 3 DONE")
+
+=====================================================
+CELL 4 of 5: Compare + Table 5 (~30 sec, no training)
+=====================================================
+
+import subprocess
+
+print("===== COMPARE + TABLE 5 =====")
+p = subprocess.run(
+    ["python3", "ablation study/ablation_study.py", "--variant", "compare"],
+    capture_output=True, text=True)
+print("\n".join(p.stdout.splitlines()[-30:]))
+
+print("\n===== TABLE 5 (LaTeX) =====")
+with open("ablation study/ablation_table.tex") as f:
+    print(f.read())
+
+print("\n===== SUMMARY (CSV) =====")
+with open("ablation study/ablation_summary.csv") as f:
+    print(f.read())
+
+print("CELL 4 DONE")
+
+=====================================================
+CELL 5 of 5: Inline figures + final Drive backup
+=====================================================
+
 from pathlib import Path
 try:
     from IPython.display import Image, display
@@ -107,22 +193,33 @@ try:
 except Exception as e:
     print("inline show skip:", e)
 
-# Final Drive backup
-echo "===== FINAL DRIVE BACKUP ====="
-cp -v "ablation study/figures/"*.png "ablation study/figures/"*.pdf \
-  "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 3 || true
-cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" \
-  "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 3 || true
-cd /content && zip -q -r "/content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip" \
-  H-CoAtNet-Ichthyosis/results/results_ablation_*.json \
-  H-CoAtNet-Ichthyosis/ablation\ study/results/ \
-  H-CoAtNet-Ichthyosis/ablation\ study/figures/ \
-  H-CoAtNet-Ichthyosis/ablation\ study/ablation_table.tex \
-  H-CoAtNet-Ichthyosis/ablation\ study/ablation_summary.csv \
-  H-CoAtNet-Ichthyosis/histories/history_ablation_*.json 2>/dev/null
-echo "zip-done"
-ls -lh "/content/drive/MyDrive/HCoAtNet_ablation/" \
-       "/content/drive/MyDrive/HCoAtNet_ablation/results/" | head -n 30
-print("DONE -- Table 5 + 8 variant JSONs + figures in Drive")
+import shutil, os, subprocess
 
-# ==== END -- COPY UP TO HERE ====
+DRIVE_FIGS = "/content/drive/MyDrive/HCoAtNet_ablation/figures"
+os.makedirs(DRIVE_FIGS, exist_ok=True)
+for ext in ("png", "pdf"):
+    for f in Path("ablation study/figures").glob(f"*.{ext}"):
+        shutil.copy(f, DRIVE_FIGS)
+for fname in ["ablation study/ablation_table.tex", "ablation study/ablation_summary.csv"]:
+    if os.path.exists(fname):
+        shutil.copy(fname, "/content/drive/MyDrive/HCoAtNet_ablation/")
+
+print("\n===== FINAL DRIVE BACKUP =====")
+subprocess.run([
+    "bash", "-c",
+    "cd /content && zip -q -r "
+    "/content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip "
+    "H-CoAtNet-Ichthyosis/results/results_ablation_*.json "
+    "'H-CoAtNet-Ichthyosis/ablation study/results/' "
+    "'H-CoAtNet-Ichthyosis/ablation study/figures/' "
+    "'H-CoAtNet-Ichthyosis/ablation study/ablation_table.tex' "
+    "'H-CoAtNet-Ichthyosis/ablation study/ablation_summary.csv' "
+    "H-CoAtNet-Ichthyosis/histories/history_ablation_*.json"
+], check=False)
+print("zip-done")
+
+print("\n===== DRIVE LISTING =====")
+subprocess.run(["ls", "-lh", "/content/drive/MyDrive/HCoAtNet_ablation/"])
+subprocess.run(["ls", "-lh", "/content/drive/MyDrive/HCoAtNet_ablation/results/"])
+
+print("\nDONE -- Table 5 + 8 variant JSONs + figures in Drive")
