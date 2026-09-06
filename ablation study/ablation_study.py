@@ -96,7 +96,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
-from tqdm import tqdm
 import matplotlib
 matplotlib.use("Agg")  # Headless backend. Required on Colab, safe locally.
 import matplotlib.pyplot as plt
@@ -752,11 +751,28 @@ def fairness_banner(epochs, seed):
 # Test loader is never touched here. Only train_one_variant calls the test
 # loader once at the end, which enforces TRIPOD-AI Type 2b (R1-2).
 # ----------------------------------------------------------------------------
+def _phase_progress(loader, desc):
+    """Yield each batch but emit ONE condensed line per phase.
+
+    tqdm's carriage-return redraws look like multiple separate lines when
+    streamed into a Jupyter cell. This helper prints a single "desc 100%..."
+    line per phase instead, so Colab cell output shows one line per epoch
+    loop rather than 100+ tqdm redraws.
+    """
+    n = len(loader)
+    start = time.time()
+    for i, batch in enumerate(loader, 1):
+        yield batch
+        if i == n:
+            elapsed = time.time() - start
+            print(f"  {desc} 100% {n}/{n} batches [{elapsed:.1f}s]", flush=True)
+
+
 def train_epoch(model, loader, criterion, optimizer):
     """Run one training epoch. Return (mean loss, accuracy)."""
     model.train()
     tot, preds, tgts = 0.0, [], []
-    for img, y in tqdm(loader, desc="Training", leave=False):
+    for img, y in _phase_progress(loader, "Training"):
         img, y = img.to(DEVICE), y.to(DEVICE)
         optimizer.zero_grad()
         out = model(img)
@@ -779,7 +795,7 @@ def evaluate(model, loader, criterion, desc="Validating"):
     """Evaluate loss and accuracy without gradients. Return (loss, acc, y, p)."""
     model.eval()
     tot, preds, tgts = 0.0, [], []
-    for img, y in tqdm(loader, desc=desc, leave=False):
+    for img, y in _phase_progress(loader, desc):
         img, y = img.to(DEVICE), y.to(DEVICE)
         out = model(img)
         tot += criterion(out, y).item()
@@ -800,7 +816,7 @@ def evaluate_with_probs(model, loader, criterion, desc="Test"):
     """Evaluate once on held-out test. Return (loss, acc, y_true, y_pred, probs)."""
     model.eval()
     tot, preds, tgts, probs = 0.0, [], [], []
-    for img, y in tqdm(loader, desc=desc, leave=False):
+    for img, y in _phase_progress(loader, desc):
         img, y = img.to(DEVICE), y.to(DEVICE)
         out = model(img)
         tot += criterion(out, y).item()
