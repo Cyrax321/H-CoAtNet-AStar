@@ -146,8 +146,13 @@ for v in VARIANTS:
                     shutil.copy(f, f"{DRIVE}/figures/")
         print(f"[BACKUP] {v} -> {RESULTS}")
     else:
-        print(f"[FAIL] {v} exit={proc.returncode}; see {log_path}")
-        break
+        # exit=3 is the ablation script's compare-failure (expected mid-run);
+        # any other non-zero exit is a real crash worth stopping on.
+        if proc.returncode == 3:
+            print(f"[NOTE] {v} compare-after-train raised RuntimeError (expected; STEP 6 will do the final compare)")
+        else:
+            print(f"[FAIL] {v} exit={proc.returncode}; see {log_path}")
+            break
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
