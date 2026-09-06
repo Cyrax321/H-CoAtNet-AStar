@@ -78,6 +78,7 @@ for v in VARIANTS:
            "--variant", v, "--epochs", "30", "--seed", "42"]
     print(f"\n[TRAIN {v}] started at {time.strftime('%H:%M:%S')}")
     # Stream output to BOTH the log file AND the cell output so epochs are visible live
+    last_heartbeat = time.time()
     with open(log_path, "w") as logf:
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
         for line in proc.stdout:
@@ -85,6 +86,16 @@ for v in VARIANTS:
             sys.stdout.flush()
             logf.write(line)
             logf.flush()
+            # Heartbeat: print elapsed time every 60s of wall clock so you
+            # can confirm the cell is alive even between epoch prints.
+            if time.time() - last_heartbeat > 60:
+                last_heartbeat = time.time()
+                elapsed_min = (time.time() - t0) / 60
+                hb = f"  [heartbeat {v}] still running, {elapsed_min:.1f} min elapsed\n"
+                sys.stdout.write(hb)
+                sys.stdout.flush()
+                logf.write(hb)
+                logf.flush()
         proc.wait()
     print(f"\n[TRAIN {v}] done in {(time.time()-t0)/60:.1f} min (exit={proc.returncode})")
     if proc.returncode == 0:
