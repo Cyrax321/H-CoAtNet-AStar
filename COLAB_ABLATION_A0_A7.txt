@@ -16,7 +16,7 @@ os.makedirs("/content", exist_ok=True)
 os.chdir("/content")
 subprocess.run(["rm", "-rf", "H-CoAtNet-Ichthyosis"], check=False)
 subprocess.run(["git", "clone", "--depth", "1",
-                "https://github.com/Cyrax321/H-CoAtNet-Ichthyosis.git"], check=True)
+                "https://github.com/Cyrax321/H-CoAtNet-AStar.git"], check=True)
 os.chdir("/content/H-CoAtNet-Ichthyosis")
 subprocess.run(["git", "log", "--oneline", "-3"], check=False)
 
@@ -146,12 +146,12 @@ print(f"copied {n_copied} figure files to {DRIVE_FIGS}")
 
 subprocess.run(["bash", "-c",
     "cd /content && zip -q -r /content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip "
-    "H-CoAtNet-Ichthyosis/results/results_ablation_*.json "
-    "'H-CoAtNet-Ichthyosis/ablation study/results/' "
-    "'H-CoAtNet-Ichthyosis/ablation study/figures/' "
-    "'H-CoAtNet-Ichthyosis/ablation study/ablation_table.tex' "
-    "'H-CoAtNet-Ichthyosis/ablation study/ablation_summary.csv' "
-    "H-CoAtNet-Ichthyosis/histories/history_ablation_*.json"],
+    "H-CoAtNet-AStar/results/results_ablation_*.json "
+    "'H-CoAtNet-AStar/ablation study/results/' "
+    "'H-CoAtNet-AStar/ablation study/figures/' "
+    "'H-CoAtNet-AStar/ablation study/ablation_table.tex' "
+    "'H-CoAtNet-AStar/ablation study/ablation_summary.csv' "
+    "H-CoAtNet-AStar/histories/history_ablation_*.json"],
     check=False)
 print("zip-done -> /content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip")
 
