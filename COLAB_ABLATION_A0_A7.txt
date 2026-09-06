@@ -14,10 +14,10 @@ from pathlib import Path
 print("=== STEP 1: env + clone + install ===")
 os.makedirs("/content", exist_ok=True)
 os.chdir("/content")
-subprocess.run(["rm", "-rf", "H-CoAtNet-Ichthyosis"], check=False)
+subprocess.run(["rm", "-rf", "H-CoAtNet-AStar"], check=False)
 subprocess.run(["git", "clone", "--depth", "1",
                 "https://github.com/Cyrax321/H-CoAtNet-AStar.git"], check=True)
-os.chdir("/content/H-CoAtNet-Ichthyosis")
+os.chdir("/content/H-CoAtNet-AStar")
 subprocess.run(["git", "log", "--oneline", "-3"], check=False)
 
 subprocess.run(["pip", "install", "-q", "-r", "requirements-colab.txt"], check=False)
