@@ -1,108 +1,128 @@
-H-CoAtNet -- ABLATION A0-A7, COLAB COPY-PASTE (ONE CELL)
+H-CoAtNet ABLATION A0-A7 -- MINIMAL COLAB (one cell, safe)
 =====================================================
-HOW TO USE:
-1. https://colab.research.google.com/ -> New Notebook
-2. Runtime -> Change runtime type -> T4 GPU -> Save
-3. Runtime -> Restart session (fresh, important)
-4. Copy EVERYTHING below "COPY FROM HERE" into ONE cell, Shift+Enter
-5. Time: smoke 3 min + 8 variants x ~50-55 min = ~7 hrs overnight
-6. Results: Table 5 (ablation_table.tex) + 12 figures + per-variant JSON
+This script is intentionally minimal to avoid Colab OOM/disconnect:
+- Single-process variant training (no background audits)
+- Memory released between variants (gc + torch.cuda.empty_cache)
+- No heavy pre-flight checks (skips tmp/audit_ablation.py)
+- Pre-downloads IN1K once before any training starts
+- Each variant backs up to Drive IMMEDIATELY after finishing
 
-WHAT IT RUNS (fair, seed 42, 30 epochs each):
-A0 cnnOnly, A1 +ViT noSE, A2 +SE no prune, A3 Fixed-random 49->24,
-A4 One-shot SE 49->24, A5 Full H-CoAtNet, A6 Hierar. raw L2, A7 Full w/o ViT
-Same split, same aug, same AdamW 5e-5, test held-out once. Only use_vit/use_se/exec_mode toggle.
+ESTIMATED TIME on T4: ~7 hours total
+(smoke 3 min + 8 variants x ~50 min + Drive backup)
 
 =====================================================
 COPY FROM HERE (paste all in ONE Colab cell):
 =====================================================
 
-# H-CoAtNet ABLATION A0-A7 -- one cell, T4 GPU, ~7 hrs
-# Fresh runtime -> paste all -> Run. No manual steps.
-
-# 0. GPU check
 !nvidia-smi -L
 !python -c "import torch; print('torch', torch.__version__, '| cuda:', torch.cuda.is_available())"
 
-# 1. Clean clone (origin = your current code with A7 + hardened audit)
+import os, time
+os.environ["ROBOFLOW_API_KEY"] = "gXuxxWEMFJ8nK73o7pN7"
+print("ROBOFLOW key set:", os.environ["ROBOFLOW_API_KEY"][:4] + "****")
+
 %cd /content
 !rm -rf H-CoAtNet-Ichthyosis
-!git clone https://github.com/Cyrax321/H-CoAtNet-Ichthyosis.git
+!git clone --depth 1 https://github.com/Cyrax321/H-CoAtNet-Ichthyosis.git
 %cd H-CoAtNet-Ichthyosis
-!git log --oneline -1
-!pwd
+!git log --oneline -2
 
-# 2. Install WITHOUT breaking Colab torch
 !pip install -q -r requirements-colab.txt
 !python -c "import timm; print('timm OK', timm.__version__)"
 
-# 3. Roboflow key -- train scripts read this env var automatically
-# Get yours: https://universe.roboflow.com/hi-l9ueo/ich-s-7lnsj -> Download -> Show download code
-import os
-os.environ["ROBOFLOW_API_KEY"] = "gXuxxWEMFJ8nK73o7pN7"
-print("key set:", os.environ["ROBOFLOW_API_KEY"][:4] + "****")
-
-# 4. Verify ablation script exists + compiles + structural audit passes (~2 min)
-!ls -lh "ablation study/ablation_study.py"
+# Quick sanity: compile + import + minimal forward (no full audit; saves RAM)
 !python3 -m py_compile "ablation study/ablation_study.py" && echo "compile OK"
-!python3 "ablation study/ablation_study.py" --help 2>&1 | head -n 22
-!python3 tmp/audit_ablation.py 2>&1 | tail -15
+!python3 -c "
+import sys; sys.path.insert(0, 'ablation study')
+import torch
+from ablation_study import AblationCoAtNet, VARIANTS
+m = AblationCoAtNet(use_vit=True, use_se=True, exec_mode='hierarchical_se', num_classes=5, pretrained=False)
+m.eval()
+with torch.no_grad():
+    out = m(torch.randn(1, 3, 224, 224))
+print('A5 forward OK:', tuple(out.shape))
+" 2>&1 | tail -3
 
-# 5. Drive backup folders (auth popup -> Allow; keeps every finished variant safe if Colab drops)
+# Drive mount + backup folders
 from google.colab import drive
 drive.mount("/content/drive")
-!mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" "/content/drive/MyDrive/HCoAtNet_ablation/figures" "/content/drive/MyDrive/HCoAtNet_ablation/histories"
-print("Drive ready")
+!mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" \
+         "/content/drive/MyDrive/HCoAtNet_ablation/figures" \
+         "/content/drive/MyDrive/HCoAtNet_ablation/histories" \
+         "/content/drive/MyDrive/HCoAtNet_ablation/logs"
+print("Drive ready at /content/drive/MyDrive/HCoAtNet_ablation/")
 
-# 6. SMOKE -- 1 epoch vitOnly, ~3 min. Proves real training works before the long run.
-!python3 "ablation study/ablation_study.py" --variant smoke --epochs 1 --seed 42 2>&1 | tail -n 20
-!ls -lh results/results_ablation_vitOnly_smoke.json 2>/dev/null
+# Pre-download IN1K weights ONCE (avoids repeating ~100MB download per variant)
+!python3 -c "
+import os; os.environ.setdefault('HF_HOME', '/root/.cache/huggingface')
+import timm
+print('Pre-downloading convnext_tiny IN1K weights...')
+m = timm.create_model('convnext_tiny', pretrained=True, num_classes=0)
+print('IN1K cached. Variants will use the local cache.')
+" 2>&1 | tail -5
 
-# 7. FULL ABLATION -- 8 variants, 30 epochs each. Each variant backs up right after,
-# so a drop costs at most 1 variant. Order: A0, A1, A2, A3, A4, A5, A6, A7.
-!for v in cnnOnly vitOnly seNoPrune randomPrune directL2 hierarchical hierarchicalRaw noViT; do
-  echo "===== TRAIN $v =====";
+# Smoke test (1 epoch vitOnly, ~3 min)
+print("\n=== SMOKE TEST (1 epoch vitOnly) ===")
+t0 = time.time()
+!python3 "ablation study/ablation_study.py" --variant smoke --epochs 1 --seed 42 2>&1 \
+  | tee "/content/drive/MyDrive/HCoAtNet_ablation/logs/smoke.log" \
+  | tail -n 15
+print(f"smoke elapsed: {(time.time()-t0)/60:.1f} min")
+
+# Full A0-A7 ablation (30 epochs each, sequential)
+# Order: A0, A1, A2, A3, A4, A5, A6, A7
+# After each variant: backup JSON + history + checkpoint to Drive.
+# If Colab disconnects mid-way, just re-run from the next variant.
+for v in cnnOnly vitOnly seNoPrune randomPrune directL2 hierarchical hierarchicalRaw noViT; do
+  echo "===== TRAIN $v (30 epochs) ====="
+  t0=$(date +%s)
   python3 -u "ablation study/ablation_study.py" --variant $v --epochs 30 --seed 42 2>&1 \
-    | tee "/content/drive/MyDrive/HCoAtNet_ablation/train_$v.log" \
-    | tail -n 15;
-  cp -v results/results_ablation_$v.json "ablation study/results/results_ablation_$v.json" \
-    histories/history_ablation_$v.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 4;
+    | tee "/content/drive/MyDrive/HCoAtNet_ablation/logs/train_$v.log" \
+    | tail -n 12
+  mins=$(( ($(date +%s) - t0) / 60 ))
+  echo "$v elapsed: ${mins} min"
+  cp -v results/results_ablation_$v.json \
+        "ablation study/results/results_ablation_$v.json" \
+        histories/history_ablation_$v.json \
+        "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 4 || true
+  cp -v "ablation study/results/best_$v.pth" \
+        "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 2 || true
 done
 
-# 8. Table 5 + summary (30 sec, no training -- rebuilds from the 8 JSONs)
-!python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 30
-!echo "===== TABLE 5 ====="
-!cat "ablation study/ablation_table.tex"
-!echo "===== SUMMARY ====="
-!cat "ablation study/ablation_summary.csv" 2>/dev/null
+# Compare + Table 5
+echo "===== COMPARE + TABLE 5 ====="
+python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 25
+echo "===== TABLE 5 (LaTeX) ====="
+cat "ablation study/ablation_table.tex"
+echo "===== SUMMARY (CSV) ====="
+cat "ablation study/ablation_summary.csv"
 
-# 9. All 12 ablation figures (real numbers, PNG+PDF) -- if generator exists
-!if [ -f "ablation study/generate_all_12_ablation_figs.py" ]; then \
-  python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 15; \
-else echo "generate_all_12_ablation_figs.py not in repo -- skipping 12-fig suite"; fi
-!ls -lh "ablation study/figures/" | head -n 20
-
-# 10. Show key figures inline (no need to open files)
+# Show 3 key comparison figures inline
 from pathlib import Path
 try:
     from IPython.display import Image, display
-    for p in sorted(Path("ablation study/figures").glob("fig_ablation_*.png"))[:6]:
+    for p in sorted(Path("ablation study/figures").glob("fig_ablation_*.png"))[:3]:
         print(f"--- {p.name} ---")
         display(Image(str(p)))
 except Exception as e:
     print("inline show skip:", e)
 
-# 11. Zip + copy everything to Drive
-!zip -q -r "/content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip" \
-  results/results_ablation_*.json "ablation study/results/" \
-  "ablation study/figures/" "ablation study/ablation_table.tex" \
-  "ablation study/ablation_summary.csv" \
-  histories/history_ablation_*.json 2>/dev/null; echo zip-done
-!cp -v "ablation study/figures/"*.png "ablation study/figures/"*.pdf \
+# Final Drive backup
+echo "===== FINAL DRIVE BACKUP ====="
+cp -v "ablation study/figures/"*.png "ablation study/figures/"*.pdf \
   "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 3 || true
-!cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" \
+cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" \
   "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 3 || true
-!ls -lh "/content/drive/MyDrive/HCoAtNet_ablation/" "/content/drive/MyDrive/HCoAtNet_ablation/results/" | head -n 25
-print("DONE -- Table 5 + 8 variant JSONs + figures in Colab AND /content/drive/MyDrive/HCoAtNet_ablation/")
+cd /content && zip -q -r "/content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip" \
+  H-CoAtNet-Ichthyosis/results/results_ablation_*.json \
+  H-CoAtNet-Ichthyosis/ablation\ study/results/ \
+  H-CoAtNet-Ichthyosis/ablation\ study/figures/ \
+  H-CoAtNet-Ichthyosis/ablation\ study/ablation_table.tex \
+  H-CoAtNet-Ichthyosis/ablation\ study/ablation_summary.csv \
+  H-CoAtNet-Ichthyosis/histories/history_ablation_*.json 2>/dev/null
+echo "zip-done"
+ls -lh "/content/drive/MyDrive/HCoAtNet_ablation/" \
+       "/content/drive/MyDrive/HCoAtNet_ablation/results/" | head -n 30
+print("DONE -- Table 5 + 8 variant JSONs + figures in Drive")
 
 # ==== END -- COPY UP TO HERE ====
