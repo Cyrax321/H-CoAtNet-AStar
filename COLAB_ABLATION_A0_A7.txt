@@ -38,7 +38,7 @@ for sub in ["results", "figures", "histories", "logs"]:
 RESULTS = f"{DRIVE}/results"
 
 print()
-print("=== STEP 3: pre-download IN1K weights ===")
+print("=== STEP 3: pre-download IN1K weights + dataset (reused across reconnects) ===")
 os.environ.setdefault("HF_HOME", "/root/.cache/huggingface")
 print("Downloading convnext_tiny IN1K...")
 _t = timm.create_model("convnext_tiny", pretrained=True, num_classes=0)
@@ -48,11 +48,30 @@ import gc; gc.collect()
 if torch.cuda.is_available():
     torch.cuda.empty_cache()
 
+# Pre-download Roboflow dataset once, into a STABLE location (not inside the
+# cloned repo). STEP 1 does rm -rf H-CoAtNet-AStar on every reconnect, so the
+# dataset would otherwise re-download each time.
+STABLE_DATA = "/content/dataset"
+if not os.path.exists(os.path.join(STABLE_DATA, "train")):
+    print("Downloading Roboflow dataset once...")
+    from roboflow import Roboflow
+    rf = Roboflow(api_key=os.environ["ROBOFLOW_API_KEY"])
+    ds = rf.workspace("hi-l9ueo").project("ich-s-7lnsj").version(1).download("folder")
+    # Move to stable location
+    import shutil as _sh
+    if os.path.exists(STABLE_DATA):
+        _sh.rmtree(STABLE_DATA)
+    _sh.move(ds.location, STABLE_DATA)
+    print(f"dataset cached at {STABLE_DATA}")
+else:
+    print(f"dataset already cached at {STABLE_DATA}")
+
 print()
 print("=== STEP 4: smoke test (1 epoch vitOnly, ~3 min) ===")
 with open(f"{DRIVE}/logs/smoke.log", "w") as logf:
     p = subprocess.run(["python3", "-u", "ablation study/ablation_study.py",
-                        "--variant", "smoke", "--epochs", "1", "--seed", "42"],
+                        "--variant", "smoke", "--epochs", "1", "--seed", "42",
+                        "--dataset_dir", "/content/dataset"],
                        stdout=logf, stderr=subprocess.STDOUT)
 print(f"smoke exit code: {p.returncode}")
 with open(f"{DRIVE}/logs/smoke.log") as f:
@@ -68,14 +87,25 @@ overall_start = time.time()
 for v in VARIANTS:
     oj_local = f"results/results_ablation_{v}.json"
     oj_drive = f"{RESULTS}/results_ablation_{v}.json"
-    # Resume on reconnect: skip variants already trained
+    # Resume on reconnect: skip variants already trained.
+    # If local is missing but Drive has it (fresh clone after disconnect),
+    # restore local from Drive so compare/zip can find it later.
+    if os.path.exists(oj_drive) and not os.path.exists(oj_local):
+        os.makedirs(os.path.dirname(oj_local), exist_ok=True)
+        shutil.copy(oj_drive, oj_local)
+        h_local = f"histories/history_ablation_{v}.json"
+        h_drive = f"{RESULTS}/history_ablation_{v}.json"
+        if os.path.exists(h_drive) and not os.path.exists(h_local):
+            os.makedirs(os.path.dirname(h_local), exist_ok=True)
+            shutil.copy(h_drive, h_local)
     if os.path.exists(oj_local) or os.path.exists(oj_drive):
         print(f"SKIP {v}: already trained")
         continue
     t0 = time.time()
     log_path = f"{DRIVE}/logs/train_{v}.log"
     cmd = ["python3", "-u", "ablation study/ablation_study.py",
-           "--variant", v, "--epochs", "30", "--seed", "42"]
+           "--variant", v, "--epochs", "30", "--seed", "42",
+           "--dataset_dir", "/content/dataset"]
     print(f"\n[TRAIN {v}] started at {time.strftime('%H:%M:%S')}")
     # Stream output to BOTH the log file AND the cell output so epochs are visible live
     last_heartbeat = time.time()
@@ -107,6 +137,13 @@ for v in VARIANTS:
         pth = f"ablation study/results/best_{v}.pth"
         if os.path.exists(pth):
             shutil.copy(pth, RESULTS)
+        # Also backup per-variant figures immediately so we don't lose
+        # them if a later variant crashes or Colab disconnects.
+        for fig_ext in ("png",):
+            for fig_pattern in (f"curve_{v}_*.{fig_ext}",
+                                f"confusion_{v}_*.{fig_ext}"):
+                for f in Path("ablation study/figures").glob(fig_pattern):
+                    shutil.copy(f, f"{DRIVE}/figures/")
         print(f"[BACKUP] {v} -> {RESULTS}")
     else:
         print(f"[FAIL] {v} exit={proc.returncode}; see {log_path}")
