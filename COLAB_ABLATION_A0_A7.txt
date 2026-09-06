@@ -1,31 +1,17 @@
-H-CoAtNet ABLATION A0-A7 -- WORKING COLAB (5 separate cells)
+H-CoAtNet ABLATION A0-A7 -- ONE COLAB CELL (pure Python)
 =====================================================
-This version splits into 5 cells. EACH CELL IS 100% PURE PYTHON
-(no `!` magic, no `subprocess shell tricks`). Paste each cell into
-a SEPARATE Colab cell and run them ONE AT A TIME in order.
-
-ESTIMATED TIME on T4: ~7 hours total
-(smoke 3 min + 8 variants x ~50 min + Drive backup)
-
-Before starting:
-  1. Open https://colab.research.google.com -> New Notebook
-  2. Runtime -> Change runtime type -> T4 GPU -> Save
-  3. Runtime -> Restart session (fresh, important)
+Paste EVERYTHING below into ONE Colab cell and run. ~7 hours on T4.
+Uses subprocess.run() for all shell calls (no `!` magic, no bash for-loops)
+so Colab's Python parser handles it cleanly.
 
 =====================================================
-CELL 1 of 5: GPU check, key, clone, install, sanity
+COPY FROM HERE (single cell):
 =====================================================
 
-import subprocess, os, sys, time
+import subprocess, os, sys, time, shutil
+from pathlib import Path
 
-subprocess.run(["nvidia-smi", "-L"], check=False)
-
-import torch
-print('torch:', torch.__version__, '| cuda:', torch.cuda.is_available())
-
-os.environ["ROBOFLOW_API_KEY"] = "gXuxxWEMFJ8nK73o7pN7"
-print("ROBOFLOW key set:", os.environ["ROBOFLOW_API_KEY"][:4] + "****")
-
+print("=== STEP 1: env + clone + install ===")
 os.makedirs("/content", exist_ok=True)
 os.chdir("/content")
 subprocess.run(["rm", "-rf", "H-CoAtNet-Ichthyosis"], check=False)
@@ -36,108 +22,66 @@ subprocess.run(["git", "log", "--oneline", "-3"], check=False)
 
 subprocess.run(["pip", "install", "-q", "-r", "requirements-colab.txt"], check=False)
 
-import timm
-print('timm OK', timm.__version__)
+import timm, torch
+print("timm:", timm.__version__, "| torch:", torch.__version__,
+      "| cuda:", torch.cuda.is_available())
 
-subprocess.run(["python3", "-m", "py_compile", "ablation study/ablation_study.py"], check=True)
-print("compile OK")
+os.environ["ROBOFLOW_API_KEY"] = "gXuxxWEMFJ8nK73o7pN7"
 
-sys.path.insert(0, 'ablation study')
-from ablation_study import AblationCoAtNet
-
-m = AblationCoAtNet(use_vit=True, use_se=True, exec_mode='hierarchical_se',
-                    num_classes=5, pretrained=False)
-m.eval()
-with torch.no_grad():
-    out = m(torch.randn(1, 3, 224, 224))
-print('A5 forward OK:', tuple(out.shape))
-del m
-import gc; gc.collect()
-if torch.cuda.is_available():
-    torch.cuda.empty_cache()
-
+print()
+print("=== STEP 2: Drive mount ===")
 from google.colab import drive
 drive.mount("/content/drive")
+DRIVE = "/content/drive/MyDrive/HCoAtNet_ablation"
 for sub in ["results", "figures", "histories", "logs"]:
-    os.makedirs(f"/content/drive/MyDrive/HCoAtNet_ablation/{sub}", exist_ok=True)
-print("Drive ready at /content/drive/MyDrive/HCoAtNet_ablation/")
+    os.makedirs(f"{DRIVE}/{sub}", exist_ok=True)
+RESULTS = f"{DRIVE}/results"
 
-os.environ.setdefault('HF_HOME', '/root/.cache/huggingface')
-print('Pre-downloading convnext_tiny IN1K weights...')
-_t = timm.create_model('convnext_tiny', pretrained=True, num_classes=0)
-print('IN1K cached. Variants will use the local cache.')
+print()
+print("=== STEP 3: pre-download IN1K weights ===")
+os.environ.setdefault("HF_HOME", "/root/.cache/huggingface")
+print("Downloading convnext_tiny IN1K...")
+_t = timm.create_model("convnext_tiny", pretrained=True, num_classes=0)
+print("IN1K cached")
 del _t
 import gc; gc.collect()
 if torch.cuda.is_available():
     torch.cuda.empty_cache()
 
-print("CELL 1 DONE")
+print()
+print("=== STEP 4: smoke test (1 epoch vitOnly, ~3 min) ===")
+with open(f"{DRIVE}/logs/smoke.log", "w") as logf:
+    p = subprocess.run(["python3", "-u", "ablation study/ablation_study.py",
+                        "--variant", "smoke", "--epochs", "1", "--seed", "42"],
+                       stdout=logf, stderr=subprocess.STDOUT)
+print(f"smoke exit code: {p.returncode}")
+with open(f"{DRIVE}/logs/smoke.log") as f:
+    for line in f.read().splitlines()[-12:]:
+        print(line)
 
-=====================================================
-CELL 2 of 5: Smoke test (~3 min)
-=====================================================
-
-import time, subprocess
-
-print("=== SMOKE TEST (1 epoch vitOnly) ===")
-t0 = time.time()
-
-with open("/content/drive/MyDrive/HCoAtNet_ablation/logs/smoke.log", "w") as logf:
-    p = subprocess.run(
-        ["python3", "-u", "ablation study/ablation_study.py",
-         "--variant", "smoke", "--epochs", "1", "--seed", "42"],
-        stdout=logf, stderr=subprocess.STDOUT)
-
-print(f"smoke exit code: {p.returncode}, elapsed: {(time.time()-t0)/60:.1f} min")
-
-# Show tail of smoke log so we can verify it ran
-with open("/content/drive/MyDrive/HCoAtNet_ablation/logs/smoke.log") as f:
-    lines = f.read().splitlines()
-for line in lines[-15:]:
-    print(line)
-
-print("CELL 2 DONE")
-
-=====================================================
-CELL 3 of 5: Full A0-A7 ablation (~7 hours, sequential)
-# Run this cell and let it run overnight. If Colab disconnects,
-# just re-run this cell: it will skip variants already trained.
-=====================================================
-
-import os, subprocess, time, sys, shutil
-import torch
-
-DRIVE = "/content/drive/MyDrive/HCoAtNet_ablation"
-RESULTS = f"{DRIVE}/results"
-os.makedirs(RESULTS, exist_ok=True)
-
+print()
+print("=== STEP 5: full A0-A7 ablation (sequential, ~7 hours) ===")
+print("Each variant: 30 epochs, ~50 min on T4. Backed up to Drive after each.")
 VARIANTS = ["cnnOnly", "vitOnly", "seNoPrune", "randomPrune",
             "directL2", "hierarchical", "hierarchicalRaw", "noViT"]
-
-print(f"Starting full A0-A7 ablation at {time.strftime('%Y-%m-%d %H:%M:%S')}")
 overall_start = time.time()
-
 for v in VARIANTS:
-    out_json = f"results/results_ablation_{v}.json"
-    out_json_drive = f"{RESULTS}/results_ablation_{v}.json"
-
-    # Skip if already trained (resume on reconnect)
-    if os.path.exists(out_json) or os.path.exists(out_json_drive):
-        print(f"SKIP {v}: already trained ({out_json_drive} exists)")
+    oj_local = f"results/results_ablation_{v}.json"
+    oj_drive = f"{RESULTS}/results_ablation_{v}.json"
+    # Resume on reconnect: skip variants already trained
+    if os.path.exists(oj_local) or os.path.exists(oj_drive):
+        print(f"SKIP {v}: already trained")
         continue
-
-    print(f"\n===== TRAIN {v} (30 epochs) =====")
     t0 = time.time()
     log_path = f"{DRIVE}/logs/train_{v}.log"
     cmd = ["python3", "-u", "ablation study/ablation_study.py",
            "--variant", v, "--epochs", "30", "--seed", "42"]
+    print(f"\n[TRAIN {v}] started at {time.strftime('%H:%M:%S')}")
     with open(log_path, "w") as logf:
         proc = subprocess.run(cmd, stdout=logf, stderr=subprocess.STDOUT)
-    elapsed = (time.time() - t0) / 60
-    print(f"{v} done in {elapsed:.1f} min (exit={proc.returncode})")
-
+    print(f"[TRAIN {v}] done in {(time.time()-t0)/60:.1f} min (exit={proc.returncode})")
     if proc.returncode == 0:
-        for src in [out_json,
+        for src in [oj_local,
                     f"ablation study/results/results_ablation_{v}.json",
                     f"histories/history_ablation_{v}.json"]:
             if os.path.exists(src):
@@ -145,81 +89,60 @@ for v in VARIANTS:
         pth = f"ablation study/results/best_{v}.pth"
         if os.path.exists(pth):
             shutil.copy(pth, RESULTS)
-        print(f"{v}: backed up to {RESULTS}")
+        print(f"[BACKUP] {v} -> {RESULTS}")
     else:
-        print(f"{v}: FAILED (exit={proc.returncode}); check {log_path}")
+        print(f"[FAIL] {v} exit={proc.returncode}; see {log_path}")
         break
-
-    import gc; gc.collect()
+    gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
+print(f"\nAll variants done in {(time.time()-overall_start)/60:.1f} min total")
 
-overall_min = (time.time() - overall_start) / 60
-print(f"\nAll variants done in {overall_min:.1f} min total")
-print("CELL 3 DONE")
+print()
+print("=== STEP 6: Table 5 + compare ===")
+p = subprocess.run(["python3", "ablation study/ablation_study.py",
+                    "--variant", "compare"], capture_output=True, text=True)
+print("\n".join(p.stdout.splitlines()[-20:]))
 
-=====================================================
-CELL 4 of 5: Compare + Table 5 (~30 sec, no training)
-=====================================================
-
-import subprocess
-
-print("===== COMPARE + TABLE 5 =====")
-p = subprocess.run(
-    ["python3", "ablation study/ablation_study.py", "--variant", "compare"],
-    capture_output=True, text=True)
-print("\n".join(p.stdout.splitlines()[-30:]))
-
-print("\n===== TABLE 5 (LaTeX) =====")
+print("\n--- TABLE 5 (LaTeX) ---")
 with open("ablation study/ablation_table.tex") as f:
     print(f.read())
 
-print("\n===== SUMMARY (CSV) =====")
+print("--- SUMMARY (CSV) ---")
 with open("ablation study/ablation_summary.csv") as f:
     print(f.read())
 
-print("CELL 4 DONE")
-
-=====================================================
-CELL 5 of 5: Inline figures + final Drive backup
-=====================================================
-
-from pathlib import Path
-try:
-    from IPython.display import Image, display
-    for p in sorted(Path("ablation study/figures").glob("fig_ablation_*.png"))[:3]:
-        print(f"--- {p.name} ---")
-        display(Image(str(p)))
-except Exception as e:
-    print("inline show skip:", e)
-
-import shutil, os, subprocess
-
-DRIVE_FIGS = "/content/drive/MyDrive/HCoAtNet_ablation/figures"
+print()
+print("=== STEP 7: Drive backup (figures + zip) ===")
+DRIVE_FIGS = f"{DRIVE}/figures"
 os.makedirs(DRIVE_FIGS, exist_ok=True)
+n_copied = 0
 for ext in ("png", "pdf"):
     for f in Path("ablation study/figures").glob(f"*.{ext}"):
         shutil.copy(f, DRIVE_FIGS)
+        n_copied += 1
 for fname in ["ablation study/ablation_table.tex", "ablation study/ablation_summary.csv"]:
     if os.path.exists(fname):
-        shutil.copy(fname, "/content/drive/MyDrive/HCoAtNet_ablation/")
+        shutil.copy(fname, DRIVE)
+print(f"copied {n_copied} figure files to {DRIVE_FIGS}")
 
-print("\n===== FINAL DRIVE BACKUP =====")
-subprocess.run([
-    "bash", "-c",
-    "cd /content && zip -q -r "
-    "/content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip "
+subprocess.run(["bash", "-c",
+    "cd /content && zip -q -r /content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip "
     "H-CoAtNet-Ichthyosis/results/results_ablation_*.json "
     "'H-CoAtNet-Ichthyosis/ablation study/results/' "
     "'H-CoAtNet-Ichthyosis/ablation study/figures/' "
     "'H-CoAtNet-Ichthyosis/ablation study/ablation_table.tex' "
     "'H-CoAtNet-Ichthyosis/ablation study/ablation_summary.csv' "
-    "H-CoAtNet-Ichthyosis/histories/history_ablation_*.json"
-], check=False)
-print("zip-done")
+    "H-CoAtNet-Ichthyosis/histories/history_ablation_*.json"],
+    check=False)
+print("zip-done -> /content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip")
 
-print("\n===== DRIVE LISTING =====")
-subprocess.run(["ls", "-lh", "/content/drive/MyDrive/HCoAtNet_ablation/"])
-subprocess.run(["ls", "-lh", "/content/drive/MyDrive/HCoAtNet_ablation/results/"])
+print()
+print("=== DRIVE LISTING ===")
+subprocess.run(["ls", "-lh", DRIVE])
+subprocess.run(["ls", "-lh", RESULTS])
 
-print("\nDONE -- Table 5 + 8 variant JSONs + figures in Drive")
+print()
+print("DONE -- Table 5 + 8 variant JSONs + figures in Drive")
+
+# ==== END -- COPY UP TO HERE ====
