@@ -1,0 +1,97 @@
+# SAVE ALL COLAB TO NEW DRIVE FOLDER - paste as Python cell, no ! lines
+# Creates new timestamped folder, copies everything, never modifies old Drive files
+%cd /content/H-CoAtNet-AStar
+from pathlib import Path
+import shutil, datetime, zipfile
+
+# 0. Drive check, STEP 2 already mounted at /content/drive
+drive = Path("/content/drive/MyDrive")
+assert drive.exists(), "Drive not mounted, run STEP 2 Drive mount first"
+print(f"Drive OK: {drive}")
+
+# 1. New folder, never touches existing files
+ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+DEST = drive / f"HCoAtNet_ablation_FULL_{ts}"
+(DEST / "results").mkdir(parents=True, exist_ok=True)
+(DEST / "figures").mkdir(parents=True, exist_ok=True)
+(DEST / "histories").mkdir(parents=True, exist_ok=True)
+(DEST / "splits").mkdir(parents=True, exist_ok=True)
+(DEST / "ablation_study").mkdir(parents=True, exist_ok=True)
+print(f"New folder: {DEST}")
+
+# 2. Copy helper, skips missing, never deletes source
+def copy_file(src, dst):
+    src = Path(src)
+    dst = Path(dst)
+    if src.exists():
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        return True
+    else:
+        print(f"skip missing: {src}")
+        return False
+
+def copy_glob(pattern, dest_dir):
+    import glob
+    files = sorted(glob.glob(pattern, recursive=True))
+    n = 0
+    for f in files:
+        if Path(f).is_file():
+            copy_file(f, Path(dest_dir) / Path(f).name)
+            n += 1
+    print(f"{pattern} -> {n} files to {dest_dir}")
+    return n
+
+def copy_tree(src, dst):
+    src = Path(src)
+    dst = Path(dst)
+    if src.exists():
+        shutil.copytree(src, dst, dirs_exist_ok=True)
+        n = sum(1 for _ in dst.rglob("*") if _.is_file())
+        print(f"{src} -> {dst} ({n} files)")
+    else:
+        print(f"skip missing dir: {src}")
+
+# 3. Everything we did in colab
+copy_glob("results/results_ablation_*.json", DEST / "results")
+copy_glob("results/metrics_*_ci.json", DEST / "results")
+copy_glob("results/significance*.json", DEST / "results")
+copy_glob("results/efficiency*.json", DEST / "results")
+copy_glob("results/tables*.tex", DEST / "results")
+copy_glob("results/compare.json", DEST / "results")
+copy_glob("results/*.txt", DEST / "results")
+copy_glob("histories/history_ablation_*.json", DEST / "histories")
+copy_glob("histories/all_histories.json", DEST / "histories")
+copy_glob("splits/seed42_indices.json", DEST / "splits")
+copy_glob("splits/test_per_class.csv", DEST / "splits")
+copy_file("ablation study/ablation_table.tex", DEST / "ablation_study/ablation_table.tex")
+copy_file("ablation study/ablation_summary.csv", DEST / "ablation_study/ablation_summary.csv")
+copy_file("ablation study/ablation_summary.json", DEST / "ablation_study/ablation_summary.json")
+copy_file("ablation study/failure_shift.csv", DEST / "ablation_study/failure_shift.csv")
+copy_tree("ablation study/figures", DEST / "ablation_study_figures")
+copy_tree("figures", DEST / "figures")
+copy_tree("figures/gradcam_full", DEST / "figures_gradcam_full")
+# Weights are large 8x111M, copy last, skip if space fails
+try:
+    copy_glob("ablation study/results/best_*.pth", DEST / "weights")
+except Exception as e:
+    print(f"weights copy skipped: {e}")
+
+# 4. Zip the new folder, zip sits next to folder, old files untouched
+zip_path = drive / f"{DEST.name}.zip"
+with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+    for f in sorted(DEST.rglob("*")):
+        if f.is_file():
+            z.write(f, f.relative_to(drive))
+print(f"Zip: {zip_path}")
+
+# 5. Print exact location + size + listing
+import subprocess
+total = sum(f.stat().st_size for f in DEST.rglob("*") if f.is_file()) / 1e6
+print(f"Saved {total:.1f} MB")
+print(f"EXACT LOCATION FOLDER: {DEST}")
+print(f"EXACT LOCATION ZIP: {zip_path}")
+print("--- top listing ---")
+for f in sorted(DEST.iterdir()):
+    print(f" - {f}")
+print("DONE-SAVE-ALL-NEW-FOLDER")

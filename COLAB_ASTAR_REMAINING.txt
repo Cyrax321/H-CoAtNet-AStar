@@ -1,0 +1,32 @@
+# A-STAR REMAINING CODE ONLY - paste cell by cell
+# You have done: A0-A7 train, Table5 compare, bootstrap 8/8, significance, efficiency, tables
+# Left from code: B-F rest + 07-09 verify + restore + final zip
+
+# ===== Cell 1 shell - check what is missing =====
+%cd /content/H-CoAtNet-AStar
+!ls -lh figures/fig_ablation_10_forest.* figures/fig_ablation_11_efficiency.* figures/fig_ablation_07_roc.* figures/fig_ablation_08_pr.* figures/fig_ablation_09_reliability.* figures/fig_ablation_12_mechanism.* 2>&1 | head -n 20
+!ls -lh figures/gradcam_full/ "ablation study/failure_shift.csv" 2>&1 | head
+!ls -lh results/metrics_*_ci.json results/significance_ablation.json "ablation study/figures/INDEX_12.md" 2>&1 | head
+
+# ===== Cell 2 - run rest, one file per cell, python cells no ! =====
+# Open and paste each as its own cell, in order:
+# COLAB_ABLATION_REST_B.txt = 05 curves 8-variant real
+# COLAB_ABLATION_REST_C.txt = 10 forest real CI
+# COLAB_ABLATION_REST_D.txt = 11 efficiency real params/MACs
+# COLAB_ABLATION_REST_E.txt = shell Grad-CAM Full A5 (shell cell with !)
+# COLAB_ABLATION_REST_F.txt = failure CSV Full-right/ablated-wrong
+# If B-F already ran and files exist above, skip to Cell 3.
+
+# ===== Cell 3 shell - finish 07-09 + restore 8-variant - paste as shell cell =====
+%cd /content/H-CoAtNet-AStar
+!python3 "ablation study/generate_all_12_ablation_figs.py" --real
+!cat "ablation study/figures/INDEX_12.md"
+!python3 "ablation study/ablation_study.py" --variant compare
+!ls -lh figures/fig_ablation_01_arch.* figures/fig_ablation_02_main_bar.* figures/fig_ablation_03_drop.* figures/fig_ablation_04_perclass_heatmap.* figures/fig_ablation_05_curves.* figures/fig_ablation_06_confusion.* figures/fig_ablation_07_roc.* figures/fig_ablation_08_pr.* figures/fig_ablation_09_reliability.* figures/fig_ablation_10_forest.* figures/fig_ablation_11_efficiency.* figures/fig_ablation_12_mechanism.*
+
+# ===== Cell 4 shell - final audit + zip + Drive - paste as shell cell =====
+%cd /content/H-CoAtNet-AStar
+!python3 tools/verify_all.py 2>&1 | tail -n 30
+!zip -r /tmp/astar_final.zip results/results_ablation_*.json results/metrics_*_ci.json results/significance_ablation.json results/efficiency.json results/tables_ablation.tex "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" "ablation study/ablation_summary.json" "ablation study/failure_shift.csv" "ablation study/figures/" figures/fig_ablation_* figures/gradcam_full/ histories/history_ablation_*.json
+!cp -v /tmp/astar_final.zip /content/drive/MyDrive/HCoAtNet_ablation/
+!echo DONE-REMAINING

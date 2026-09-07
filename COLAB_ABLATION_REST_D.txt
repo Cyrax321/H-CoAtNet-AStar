@@ -1,0 +1,26 @@
+%cd /content/H-CoAtNet-AStar
+from pathlib import Path
+import json, matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+ORDER = ["cnnOnly","vitOnly","seNoPrune","randomPrune","directL2","hierarchical","hierarchicalRaw","noViT"]
+NAMES = {"cnnOnly":"A0","vitOnly":"A1","seNoPrune":"A2","randomPrune":"A3","directL2":"A4","hierarchical":"A5 Full","hierarchicalRaw":"A6","noViT":"A7"}
+fig, ax = plt.subplots(figsize=(9,5.5))
+for v in ORDER:
+    d = json.loads(Path(f"results/results_ablation_{v}.json").read_text())
+    p = d["efficiency"]["params_M"]
+    m = d["efficiency"]["macs_G"]
+    acc = d["test"]["accuracy"]*100
+    ax.scatter(p, acc, s=m*60, alpha=0.8, edgecolors="k")
+    ax.annotate(f"{NAMES[v]}\n{p:.2f}M, {m:.2f}G", (p, acc), fontsize=7, ha="center", va="bottom")
+ax.set_xlabel("Params (M)")
+ax.set_ylabel("Accuracy (%)")
+ax.set_title("Efficiency vs Accuracy (size=MACs, color=latency T4 b1)", fontsize=10, weight="bold")
+ax.text(0.02, 0.02, "Latency T4 b1 ref: H 10.33ms, CoAt 6.19ms from results/efficiency.json.", transform=ax.transAxes, fontsize=6, color="#555")
+ax.grid(alpha=0.3)
+fig.tight_layout()
+fig.savefig("ablation study/figures/fig_ablation_11_efficiency.png", bbox_inches="tight", dpi=300)
+fig.savefig("ablation study/figures/fig_ablation_11_efficiency.pdf", bbox_inches="tight")
+fig.savefig("figures/fig_ablation_11_efficiency.png", bbox_inches="tight", dpi=300)
+fig.savefig("figures/fig_ablation_11_efficiency.pdf", bbox_inches="tight")
+print("saved 11 real params/MACs")

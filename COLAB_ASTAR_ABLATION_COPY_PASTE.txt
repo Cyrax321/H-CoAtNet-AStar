@@ -1,0 +1,78 @@
+# COLAB A* ABLATION - COPY PASTE - verified against ablation study/ablation_study.py
+# Repo root in Colab is /content/H-CoAtNet-AStar
+# This file does NOT retrain. It only rebuilds Table 5 + figs + CI from saved JSONs.
+# Logic source:
+#   ORDER = cnnOnly vitOnly seNoPrune randomPrune directL2 hierarchical hierarchicalRaw noViT (A0-A7)
+#   Full reference for Drop_pp and stats is hierarchical = A5 Full H-CoAtNet
+#   Compare requires ALL 8 JSONs or it exits 3 with ABORT missing list
+#   Compare writes dual paths so old notebooks keep working
+
+%cd /content/H-CoAtNet-AStar
+
+# STEP 0 - sanity check, all 8 must exist, prefers results/, fallback is ablation study/results/
+!ls -lh results/results_ablation_cnnOnly.json results/results_ablation_vitOnly.json results/results_ablation_seNoPrune.json results/results_ablation_randomPrune.json results/results_ablation_directL2.json results/results_ablation_hierarchical.json results/results_ablation_hierarchicalRaw.json results/results_ablation_noViT.json
+!ls -lh histories/history_ablation_*.json "ablation study/results/best_"*.pth
+
+# STEP 1 - Table 5 + 3 figs, no GPU, no dataset needed
+# Writes:
+#   ablation study/ablation_table.tex + ablation/ablation_table.tex
+#   ablation study/ablation_summary.csv + ablation study/ablation_summary.json
+#   figures/fig_ablation_02_main_bar.png/pdf + ablation study/figures/ same
+#   figures/fig_ablation_03_drop.png + ablation study/figures/ same (png only in code)
+#   figures/fig_ablation_04_perclass_heatmap.png + ablation study/figures/ same (png only in code)
+# Per-variant curves and confusions were already written during training, not here:
+#   ablation study/figures/curve_{variant}_acc.png, curve_{variant}_loss.png
+#   ablation study/figures/confusion_{variant}_raw.png, confusion_{variant}_norm.png
+!python3 "ablation study/ablation_study.py" --variant compare
+
+# STEP 2 - verify compare output
+!echo "--- Table 5 ---"
+!cat "ablation study/ablation_table.tex"
+!echo "--- summary csv ---"
+!cat "ablation study/ablation_summary.csv"
+!ls -lh figures/fig_ablation_02_main_bar.* figures/fig_ablation_03_drop.* figures/fig_ablation_04_perclass_heatmap.* "ablation study/figures/fig_ablation_"*
+
+# STEP 3 - bootstrap 95 percent CIs, one per variant, uses test y_true/y_pred/y_probs in JSON
+# Tool usage: tools/bootstrap_ci.py --results <in> --n_bootstrap 1000 --seed 42 --out <out>
+!for v in cnnOnly vitOnly seNoPrune randomPrune directL2 hierarchical hierarchicalRaw noViT; do echo "=== $v ==="; python3 tools/bootstrap_ci.py --results results/results_ablation_${v}.json --n_bootstrap 1000 --seed 42 --out results/metrics_${v}_ci.json; done
+!ls -lh results/metrics_*_ci.json
+
+# STEP 4 - significance vs Full, Full is hierarchical A5, not a file named full.json
+# Tool usage: tools/stats_tests.py --all <list> --reference <ref> --out <out>
+!python3 tools/stats_tests.py --all results/results_ablation_cnnOnly.json results/results_ablation_vitOnly.json results/results_ablation_seNoPrune.json results/results_ablation_randomPrune.json results/results_ablation_directL2.json results/results_ablation_hierarchical.json results/results_ablation_hierarchicalRaw.json results/results_ablation_noViT.json --reference results/results_ablation_hierarchical.json --out results/significance_ablation.json
+!cat results/significance_ablation.json
+
+# STEP 5 - efficiency, ablation Params and MACs already in each JSON under efficiency.params_M and efficiency.macs_G
+# This step is for main 7-model table, keep separate from ablation Table 5
+!python3 tools/compute_flops.py --all --out results/efficiency.json
+!cat results/efficiency.json
+!python3 -c "import json,glob; print('ablation efficiency from training JSONs:'); [print(f\"{p.split('_')[-1].split('.')[0]}: {json.load(open(p)).get('efficiency')}\") for p in sorted(glob.glob('results/results_ablation_*.json'))]"
+
+# STEP 6 - 12 fig suite, REAL mode only, NOTE version gap
+# generate_all_12_ablation_figs.py VARIANTS = full,noSE,noViT,cnnOnly (old 4 set)
+# Your training is 8 variants A0-A7, so --real will show missing full,noSE using demo proxy with PREVIEW watermark
+# For A* paper: TRUST STEP 1 output for 02/03/04, use this suite only for 05-12 layout check until script is patched to ORDER
+!python3 "ablation study/generate_all_12_ablation_figs.py" --real
+!cat "ablation study/figures/INDEX_12.md"
+!grep -r "PREVIEW" "ablation study/figures/" figures/ 2>/dev/null | head
+
+# STEP 7 - LaTeX comparison table from real JSONs
+!python3 tools/generate_tables.py --all results/results_ablation_*.json --out results/tables_ablation.tex
+!cat results/tables_ablation.tex
+
+# STEP 8 - backup, zip everything reviewers need to reproduce Table 5
+!zip -r /tmp/astar_ablation_final.zip results/results_ablation_*.json results/metrics_*_ci.json results/significance_ablation.json results/tables_ablation.tex "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" "ablation study/ablation_summary.json" "ablation study/figures/" figures/fig_ablation_* histories/history_ablation_*.json
+!ls -lh /tmp/astar_ablation_final.zip
+!cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" /content/drive/MyDrive/HCoAtNet_ablation/ 2>&1 | tail
+
+# EXACT FIGURE TITLES FROM ablation_study.py - do not reword in manuscript
+# Curve: A0 CNN only acc - Train vs Val (n_val=154, seed 42)
+# Curve: A0 CNN only loss - Train vs Val (n_val=154, seed 42)
+# Same pattern for A1 +ViT, no SE / A2 +SE, no pruning / A3 Fixed-random 49->24 / A4 One-shot SE 49->24 / A5 Full H-CoAtNet / A6 Hierar. raw-token scoring / A7 Full H-CoAtNet w/o ViT
+# Confusion raw: Confusion raw - A5 Full H-CoAtNet (test n=158, once)
+# Confusion norm: Confusion norm - A5 Full H-CoAtNet (test n=158, once)
+# Fig 02: Ablation - Acc/MacroF1/Kappa per variant (frozen test n=158, seed 42)
+# Fig 03: Accuracy drop vs Full (pp, n=158)
+# Fig 04: Per-class F1 across variants (n=158)
+# Table 5 caption: Causal component ablation on frozen test (n=158, seed 42). Same 30ep, same frozen split, same augmentation, same CE+LS0.1+classweight, same AdamW 5e-05 Cosine WD 0.01, same IN1K init, deterministic, TRIPOD-AI Type 2b (validation selects checkpoint, test evaluated once). Only use_vit / use_se / exec_mode toggled per row.
+# Table 5 header: Variant and Acc% and BalAcc% and MacroF1% and Kappa% and MCC% and ECE% down arrow and Delta vs Full (pp)

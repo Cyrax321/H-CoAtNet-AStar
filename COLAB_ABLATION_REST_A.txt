@@ -1,0 +1,8 @@
+# COLAB_ABLATION_REST - paste cell by cell
+# Cell A = shell, Cells B-D,F = python no-!, Cell E = shell
+# ORDER: cnnOnly vitOnly seNoPrune randomPrune directL2 hierarchical hierarchicalRaw noViT
+
+# ---------- Cell A shell ----------
+%cd /content/H-CoAtNet-AStar
+!python3 "ablation study/ablation_study.py" --variant compare
+!ls -lh figures/fig_ablation_02_main_bar.* figures/fig_ablation_03_drop.* figures/fig_ablation_04_perclass_heatmap.*

@@ -1,0 +1,33 @@
+# FIX NOW - PASTE INTO COLAB IN ORDER
+# Reason last paste failed:
+# 1. Colab expands $v as Python var, so for-loop looked for results_ablation_.json
+# 2. 12-fig script expects full,noSE but you trained 8 variants A0-A7, so fig07 crashed KeyError full
+
+%cd /content/H-CoAtNet-AStar
+!python3 tools/bootstrap_ci.py --results results/results_ablation_cnnOnly.json --n_bootstrap 1000 --seed 42 --out results/metrics_cnnOnly_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_vitOnly.json --n_bootstrap 1000 --seed 42 --out results/metrics_vitOnly_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_seNoPrune.json --n_bootstrap 1000 --seed 42 --out results/metrics_seNoPrune_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_randomPrune.json --n_bootstrap 1000 --seed 42 --out results/metrics_randomPrune_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_directL2.json --n_bootstrap 1000 --seed 42 --out results/metrics_directL2_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_hierarchical.json --n_bootstrap 1000 --seed 42 --out results/metrics_hierarchical_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_hierarchicalRaw.json --n_bootstrap 1000 --seed 42 --out results/metrics_hierarchicalRaw_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_noViT.json --n_bootstrap 1000 --seed 42 --out results/metrics_noViT_ci.json
+!ls -lh results/metrics_*_ci.json
+!cat results/metrics_hierarchical_ci.json
+
+# Map 8-variant names to old 4-variant 12-fig names, then rerun 12-figs
+# full = hierarchical A5 Full, noSE = vitOnly A1 +ViT no SE, noViT and cnnOnly already match
+%cd /content/H-CoAtNet-AStar
+!cp -v results/results_ablation_hierarchical.json results/results_ablation_full.json
+!cp -v results/results_ablation_vitOnly.json results/results_ablation_noSE.json
+!cp -v "ablation study/results/results_ablation_hierarchical.json" "ablation study/results/results_ablation_full.json"
+!cp -v "ablation study/results/results_ablation_vitOnly.json" "ablation study/results/results_ablation_noSE.json"
+!python3 "ablation study/generate_all_12_ablation_figs.py" --real
+!ls -lh "ablation study/figures/fig_ablation_"*.png figures/fig_ablation_*.png
+
+# Final zip + Drive copy, run after above passes
+%cd /content/H-CoAtNet-AStar
+!zip -r /tmp/astar_ablation_with_CI.zip results/results_ablation_*.json results/metrics_*_ci.json results/significance_ablation.json results/efficiency.json results/tables_ablation.tex "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" "ablation study/ablation_summary.json" "ablation study/figures/" figures/fig_ablation_* histories/history_ablation_*.json
+!cp -v results/metrics_*_ci.json results/significance_ablation.json /content/drive/MyDrive/HCoAtNet_ablation/
+!cp -v /tmp/astar_ablation_with_CI.zip /content/drive/MyDrive/HCoAtNet_ablation/
+!echo DONE

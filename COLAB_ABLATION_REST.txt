@@ -1,0 +1,32 @@
+# COLAB_ABLATION_REST - paste cell by cell. Headers start with #. Code below each header is live.
+# ORDER A0-A7: cnnOnly vitOnly seNoPrune randomPrune directL2 hierarchical hierarchicalRaw noViT
+
+# ===== Cell A - shell - paste as shell cell =====
+%cd /content/H-CoAtNet-AStar
+!python3 "ablation study/ablation_study.py" --variant compare
+!ls -lh figures/fig_ablation_02_main_bar.* figures/fig_ablation_03_drop.* figures/fig_ablation_04_perclass_heatmap.*
+
+# ===== Cell B - python, no ! - paste as python cell =====
+# %cd /content/H-CoAtNet-AStar
+# from pathlib import Path
+# import json, matplotlib
+# matplotlib.use("Agg")
+# import matplotlib.pyplot as plt
+# ORDER = ["cnnOnly","vitOnly","seNoPrune","randomPrune","directL2","hierarchical","hierarchicalRaw","noViT"]
+# NAMES = {"cnnOnly":"A0 CNN only","vitOnly":"A1 +ViT, no SE","seNoPrune":"A2 +SE, no pruning","randomPrune":"A3 Fixed-random 49->24","directL2":"A4 One-shot SE 49->24","hierarchical":"A5 Full H-CoAtNet","hierarchicalRaw":"A6 Hierar. raw-token scoring","noViT":"A7 Full H-CoAtNet w/o ViT"}
+# COLORS = {"cnnOnly":"#000000","vitOnly":"#E69F00","seNoPrune":"#D55E00","randomPrune":"#CC79A7","directL2":"#56B4E9","hierarchical":"#0072B2","hierarchicalRaw":"#009E73","noViT":"#F0E442"}
+# fig, axes = plt.subplots(1,2,figsize=(13,4.5))
+# for v in ORDER:
+#     h = json.loads(Path(f"histories/history_ablation_{v}.json").read_text())
+#     ep = h["epochs"]; va = [x*100 for x in h["val_acc"]]; vl = h["val_loss"]
+#     axes[0].plot(ep, va, label=NAMES[v], color=COLORS[v], lw=1.8, marker="o", ms=2.5, markevery=5)
+#     axes[1].plot(ep, vl, label=NAMES[v], color=COLORS[v], lw=1.8, marker="s", ms=2.5, markevery=5)
+# axes[0].set_title("Val Acc - 8 variants (test held-out)"); axes[0].set_xlabel("Epoch"); axes[0].set_ylabel("Val Acc (%)"); axes[0].grid(alpha=0.3); axes[0].legend(fontsize=7)
+# axes[1].set_title("Val Loss - 8 variants"); axes[1].set_xlabel("Epoch"); axes[1].set_ylabel("Loss"); axes[1].grid(alpha=0.3); axes[1].legend(fontsize=7)
+# fig.suptitle("Learning dynamics - equal 30ep budget, best val selects checkpoint", fontsize=10, weight="bold")
+# fig.tight_layout()
+# fig.savefig("ablation study/figures/fig_ablation_05_curves.png", bbox_inches="tight", dpi=300)
+# fig.savefig("ablation study/figures/fig_ablation_05_curves.pdf", bbox_inches="tight")
+# fig.savefig("figures/fig_ablation_05_curves.png", bbox_inches="tight", dpi=300)
+# fig.savefig("figures/fig_ablation_05_curves.pdf", bbox_inches="tight")
+# print("saved 05 8-variant")

@@ -1,0 +1,90 @@
+H-CoAtNet — ABLATION ONLY, COLAB COPY-PASTE (ONE CELL)
+=====================================================
+HOW TO USE:
+1. https://colab.research.google.com/ -> New Notebook
+2. Runtime -> Change runtime type -> T4 GPU -> Save
+3. Runtime -> Restart session (fresh, important)
+4. Copy EVERYTHING below "COPY FROM HERE" into ONE cell, Shift+Enter
+5. Time: smoke 3 min + 4 variants x ~55 min = ~3.5 hrs overnight
+6. Results: Table 5 (ablation_table.tex) + 12 figures + per-variant JSON
+
+WHAT IT RUNS (fair, seed 42, 30 epochs each):
+full (H-CoAtNet) / noSE (no pruning) / noViT (no transformer) / cnnOnly
+Same split, same aug, same AdamW 5e-5, test held-out once. Only use_vit/use_se toggle.
+
+=====================================================
+COPY FROM HERE (paste all in ONE Colab cell):
+=====================================================
+
+# H-CoAtNet ABLATION ONLY — one cell, T4 GPU, ~3.5 hrs
+# Fresh runtime -> paste all -> Run. No manual steps.
+
+# 0. GPU check
+!nvidia-smi -L
+!python -c "import torch; print('torch', torch.__version__, '| cuda:', torch.cuda.is_available())"
+
+# 1. Clean clone (origin = your current code)
+%cd /content
+!rm -rf H-CoAtNet-Ichthyosis
+!git clone https://github.com/Cyrax321/H-CoAtNet-Ichthyosis.git
+%cd H-CoAtNet-Ichthyosis
+!pwd
+!ls -lh
+
+# 2. Install WITHOUT breaking Colab torch
+!pip install -q -r requirements-colab.txt
+!python -c "import timm; print('timm OK', timm.__version__)"
+
+# 3. Roboflow key — train scripts read this env var automatically
+# Get yours: https://universe.roboflow.com/hi-l9ueo/ich-s-7lnsj -> Download -> Show download code
+import os
+os.environ["ROBOFLOW_API_KEY"] = "gXuxxWEMFJ8nK73o7pN7"
+print("key set:", os.environ["ROBOFLOW_API_KEY"][:4] + "****")
+
+# 4. Verify ablation script exists + compiles (30 sec, catches clone mistakes early)
+!ls -lh "ablation study/ablation_study.py"
+!python3 -m py_compile "ablation study/ablation_study.py" && echo "compile OK"
+!python3 "ablation study/ablation_study.py" --help 2>&1 | head -n 20
+
+# 5. Drive backup folders (auth popup -> Allow; keeps every finished variant safe if Colab drops)
+from google.colab import drive
+drive.mount("/content/drive")
+!mkdir -p "/content/drive/MyDrive/HCoAtNet_ablation/results" "/content/drive/MyDrive/HCoAtNet_ablation/figures" "/content/drive/MyDrive/HCoAtNet_ablation/histories"
+print("Drive ready")
+
+# 6. SMOKE — 1 epoch noSE, ~3 min. Proves real training works before the long run.
+!python3 "ablation study/ablation_study.py" --variant smoke --epochs 1 --seed 42 2>&1 | tail -n 20
+!ls -lh results/results_ablation_noSE_smoke.json 2>/dev/null
+
+# 7. FULL ABLATION — 4 variants, 30 epochs each. Each variant backs up right after, so a drop costs at most 1 variant.
+!for v in full noSE noViT cnnOnly; do echo "===== TRAIN $v ====="; python3 -u "ablation study/ablation_study.py" --variant $v --epochs 30 --seed 42 2>&1 | tee "/content/drive/MyDrive/HCoAtNet_ablation/train_$v.log" | tail -n 15; cp -v results/results_ablation_$v.json "ablation study/results/results_ablation_$v.json" histories/history_ablation_$v.json "/content/drive/MyDrive/HCoAtNet_ablation/results/" 2>&1 | tail -n 4; done
+
+# 8. Table 5 + summary (30 sec, no training — rebuilds from the 4 JSONs)
+!python3 "ablation study/ablation_study.py" --variant compare 2>&1 | tail -n 25
+!echo "===== TABLE 5 ====="
+!cat "ablation study/ablation_table.tex"
+!echo "===== SUMMARY ====="
+!cat "ablation study/ablation_summary.csv" 2>/dev/null
+
+# 9. All 12 ablation figures (real numbers, PNG+PDF)
+!python3 "ablation study/generate_all_12_ablation_figs.py" --real 2>&1 | tail -n 15
+!ls -lh "ablation study/figures/" | head -n 20
+
+# 10. Show key figures inline (no need to open files)
+from pathlib import Path
+try:
+    from IPython.display import Image, display
+    for p in sorted(Path("ablation study/figures").glob("fig_ablation_*.png"))[:6]:
+        print(f"--- {p.name} ---")
+        display(Image(str(p)))
+except Exception as e:
+    print("inline show skip:", e)
+
+# 11. Zip + copy everything to Drive
+!zip -q -r "/content/drive/MyDrive/HCoAtNet_ablation/ablation_outputs.zip" results/results_ablation_*.json "ablation study/results/" "ablation study/figures/" "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" histories/history_ablation_*.json 2>/dev/null; echo zip-done
+!cp -v "ablation study/figures/"*.png "ablation study/figures/"*.pdf "/content/drive/MyDrive/HCoAtNet_ablation/figures/" 2>&1 | tail -n 3 || true
+!cp -v "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" "/content/drive/MyDrive/HCoAtNet_ablation/" 2>&1 | tail -n 3 || true
+!ls -lh "/content/drive/MyDrive/HCoAtNet_ablation/" "/content/drive/MyDrive/HCoAtNet_ablation/results/" | head -n 25
+print("DONE — Table 5 + 12 figs in Colab AND /content/drive/MyDrive/HCoAtNet_ablation/")
+
+# ==== END — COPY UP TO HERE ====

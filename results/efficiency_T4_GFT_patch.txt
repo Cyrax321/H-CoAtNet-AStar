@@ -1,0 +1,29 @@
+GFT T4 patch - measured 2026-09-04 Tesla T4 torch 2.11.0+cu128
+=============================================================
+Method: latency-only cell GFT_FILL_FIX.txt, no thop.
+Input 1x3x224x224, eval mode, 100 runs after 20 warmup,
+CUDA synchronize, torch.cuda.max_memory_allocated.
+Pretrained=False (arch identical, weights do not affect timing).
+
+b1: latency 7.44 ms | throughput 134.5 img/s | peak 0.03 GB
+b32: latency 24.8 ms | peak 0.10 GB
+
+LaTeX row (Table 4, batch-1 T4):
+GFT & 6.16 & 2.90 & 7.44 & 134.5 & 0.03 & 85.44 \\
+
+Full T4 b1 table for manuscript (test-acc current run n=158):
+Model & Params (M) & MACs (G) & Latency (ms) & Throughput & Peak (GB) & Test acc (%)
+H-CoAtNet & 29.01 & 5.15 & 8.28 & 120.8 & 0.13 & 89.87
+CoAtNet & 27.82 & 4.45 & 6.92 & 144.4 & 0.35 & 90.51
+GFT & 6.16 & 2.90 & 7.44 & 134.5 & 0.03 & 85.44
+Swin & 27.52 & 4.37 & 17.20 & 58.1 & 0.48 & 76.58
+ViT & 5.53 & 1.07 & 5.16 & 193.9 & 0.36 & 78.48
+CNN & 0.24 & 3.78 & 2.35 & 425.3 & 0.39 & 72.78
+EfficientNet-B0 & 4.01 & 0.38 & 7.95 & 125.8 & 0.59 & 67.09
+
+Note: b1 peak is allocator-sensitive. For cross-model memory
+compare use b32 peaks: H 0.64 / CoAt 0.75 / GFT 0.10 /
+Swin 1.12 / ViT 0.43 / CNN 2.25 / Eff 0.74 GB.
+CPU b1 supplement (not comparable to T4, same log):
+H 324.7 / CoAt 120.3 / GFT 28.5 / Swin 177.6 /
+ViT 35.9 / CNN 109.9 / Eff 48.2 ms.

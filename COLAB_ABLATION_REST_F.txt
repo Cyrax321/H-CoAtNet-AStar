@@ -1,0 +1,16 @@
+%cd /content/H-CoAtNet-AStar
+from pathlib import Path
+import json, pandas as pd
+ORDER = ["cnnOnly","vitOnly","seNoPrune","randomPrune","directL2","hierarchicalRaw","noViT"]
+ref = json.loads(Path("results/results_ablation_hierarchical.json").read_text())
+yt = ref["test"]["y_true"]
+yp_full = ref["test"]["y_pred"]
+rows = []
+for v in ORDER:
+    d = json.loads(Path(f"results/results_ablation_{v}.json").read_text())
+    yp = d["test"]["y_pred"]
+    fix = sum(1 for t,a,b in zip(yt, yp_full, yp) if a==t and b!=t)
+    lose = sum(1 for t,a,b in zip(yt, yp_full, yp) if a!=t and b==t)
+    rows.append({"variant":v, "Full_right_ablated_wrong":fix, "Full_wrong_ablated_right":lose})
+pd.DataFrame(rows).to_csv("ablation study/failure_shift.csv", index=False)
+print(pd.DataFrame(rows).to_string(index=False))

@@ -1,0 +1,22 @@
+# Cell 1 - Python, no ! at start, paste whole block
+%cd /content/H-CoAtNet-AStar
+from pathlib import Path
+p = Path("ablation study/generate_all_12_ablation_figs.py")
+t = p.read_text()
+if "def short_name(k):" in t:
+    print("already patched, skip")
+else:
+    old = '    mat = pd.DataFrame({NAMES[v]: data[v].get("per_f1", {c: 0.7 for c in CLASSES})\n                        for v in VARIANTS}).T\n    mat = mat[CLASSES]'
+    assert old in t, "fig04 block not found"
+    new = '    def short_name(k):\n        kl = k.strip().lower()\n        if "harlequin" in kl:\n            return "HI"\n        if "healthy" in kl:\n            return "Healthy"\n        if "vulgaris" in kl or kl == "iv":\n            return "IV"\n        if "lamellar" in kl or kl == "li":\n            return "LI"\n        if "netherton" in kl or kl == "ns":\n            return "NS"\n        return k.strip()\n    rows = {}\n    for v in VARIANTS:\n        pf = data[v].get("per_f1", {}) or {}\n        mapped = {short_name(k): float(vv) for k, vv in pf.items()}\n        row = {c: mapped.get(c, 0.7) for c in CLASSES}\n        rows[NAMES[v]] = row\n    mat = pd.DataFrame(rows).T\n    mat = mat[CLASSES]'
+    p.write_text(t.replace(old, new))
+    print("patched fig04")
+
+# Cell 2 - shell, paste after Cell 1 passes
+# !python3 "ablation study/generate_all_12_ablation_figs.py" --real
+# !ls -lh "ablation study/figures/fig_ablation_"*.png
+# !cat "ablation study/figures/INDEX_12.md"
+
+# Cell 3 - shell, restores real 8-variant 02/03/04
+# !python3 "ablation study/ablation_study.py" --variant compare
+# !ls -lh figures/fig_ablation_07_roc.* figures/fig_ablation_08_pr.* figures/fig_ablation_09_reliability.* figures/fig_ablation_10_forest.* figures/fig_ablation_11_efficiency.* figures/fig_ablation_12_mechanism.*

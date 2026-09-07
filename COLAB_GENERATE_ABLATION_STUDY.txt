@@ -1,0 +1,25 @@
+# GENERATE ablation_study.py OUTPUTS - PASTE INTO COLAB
+# Script: ablation study/ablation_study.py
+# ORDER A0-A7: cnnOnly vitOnly seNoPrune randomPrune directL2 hierarchical hierarchicalRaw noViT
+# Full ref for Drop_pp is hierarchical A5 Full H-CoAtNet
+# Compare needs all 8 JSONs or it exits 3 with ABORT list. No GPU. No dataset.
+
+%cd /content/H-CoAtNet-AStar
+!ls -lh results/results_ablation_cnnOnly.json results/results_ablation_vitOnly.json results/results_ablation_seNoPrune.json results/results_ablation_randomPrune.json results/results_ablation_directL2.json results/results_ablation_hierarchical.json results/results_ablation_hierarchicalRaw.json results/results_ablation_noViT.json
+
+# Main generate: Table 5 + 3 figs
+!python3 "ablation study/ablation_study.py" --variant compare
+
+# Verify outputs
+!echo "--- Table 5 ---"
+!cat "ablation study/ablation_table.tex"
+!echo "--- summary csv ---"
+!cat "ablation study/ablation_summary.csv"
+!echo "--- figs ---"
+!ls -lh figures/fig_ablation_02_main_bar.* figures/fig_ablation_03_drop.* figures/fig_ablation_04_perclass_heatmap.* "ablation study/figures/fig_ablation_02_main_bar.*" "ablation study/figures/fig_ablation_03_drop.*" "ablation study/figures/fig_ablation_04_perclass_heatmap.*"
+!ls -lh "ablation study/figures/curve_"*.png "ablation study/figures/confusion_"*.png histories/history_ablation_*.json
+
+# Titles from code, do not reword:
+# 02: Ablation - Acc/MacroF1/Kappa per variant (frozen test n=158, seed 42)
+# 03: Accuracy drop vs Full (pp, n=158)
+# 04: Per-class F1 across variants (n=158)

@@ -1,0 +1,36 @@
+%cd /content/H-CoAtNet-AStar
+from pathlib import Path
+import json, matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+ORDER = ["cnnOnly","vitOnly","seNoPrune","randomPrune","directL2","hierarchical","hierarchicalRaw","noViT"]
+NAMES = {"cnnOnly":"A0 CNN only","vitOnly":"A1 +ViT, no SE","seNoPrune":"A2 +SE, no pruning","randomPrune":"A3 Fixed-random 49->24","directL2":"A4 One-shot SE 49->24","hierarchical":"A5 Full H-CoAtNet","hierarchicalRaw":"A6 Hierar. raw-token scoring","noViT":"A7 Full H-CoAtNet w/o ViT"}
+accs = []
+los = []
+his = []
+for v in ORDER:
+    d = json.loads(Path(f"results/metrics_{v}_ci.json").read_text())
+    b = d["bootstrap"]["acc"]
+    accs.append(b["mean"]*100)
+    los.append(b["ci_low"]*100)
+    his.append(b["ci_high"]*100)
+y = np.arange(len(ORDER))
+fig, ax = plt.subplots(figsize=(9,5))
+ax.errorbar(accs, y, xerr=[np.array(accs)-np.array(los), np.array(his)-np.array(accs)], fmt="o", color="#0072B2", capsize=4, ms=5)
+ax.set_yticks(y)
+ax.set_yticklabels([NAMES[v] for v in ORDER])
+ax.set_xlabel("Accuracy (%) [95% bootstrap interval, 1000]")
+ax.set_title("Forest - Accuracy with uncertainty per variant", fontsize=10, weight="bold")
+full_acc = accs[ORDER.index("hierarchical")]
+ax.axvline(full_acc, color="red", ls="--", lw=1, label="Full A5")
+ax.legend()
+ax.grid(alpha=0.3, axis="x")
+for i, v in enumerate(ORDER):
+    ax.text(his[i]+0.25, i, f"{accs[i]:.2f} [{los[i]:.2f}-{his[i]:.2f}]", va="center", fontsize=7)
+fig.tight_layout()
+fig.savefig("ablation study/figures/fig_ablation_10_forest.png", bbox_inches="tight", dpi=300)
+fig.savefig("ablation study/figures/fig_ablation_10_forest.pdf", bbox_inches="tight")
+fig.savefig("figures/fig_ablation_10_forest.png", bbox_inches="tight", dpi=300)
+fig.savefig("figures/fig_ablation_10_forest.pdf", bbox_inches="tight")
+print("saved 10 real CI")

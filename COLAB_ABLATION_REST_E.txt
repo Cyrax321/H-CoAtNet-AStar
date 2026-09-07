@@ -1,0 +1,5 @@
+%cd /content/H-CoAtNet-AStar
+!ls -lh "ablation study/results/best_hierarchical.pth" /content/dataset/test
+!python3 tools/gradcam.py --weights "ablation study/results/best_hierarchical.pth" --dataset_dir /content/dataset/test --results results/results_ablation_hierarchical.json --out figures/gradcam_full --n 6
+!ls -lh figures/gradcam_full/
+!cat figures/gradcam_full/method.txt

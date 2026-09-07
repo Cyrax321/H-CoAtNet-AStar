@@ -1,0 +1,94 @@
+H-CoAtNet — COLAB COPY-PASTE RUN (ONE CELL)
+================================================
+HOW TO USE:
+1. Go to https://colab.research.google.com/ -> New Notebook
+2. Runtime -> Change runtime type -> T4 GPU -> Save
+3. Runtime -> Restart session (fresh start, important)
+4. Copy EVERYTHING below the line "COPY FROM HERE" and paste into ONE cell
+5. Press Shift+Enter and go to sleep. ~3-4 hrs for all 7 models.
+6. Results stay in Colab + auto-backup to Drive at the end.
+
+WHAT IT DOES:
+clone repo -> install deps (no torch-break) -> set Roboflow key
+-> train 7 models (H-CoAtNet + 6 baselines, 30 epochs each)
+-> tables + bootstrap CI + stats + FLOPs + figures
+-> verify + list results + backup to Drive
+
+================================================
+COPY FROM HERE (paste all of this in ONE Colab cell):
+================================================
+
+# H-CoAtNet — ONE-CELL FULL RUN (T4 GPU, ~3-4 hrs, fresh runtime)
+# Paste this ENTIRE cell and run. No manual steps.
+
+# 0. GPU check
+!nvidia-smi -L
+!python -c "import torch; print('torch', torch.__version__, '| cuda:', torch.cuda.is_available())"
+
+# 1. Clean clone (origin = current code you are using locally)
+%cd /content
+!rm -rf H-CoAtNet-Ichthyosis
+!git clone https://github.com/Cyrax321/H-CoAtNet-Ichthyosis.git
+%cd H-CoAtNet-Ichthyosis
+!pwd
+!ls -lh
+
+# 2. Install WITHOUT breaking Colab torch (do NOT pip install torch==2.2.0)
+!pip install -q -r requirements-colab.txt
+!python -c "import torch, timm; print('OK torch', torch.__version__)"
+
+# 3. Roboflow key (env var — train scripts read this automatically)
+import os
+os.environ["ROBOFLOW_API_KEY"] = "gXuxxWEMFJ8nK73o7pN7"
+print("ROBOFLOW_API_KEY set:", os.environ["ROBOFLOW_API_KEY"][:4] + "****")
+
+# 4. Train all 7 models — 30 epochs each, identical frozen splits, test held-out once
+# Order: proposed first, then baselines
+!python H-CoAtNet/proposed_method/train_h_coatnet.py
+!python H-CoAtNet/baselines/train_gft.py
+!python H-CoAtNet/baselines/train_coatnet.py
+!python H-CoAtNet/baselines/train_swin.py
+!python H-CoAtNet/baselines/train_vit.py
+!python H-CoAtNet/baselines/train_cnn.py
+!python H-CoAtNet/baselines/train_efficientnet.py
+
+# 5. Tables + Bootstrap CI + Stats + FLOPs + Figures (one command, never fails hard)
+!python tools/finalize_after_training.py
+
+# 6. Verify + show results
+!python tools/verify_all.py
+!echo "===== results/ ====="
+!ls -lh results/
+!echo "===== figures/ ====="
+!ls -lh figures/ 2>/dev/null | head -n 40
+!echo "===== tables.tex ====="
+!cat results/tables.tex 2>/dev/null | head -n 80
+!echo "===== efficiency ====="
+!cat results/efficiency.json 2>/dev/null | head -n 60
+
+# 7. Show confusion matrices inline (so you see results without opening files)
+from pathlib import Path
+try:
+    from IPython.display import Image, display
+    for p in sorted(Path("results").glob("confusion*.png")):
+        print(f"--- {p} ---")
+        display(Image(str(p)))
+except Exception as e:
+    print("inline show skip:", e)
+
+# 8. Backup everything to Drive (auth popup -> click Allow, then it copies)
+from google.colab import drive
+drive.mount('/content/drive')
+import datetime, pathlib
+DATE = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+DRIVE_OUT = pathlib.Path(f"/content/drive/MyDrive/HCoAtNet_run_{DATE}")
+(DRIVE_OUT / "results").mkdir(parents=True, exist_ok=True)
+(DRIVE_OUT / "splits").mkdir(parents=True, exist_ok=True)
+print(f"Backing up to {DRIVE_OUT} ...")
+!cp -r results/* "/content/drive/MyDrive/HCoAtNet_run_$DATE/results/" 2>/dev/null; echo done-results
+!cp -r splits/* "/content/drive/MyDrive/HCoAtNet_run_$DATE/splits/" 2>/dev/null; echo done-splits
+!cp -r figures/* "/content/drive/MyDrive/HCoAtNet_run_$DATE/figures/" 2>/dev/null; echo done-figures
+!ls -lh "/content/drive/MyDrive/HCoAtNet_run_$DATE/results/" | head -n 30
+print(f"\nDONE. All results in Colab ./results/ + Drive {DRIVE_OUT}")
+
+# ==== END — COPY UP TO HERE ====

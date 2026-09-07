@@ -1,0 +1,67 @@
+# STEP 8 - GENERATE ALL MISSING - COPY PASTE INTO COLAB
+# You already have: Table 5 + ablation_summary.csv/json + 36 figs (curves + confusions + 02/03/04)
+# This generates what STEP 6/7 did not: CIs + p-values + efficiency + tables + 12-fig suite + Grad-CAM
+# Paths match ablation study/ablation_study.py logic: RESULTS=results/, STUDY_RESULTS=ablation study/results/, HIST=histories/
+# Full reference is hierarchical (A5 Full H-CoAtNet). Do not use a file named full.json, it does not exist.
+
+%cd /content/H-CoAtNet-AStar
+!ls -lh results/results_ablation_*.json
+!ls -lh "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" results/significance_ablation.json results/metrics_hierarchical_ci.json 2>&1 | head
+
+# 1. Bootstrap 95 percent CIs, 1000 resamples, seed 42, one output per variant
+# Input must contain test.y_true, test.y_pred, test.y_probs - your JSONs do, saved by evaluate_with_probs
+# NOTE Colab: do NOT use shell for-loop with $v here, IPython expands $v as Python var and breaks the loop.
+# Use 8 explicit lines below (no dollar variables).
+!python3 tools/bootstrap_ci.py --results results/results_ablation_cnnOnly.json --n_bootstrap 1000 --seed 42 --out results/metrics_cnnOnly_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_vitOnly.json --n_bootstrap 1000 --seed 42 --out results/metrics_vitOnly_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_seNoPrune.json --n_bootstrap 1000 --seed 42 --out results/metrics_seNoPrune_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_randomPrune.json --n_bootstrap 1000 --seed 42 --out results/metrics_randomPrune_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_directL2.json --n_bootstrap 1000 --seed 42 --out results/metrics_directL2_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_hierarchical.json --n_bootstrap 1000 --seed 42 --out results/metrics_hierarchical_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_hierarchicalRaw.json --n_bootstrap 1000 --seed 42 --out results/metrics_hierarchicalRaw_ci.json
+!python3 tools/bootstrap_ci.py --results results/results_ablation_noViT.json --n_bootstrap 1000 --seed 42 --out results/metrics_noViT_ci.json
+!ls -lh results/metrics_*_ci.json
+!cat results/metrics_hierarchical_ci.json
+
+# 2. Significance vs Full (hierarchical A5), McNemar for Acc + bootstrap DeLong-like for AUROC
+# Requires same y_true across all 8, you have frozen split seed 42 n=158 so assert passes
+!python3 tools/stats_tests.py --all results/results_ablation_cnnOnly.json results/results_ablation_vitOnly.json results/results_ablation_seNoPrune.json results/results_ablation_randomPrune.json results/results_ablation_directL2.json results/results_ablation_hierarchical.json results/results_ablation_hierarchicalRaw.json results/results_ablation_noViT.json --reference results/results_ablation_hierarchical.json --out results/significance_ablation.json
+!cat results/significance_ablation.json
+
+# 3. Efficiency independent check, same HW, thop MACs + latency b1 and b32
+# Note: ablation JSONs already have efficiency.params_M and efficiency.macs_G from training. This is for Paper Table 4.
+# This takes about 10 min on T4. Skip if you only need ablation Table 5.
+!python3 tools/compute_flops.py --all --out results/efficiency.json
+!cat results/efficiency.json
+
+# 4. LaTeX comparison table from real ablation JSONs
+!python3 tools/generate_tables.py --all results/results_ablation_cnnOnly.json results/results_ablation_vitOnly.json results/results_ablation_seNoPrune.json results/results_ablation_randomPrune.json results/results_ablation_directL2.json results/results_ablation_hierarchical.json results/results_ablation_hierarchicalRaw.json results/results_ablation_noViT.json --out results/tables_ablation.tex
+!cat results/tables_ablation.tex
+
+# 5. 12-fig suite REAL mode. WARNING version gap, read before submit.
+# generate_all_12_ablation_figs.py VARIANTS = full,noSE,noViT,cnnOnly (old 4-set)
+# Your training ORDER = cnnOnly,vitOnly,seNoPrune,randomPrune,directL2,hierarchical,hierarchicalRaw,noViT (8-set A0-A7)
+# So --real will find only cnnOnly and noViT, others fall back to demo proxy with PREVIEW watermark. Do not submit those as real.
+# TRUST STEP 6 output for figs below, they are real 8-variant from ablation_study.py generate_compare:
+#   Title 02: Ablation - Acc/MacroF1/Kappa per variant (frozen test n=158, seed 42)
+#   Title 03: Accuracy drop vs Full (pp, n=158)
+#   Title 04: Per-class F1 across variants (n=158)
+!python3 "ablation study/generate_all_12_ablation_figs.py" --real
+!cat "ablation study/figures/INDEX_12.md"
+!ls -lh "ablation study/figures/fig_ablation_"*.png figures/fig_ablation_*.png
+!echo "--- PREVIEW check, must be empty for A-star submit ---"
+!grep -rl "PREVIEW" "ablation study/figures/" figures/ 2>/dev/null | head
+
+# 6. Grad-CAM Full only, layer cnn_stage4 7x7, pred logit, no test label for map
+# Weights must be ablation study/results/best_hierarchical.pth (A5 Full). Dataset must be test folder with class subfolders.
+!ls -lh "ablation study/results/best_hierarchical.pth" /content/dataset/test 2>&1 | head
+!python3 tools/gradcam.py --weights "ablation study/results/best_hierarchical.pth" --dataset_dir /content/dataset/test --results results/results_ablation_hierarchical.json --out figures/gradcam_full --n 6
+!ls -lh figures/gradcam_full/
+!cat figures/gradcam_full/method.txt
+
+# 7. Final verify + re-zip + Drive copy (run after 1-6 pass)
+!ls results/metrics_*_ci.json results/significance_ablation.json results/tables_ablation.tex "ablation study/ablation_table.tex"
+!zip -r /tmp/astar_ablation_with_CI.zip results/results_ablation_*.json results/metrics_*_ci.json results/significance_ablation.json results/efficiency.json results/tables_ablation.tex "ablation study/ablation_table.tex" "ablation study/ablation_summary.csv" "ablation study/ablation_summary.json" "ablation study/figures/" figures/fig_ablation_* figures/gradcam_full/ histories/history_ablation_*.json
+!cp -v results/metrics_*_ci.json results/significance_ablation.json results/tables_ablation.tex /content/drive/MyDrive/HCoAtNet_ablation/ 2>&1 | tail
+!cp -v /tmp/astar_ablation_with_CI.zip /content/drive/MyDrive/HCoAtNet_ablation/ 2>&1 | tail
+!echo DONE-STEP-8
