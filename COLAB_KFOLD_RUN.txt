@@ -4,12 +4,9 @@ Copy-paste each block in order. Total runtime on T4: ~8-12 h (overnight).
 On a faster GPU (A100/4090): ~3-5 h. Interrupt-safe: just re-run Step 5.
 ================================================================================
 
-STEP 0 — (YOU, before sharing) commit and push the fixed code:
+STEP 0 — (DONE 2026-09-09) fixed code pushed to GitHub as commit 2b0f3a4.
 --------------------------------------------------------------------------------
-cd "hcoat updated"
-git add tools/kfold/kfold.py H-CoAtNet/tools/kfold/kfold.py H-CoAtNet/tools/KFOLD_EVALUATION_PLAN.md COLAB_KFOLD_RUN.txt
-git commit -m "K-fold: fairness fixes (Table-3 parity gate), frozen-test eval, CI, Friedman/Nemenyi, MPS support"
-git push astar main
+No action needed - `git pull` in Step 1 gets everything.
 
 STEP 1 — (COLLABORATOR) pull the latest code:
 --------------------------------------------------------------------------------
@@ -52,23 +49,47 @@ nohup python H-CoAtNet/tools/kfold/kfold.py \
     --dataset_dir <DATASET_DIR> \
     --k 5 --epochs 30 --seed 42 --models all --resume \
     > kfold_run.log 2>&1 &
+echo $! > kfold_train.pid          # PID saved for the auto-backup watcher
 
 # Monitor progress any time:
 tail -f kfold_run.log
 # If the box disconnects: log back in and re-run the SAME Step-5 command.
 # Completed folds are skipped automatically (--resume).
 
+STEP 5b — AUTO-BACKUP WATCHER (start right after Step 5; runs unattended):
+--------------------------------------------------------------------------------
+# Waits for training to finish, then zips results/kfold automatically
+# (checkpoints excluded to keep the archive small; ~50-100 MB).
+nohup bash -c '
+  while kill -0 $(cat kfold_train.pid) 2>/dev/null; do sleep 120; done
+  STAMP=$(date +%Y%m%d_%H%M%S)
+  ZIP="kfold_results_${STAMP}.zip"
+  zip -rq "$ZIP" results/kfold -x "results/kfold/checkpoints/*" \
+      && echo "[BACKUP] saved $ZIP (checkpoints excluded)" >> kfold_run.log \
+      || echo "[BACKUP] zip failed - run Step 6 manually" >> kfold_run.log
+' > kfold_backup.log 2>&1 &
+
+# Include the 35 checkpoints too (~3 GB archive)? Use this instead:
+#   zip -rq "kfold_results_FULL.zip" results/kfold
+# If zip is not installed:  apt-get install -y zip
+# (tar fallback:  tar czf kfold_results.tar.gz results/kfold --exclude="results/kfold/checkpoints" )
+
 STEP 6 — (morning) verify completion and collect results:
 --------------------------------------------------------------------------------
 grep -c "DONE" kfold_run.log          # expect 35 (7 models x 5 folds)
 grep -i "FAILED" kfold_run.log        # expect none
+grep "BACKUP" kfold_run.log           # expect: saved kfold_results_<stamp>.zip
+# No zip? Create it manually:
+#   zip -rq kfold_results.zip results/kfold -x "results/kfold/checkpoints/*"
 # Results are in results/kfold/ :
 #   kfold_summary.csv + kfold_test_summary.csv   (mean +/- SD + 95% CI)
 #   kfold_table.tex                              (Table 6, LaTeX)
 #   kfold_per_class_summary.csv                  (per-class P/R/F1 all models)
 #   kfold_paired_tests.json + kfold_friedman_nemenyi.json   (statistics)
 #   figures/*.png  + test/roc + test/reliability (13 summary figures, 300 DPI)
-# Send back the whole results/kfold/ folder (checkpoints/ optional - large).
+# Send back the zip from Step 5b:  kfold_results_<stamp>.zip
+# (it contains everything except checkpoints/; all tables and figures
+#  regenerate from the JSONs inside it, so nothing else is needed).
 
 NOTES
 - Frozen 158-image test set is never trained on; evaluated once per fold
