@@ -1,0 +1,78 @@
+================================================================================
+K-FOLD EVALUATION — RUN INSTRUCTIONS (R2-4)
+Copy-paste each block in order. Total runtime on T4: ~8-12 h (overnight).
+On a faster GPU (A100/4090): ~3-5 h. Interrupt-safe: just re-run Step 5.
+================================================================================
+
+STEP 0 — (YOU, before sharing) commit and push the fixed code:
+--------------------------------------------------------------------------------
+cd "hcoat updated"
+git add tools/kfold/kfold.py H-CoAtNet/tools/kfold/kfold.py H-CoAtNet/tools/KFOLD_EVALUATION_PLAN.md COLAB_KFOLD_RUN.txt
+git commit -m "K-fold: fairness fixes (Table-3 parity gate), frozen-test eval, CI, Friedman/Nemenyi, MPS support"
+git push astar main
+
+STEP 1 — (COLLABORATOR) pull the latest code:
+--------------------------------------------------------------------------------
+git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git H-CoAtNet-AStar   # only if not cloned yet
+cd H-CoAtNet-AStar
+git pull origin main                                                       # if already cloned
+
+STEP 2 — install requirements (GPU box / RunPod pytorch image):
+--------------------------------------------------------------------------------
+pip install -r requirements.txt
+# Sanity check (must print torch 2.2.0 and cuda True):
+python -c "import torch, timm, sklearn, scipy; print(torch.__version__, torch.cuda.is_available())"
+
+STEP 3 — get the dataset (Roboflow folder export: train/ valid/ test/<class>/):
+--------------------------------------------------------------------------------
+# Option A: Roboflow download (needs the API key, passed env-only):
+export ROBOFLOW_API_KEY="<key>"
+python - <<'EOF'
+import os
+from roboflow import Roboflow
+ds = Roboflow(api_key=os.environ["ROBOFLOW_API_KEY"]) \
+        .workspace("hi-l9ueo").project("ich-s-7lnsj").version(1).download("folder")
+print("DATASET_DIR =", ds.location)
+EOF
+
+# Option B: upload the dataset zip from Drive and unzip, e.g.:
+# unzip dataset.zip -d /workspace/dataset
+# -> dataset must contain train/, valid/, test/ subfolders with class dirs.
+
+STEP 4 — pre-flight checks (2 min; must print 9/9 PASS):
+--------------------------------------------------------------------------------
+python H-CoAtNet/tools/kfold/kfold.py --dataset_dir <DATASET_DIR> --validate-only
+
+# Optional 5-min sanity: one model, one fold, one epoch
+python H-CoAtNet/tools/kfold/kfold.py --dataset_dir <DATASET_DIR> --smoke-test
+
+STEP 5 — FULL OVERNIGHT RUN (nohup keeps it alive after disconnect):
+--------------------------------------------------------------------------------
+nohup python H-CoAtNet/tools/kfold/kfold.py \
+    --dataset_dir <DATASET_DIR> \
+    --k 5 --epochs 30 --seed 42 --models all --resume \
+    > kfold_run.log 2>&1 &
+
+# Monitor progress any time:
+tail -f kfold_run.log
+# If the box disconnects: log back in and re-run the SAME Step-5 command.
+# Completed folds are skipped automatically (--resume).
+
+STEP 6 — (morning) verify completion and collect results:
+--------------------------------------------------------------------------------
+grep -c "DONE" kfold_run.log          # expect 35 (7 models x 5 folds)
+grep -i "FAILED" kfold_run.log        # expect none
+# Results are in results/kfold/ :
+#   kfold_summary.csv + kfold_test_summary.csv   (mean +/- SD + 95% CI)
+#   kfold_table.tex                              (Table 6, LaTeX)
+#   kfold_per_class_summary.csv                  (per-class P/R/F1 all models)
+#   kfold_paired_tests.json + kfold_friedman_nemenyi.json   (statistics)
+#   figures/*.png  + test/roc + test/reliability (13 summary figures, 300 DPI)
+# Send back the whole results/kfold/ folder (checkpoints/ optional - large).
+
+NOTES
+- Frozen 158-image test set is never trained on; evaluated once per fold
+  from the val-best checkpoint (protocol recorded in kfold_protocol.json).
+- Do NOT hand-edit kfold_*.json outputs; everything regenerates from the run.
+- If a pre-flight FAIL appears, stop and report - do not bypass.
+================================================================================
