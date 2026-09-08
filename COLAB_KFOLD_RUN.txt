@@ -4,6 +4,13 @@ Copy-paste each block in order. Total runtime on T4: ~8-12 h (overnight).
 On a faster GPU (A100/4090): ~3-5 h. Interrupt-safe: just re-run Step 5.
 ================================================================================
 
+!!! READ BEFORE PASTING ON A MAC !!!
+The blocks below contain lines starting with #. Linux/RunPod/Colab terminals
+handle them fine, but macOS Terminal (zsh) does NOT - pasting them there
+causes 'zsh: ==== not found' errors. On a Mac use the comment-free blocks
+sent separately, or the all-in-one Colab cell (COLAB_KFOLD_ALL_IN_ONE.txt).
+================================================================================
+
 STEP 0 — (DONE 2026-09-09) fixed code pushed to GitHub as commit 2b0f3a4.
 --------------------------------------------------------------------------------
 No action needed - `git pull` in Step 1 gets everything.
