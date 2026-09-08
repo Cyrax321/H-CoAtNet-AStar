@@ -596,10 +596,16 @@ def run_one_fold(model_name, fold_idx, files, labels, train_idx, val_idx,
         history["train_acc"].append(ta)
         history["val_loss"].append(vl)
         history["val_acc"].append(va)
-        if va > best_val:
+        is_best = va > best_val
+        if is_best:
             best_val = va
             best_epoch = ep + 1
             best_state = deepcopy(model.state_dict())
+        # Per-epoch logging (match ablation study format)
+        tag = " [NEW BEST]" if is_best else ""
+        print(f"--- Epoch {ep+1:2d}/{epochs} [{model_name} fold {fold_idx+1}] ---")
+        print(f"  train acc {ta:.4f} loss {tl:.4f} | val acc {va:.4f} loss {vl:.4f}{tag}")
+        sys.stdout.flush()
     history["best_epoch"] = best_epoch
     # Restore the validation-selected checkpoint (protocol: val-best model
     # selection, matching the single-split benchmark). All final metrics --
