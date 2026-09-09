@@ -1,0 +1,94 @@
+================================================================================
+H-CoAtNet K-FOLD — MINIMAL COLAB CELL (T4, ~4-5h)
+Same run as the full cell, minus the scaffolding: no smoke test, no log
+watcher, no local sync. Training logs stream live in the cell output.
+Re-run THIS SAME CELL to resume after a disconnect (--resume).
+1. Runtime -> T4 GPU.  2. Paste cell, Run, authorize Drive.  3. Wait.
+Results land in Drive: MyDrive/HCoAtNet_KFOLD_RUN/
+================================================================================
+
+# H-CoAtNet K-FOLD — MINIMAL CELL (Colab T4, ~4-5h). Re-run to resume.
+import os, subprocess, sys, time, zipfile, shutil
+KEY, REPO = "gXuxxWEMFJ8nK73o7pN7", "/content/H-CoAtNet-AStar"
+DRIVE_RUN = "/content/drive/MyDrive/HCoAtNet_KFOLD_RUN"
+OUT = DRIVE_RUN + "/results/kfold"
+LOG = "/content/kfold_run.log"
+def sh(c, **k):
+    return subprocess.run(c, shell=True, text=True, capture_output=True, **k)
+
+r = sh("nvidia-smi --query-gpu=name --format=csv,noheader")
+assert r.returncode == 0, "Set Runtime -> T4 GPU first"
+print("GPU:", r.stdout.strip())
+
+from google.colab import drive
+if not os.path.ismount("/content/drive"):
+    drive.mount("/content/drive")
+os.makedirs(DRIVE_RUN, exist_ok=True)
+
+if os.path.isdir(REPO + "/.git"):
+    r = sh(f"cd {REPO} && git pull origin main")
+    print((r.stdout or "").strip()[-200:] or (r.stderr or "").strip()[-200:])
+else:
+    if os.path.exists(REPO):
+        shutil.move(REPO, REPO + "_bak_" + time.strftime("%H%M%S"))
+    r = sh(f"git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git {REPO}")
+    assert r.returncode == 0, (r.stderr or "")[-500:]
+
+r = sh(f"cd {REPO} && pip install -q -r requirements.txt")
+if r.returncode != 0:  # no torch==2.2.0 wheel on Colab: keep its torch, install rest
+    pkgs = [l.strip() for l in open(f"{REPO}/requirements.txt")
+            if l.strip() and not l.startswith("#")
+            and not l.lower().startswith(("torch==", "torchvision=="))]
+    r = sh("pip install -q " + " ".join(pkgs))
+    assert r.returncode == 0, (r.stderr or "")[-500:]
+print("deps OK")
+
+KF = next((p for p in [f"{REPO}/H-CoAtNet/tools/kfold/kfold.py", f"{REPO}/tools/kfold/kfold.py"] if os.path.isfile(p)), None)
+assert KF, "kfold.py missing after clone"
+print("kfold:", KF)
+
+DT = f"{REPO}/DATASET_DIR.txt"
+DS = None
+if os.path.isfile(DT):
+    d = open(DT).read().strip()
+    if os.path.isdir(d):
+        DS = d
+        print("reuse:", DS)
+if DS is None:
+    open(f"{REPO}/dl.py", "w").write(
+        "from roboflow import Roboflow\nimport os\n"
+        "ds = Roboflow(api_key=os.environ['K']).workspace('hi-l9ueo').project('ich-s-7lnsj').version(1).download('folder')\n"
+        f"open('{DT}', 'w').write(ds.location)\nprint(ds.location)")
+    r = sh(f'"{sys.executable}" {REPO}/dl.py', env=dict(os.environ, K=KEY))
+    assert r.returncode == 0, (r.stderr or "")[-500:]
+    DS = open(DT).read().strip()
+    print("dataset:", DS)
+
+r = sh(f'"{sys.executable}" {KF} --dataset_dir {DS} --validate-only')
+print((r.stdout or "")[-1200:])
+assert r.returncode == 0 and "fail=0" in (r.stdout or ""), "PREFLIGHT FAILED - see output above"
+
+print("TRAINING 4 models x 5 folds (live log below, ~4-5h)")
+p = subprocess.Popen([sys.executable, KF, "--dataset_dir", DS, "--out", OUT,
+                      "--k", "5", "--epochs", "30", "--seed", "42",
+                      "--models", "H-CoAtNet,CoAtNet,CNN,GFT", "--resume"],
+                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+with open(LOG, "ab", buffering=0) as f:
+    for line in p.stdout:
+        sys.stdout.write(line)
+        sys.stdout.flush()
+        f.write(line.encode(errors="ignore"))
+p.wait()
+print("exit:", p.returncode)
+shutil.copy(LOG, DRIVE_RUN + "/kfold_run_final.log")
+
+zp = f"{DRIVE_RUN}/kfold_results_{time.strftime('%Y%m%d_%H%M%S')}.zip"
+with zipfile.ZipFile(zp, "w", zipfile.ZIP_DEFLATED) as z:
+    for root, subdirs, files in os.walk(OUT):
+        subdirs[:] = [d for d in subdirs if d != "checkpoints"]
+        for fn in files:
+            fp = os.path.join(root, fn)
+            z.write(fp, os.path.relpath(fp, os.path.dirname(OUT)))
+print("zip:", zp, f"({os.path.getsize(zp)/1e6:.0f} MB)")
+assert p.returncode == 0, "training exited non-zero - check kfold_run_final.log on Drive"
+print("DONE: 20 folds expected - check the MODEL COMPLETE banners above")
