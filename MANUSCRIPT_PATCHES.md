@@ -11,7 +11,7 @@ Paste these directly into your Overleaf. Each patch addresses a reviewer comment
 
 **AFTER (A* ACCEPT):**
 ```latex
-We curated a 1,580-image 5-class dermatological dataset (Harlequin, Healthy, Ichthyosis Vulgaris, Lamellar, Netherton) and propose H-CoAtNet, a hierarchical hybrid ConvNeXt-Tiny [3,3,9,3] + 2 ViT blocks + HierarchicalSE (49$\rightarrow$36$\rightarrow$24 tokens). Under a frozen stratified 70/15/15 split (seed 42, test n=237, TRIPOD-AI Type 2b, test held-out), H-CoAtNet achieved 90.51\% accuracy [86.2--93.8, bootstrap 1000], balanced accuracy 88.4\%, macro F1 0.861 [0.82--0.89], Cohen's $\kappa$ 0.875 [0.84--0.91] and MCC 0.878, outperforming six baselines (Swin-T 82.91\%, GFT 82.28\%, CoAtNet 74.68\%) with comparable cost (28.3M params, 4.51 GMacs). Results are reported with 95\% CIs, 5-seed mean$\pm$SD (89.8$\pm$0.9) and McNemar significance (p=0.003 vs GFT). As a prototype decision-support tool requiring prospective external validation, H-CoAtNet shows potential for rare-disease teledermatology. Code, frozen splits and weights: Zenodo DOI:10.5281/zenodo.XXXXXXX.
+We curated 1,580 dermatological images (5 classes: Harlequin, Healthy, Ichthyosis Vulgaris, Lamellar, Netherton; 2,508 after frozen Roboflow augmentation) and propose H-CoAtNet, a hierarchical hybrid ConvNeXt-Tiny [3,3,9,3] + 2 ViT blocks + HierarchicalSE (49$\rightarrow$36$\rightarrow$24 tokens). Under a frozen stratified split (seed 42, test n=158, TRIPOD-AI Type 2b, test evaluated once), H-CoAtNet achieved 89.87\% accuracy [84.8--94.3, bootstrap 1000], balanced accuracy 0.862, macro F1 0.855, Cohen's $\kappa$ 0.868 and MCC 0.869. CoAtNet achieved the highest single-split accuracy (90.51\%); the 0.64pp gap equals one test image (McNemar p=1.000, ns), so no superiority over CoAtNet is claimed. H-CoAtNet is the best-calibrated model (ECE 8.03\%) and halves tokens (49$\rightarrow$24) with zero accuracy loss vs no pruning. Efficiency claims are withdrawn (29.01M params, 5.15 GMacs, slower than CoAtNet on every axis). A 5-fold cross-validation (H-CoAtNet vs CoAtNet, Suppl.~Table~SX) arbitrates the ranking. As a prototype decision-support tool requiring prospective external validation, H-CoAtNet shows potential for rare-disease teledermatology. Code, frozen splits and weights: Zenodo DOI:10.5281/zenodo.XXXXXXX.
 ```
 **Addresses:** R1-10 (audit), R1-8 (CI), R1-9 (cost), R1-11 (moderate), R1-12 (not SOTA)
 
@@ -70,9 +70,9 @@ We curated 1,580 dermatological images across 5 classes: Harlequin Ichthyosis (H
 
 \textbf{Expert verification:} Two board-certified dermatologists (D1: MBBS, MD 10yr; D2: MBBS, MD 12yr, blinded to source labels and to each other) independently labeled all 1,580 images. Disagreements (12/1,580 = 0.76\%) were adjudicated by D3 (20yr). Inter-rater reliability: Cohen's $\kappa$=0.89 [0.85--0.92], weighted $\kappa$=0.91, observed agreement 92.3\%; Fleiss $\kappa$ (3 raters, 100-image subset)=0.87 (almost perfect per Landis \& Koch).
 
-\textbf{Deduplication (R1-5):} Before split, we ran \texttt{tools/dedup\_audit.py}: MD5 exact, pHash Hamming, SSIM. Result: 0 exact MD5 duplicates, 7 near-duplicate pairs (pHash $<$8) removed (final n=1,573 before split, 1,580 reported includes 7 removed for transparency), max inter-split CLIP cosine 0.31, no cross-split pHash $<$8 (report \texttt{results/dedup\_report.json}). Patient IDs were unavailable for 68\% web images, so we used image-level stratified split + audit (source-aware split described below).
+\textbf{Deduplication (R1-5):} Before split, we ran \texttt{tools/dedup\_audit.py}: MD5 exact, pHash Hamming, SSIM. Result: 0 exact MD5 duplicates, 0 near-duplicates (pHash $<$8 over 5,000 sampled pairs); one cross-split pair at Hamming distance 2 retained with disclosure (removing it changes accuracy by $-$0.13pp; report \texttt{results/dedup\_report.json}). Patient IDs were unavailable for 68\% web images, so we used image-level stratified split + audit (source-aware split described below).
 
-\textbf{Split (R1-1, TRIPOD-AI Type 2b):} Frozen stratified 70/15/15 via \texttt{StratifiedShuffleSplit} seed 42: Train 1,106 (HI 154, Healthy 298, IV 332, LI 168, NS 154), Valid 237 (HI 32, Healthy 60, IV 66, LI 34, NS 45), Test 237 (HI 32, Healthy 45, IV 46, LI 22, NS 26*) *counts from \texttt{splits/seed42\_indices.json} (SHA256 sample in \texttt{SHA256SUM}), test held-out and evaluated once after hyperparameter freeze (Fig.~5 train/val only). *If your true counts differ, replace these numbers with audit output — do not fake 237 if audit says 171; report truth.
+\textbf{Split (R1-1, TRIPOD-AI Type 2b):} Frozen stratified split via \texttt{StratifiedShuffleSplit} seed 42: Train 2,196 (HI 420, Healthy 507, IV 720, LI 324, NS 225), Valid 154 (HI 32, Healthy 41, IV 38, LI 28, NS 15), Test 158 (HI 32, Healthy 45, IV 46, LI 22, NS 13); counts from \texttt{splits/seed42\_indices.json} (SHA256 in \texttt{SHA256SUM}), test held-out and evaluated once after hyperparameter freeze (train/val curves only).
 
 \textbf{Preprocessing:} 224$\times$224, ImageNet mean/std, augment: RandomResizedCrop 0.8--1.0, HFlip, Rot15, TrivialAugmentWide (H-CoAtNet only, see Table~3), RandomErasing 0.2. All splits share val/test transform (Resize only).
 ```
@@ -92,10 +92,10 @@ Paste this Table:
 \toprule
 Model & Optim & LR & Sched. (warmup) & WD & Batch & Loss & Aug & Init \\
 \midrule
-H-CoAtNet & AdamW & 5e-5 & Cosine T=30 (5ep warmup) & 0.01 & 24 & CE+LS0.1+w & RRC+Flip+Rot15+TrivAug+Eras & ConvNeXt-T IN1K \\
+H-CoAtNet & AdamW & 5e-5 & Cosine T=30 (no warmup) & 0.01 & 24 & CE+LS0.1+w & RRC+Flip+Rot15+TrivAug+Eras & ConvNeXt-T IN1K \\
 GFT & AdamW & 5e-5 & Cosine T=30 & 0.01 & 24 & CE+w & RRC+Flip & ViT-T IN1K \\
 CoAtNet (ConvNeXt-T) & AdamW & 5e-5 & Cosine & 0.01 & 24 & CE+w & RRC+Flip+Rot15+CJ & ConvNeXt-T IN1K \\
-ViT-T & AdamW & 5e-5 & Cosine & 0.01 & 16 & CE & RRC+Flip & IN1K \\
+ViT-T & AdamW & 5e-5 & Cosine & 0.01 & 16 & CE & RRC+Flip & Scratch \\
 Swin-T & AdamW & 5e-5 & Cosine & 0.01 & 16 & CE & RRC+Flip & Scratch \\
 EfficientNet-B0 & AdamW & 3e-4 & Cosine & 0.01 & 24 & CE+w & RRC+Flip+Rot15+CJ & Scratch \\
 CNN (Fair) & AdamW & 3e-4 & Cosine & 0.01 & 24 & CE+w & RRC+Flip & Scratch \\
@@ -112,7 +112,7 @@ CNN (Fair) & AdamW & 3e-4 & Cosine & 0.01 & 24 & CE+w & RRC+Flip & Scratch \\
 
 ```latex
 \subsection{Evaluation Metrics (A* Package)}
-We report accuracy, balanced accuracy, macro/weighted precision/recall/F1, Cohen's $\kappa$, MCC, macro AUROC/AUPRC, ECE and Brier, per-class precision/recall/specificity/F1/AUROC with 95\% bootstrap CIs (1,000 stratified resamples, percentile) and 5-seed mean$\pm$SD. Significance vs H-CoAtNet: McNemar for accuracy, DeLong-like bootstrap for AUROC. Test set (n=237) was held-out per TRIPOD-AI and evaluated once on the best validation checkpoint.
+We report accuracy, balanced accuracy, macro/weighted precision/recall/F1, Cohen's $\kappa$, MCC, macro AUROC/AUPRC, ECE and Brier, per-class precision/recall/specificity/F1/AUROC with 95\% bootstrap CIs (1,000 stratified resamples, percentile) and 5-seed mean$\pm$SD. Significance vs H-CoAtNet: McNemar for accuracy, DeLong-like bootstrap for AUROC. Test set (n=158) was held-out per TRIPOD-AI and evaluated once on the best validation checkpoint.
 
 % Paste Table 8 LaTeX generated by tools/generate_tables.py --all results/*.json
 % Example placeholder: \input{results/tables.tex}
@@ -147,9 +147,41 @@ Deterministic training (seed 42, \texttt{cudnn.deterministic=True}), \texttt{env
 
 ---
 
-## 9. Checklist for Submission
+## 10. Supplement — Table SX: 5-Fold Cross-Validation (New, PENDING Colab run)
 
-- [ ] Search `90.51` — appears in Abstract, §4 first para, Table 8, Conclusion — all same
+Paste the generated table (do NOT hand-fill — copy from `results/kfold/kfold_table.tex`):
+
+```latex
+% PENDING — paste results/kfold/kfold_table.tex after the Colab T4 run (~2.3h).
+% Design: dev pool n=2350 (train+valid), frozen test n=158 held out (TRIPOD-AI
+% Type 2b), group-aware StratifiedGroupKFold k=5 seed 42, H-CoAtNet vs CoAtNet
+% (only pair within noise; A0 repeats CoAtNet's backbone story; rest p<0.001),
+% 30 epochs, val-best checkpoint per fold evaluated once on frozen test.
+% Placeholder structure (mean +/- SD across 5 folds):
+\begin{table}[t]
+\centering
+\caption{Five-fold cross-validation (mean $\pm$ SD). Frozen test n=158 held out.}
+\label{tab:kfold}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Model & Val Acc (\%) & Test Acc (\%) & Test Macro-F1 & Test ECE $\downarrow$ \\
+\midrule
+H-CoAtNet & XX.X$\pm$Y.Y & XX.X$\pm$Y.Y & 0.XXX$\pm$0.0XX & 0.XXX$\pm$0.0XX \\
+CoAtNet & XX.X$\pm$Y.Y & XX.X$\pm$Y.Y & 0.XXX$\pm$0.0XX & 0.XXX$\pm$0.0XX \\
+\bottomrule
+\end{tabular}
+\end{table}
+```
+Accompanying text (pick AFTER results land, delete the others): (a) H-CoAtNet top mean/lowest SD → accuracy+stability claim; (b) statistical tie → contribution is calibration (ECE 8.03\%) + 50\% token reduction at zero loss + interpretability; (c) CoAtNet consistently ahead → drop accuracy leadership, reframe to calibration/efficiency. Wilcoxon + Friedman/Nemenyi from `kfold_paired_tests.json` / `kfold_friedman_nemenyi.json`.
+**Addresses:** R2-4 (second half), R1-8 (second pillar)
+
+---
+
+## 11. Checklist for Submission
+
+- [ ] Search `90.51` — appears ONLY as CoAtNet's score (Abstract, Table 8); H-CoAtNet is 89.87 everywhere; Conclusion has no 89.24
+- [ ] K-fold Table SX pasted from `results/kfold/kfold_table.tex` (no hand-filled numbers; placeholders XX.X replaced or marked PENDING)
 - [ ] Search `H-Coat` — 0 results (all `H-CoAtNet`)
 - [ ] Search `propoed/basseline/superiour/Tehnologoical` — 0
 - [ ] Fig5 caption says `test held-out, evaluated once`
