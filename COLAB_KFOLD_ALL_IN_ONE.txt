@@ -66,11 +66,13 @@ if os.path.exists(os.path.join(REPO, ".git")):
         print("    git pull stderr:", gp.stderr.strip()[-500:])
     if gp.returncode != 0:
         raise RuntimeError("git pull FAILED - screenshot the stderr above")
-elif os.path.exists(REPO):
-    raise RuntimeError(
-        f"{REPO} exists but is NOT a git repo (stale upload?). "
-        f"Delete it and re-run: !rm -rf {REPO}")
 else:
+    if os.path.exists(REPO):
+        # Leftover from the pre-820acc5 cell (which created REPO via makedirs)
+        # or a stale upload: move aside, never delete user data silently.
+        bak = REPO + f"_stale_{time.strftime('%Y%m%d_%H%M%S')}"
+        print(f"    {REPO} is not a git repo - moving aside to {bak}, fresh-cloning")
+        shutil.move(REPO, bak)
     gc = sh(f"git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git {REPO}")
     print("    clone:", (gc.stdout or "").strip()[-200:] or "(see stderr)")
     if gc.stderr.strip():
