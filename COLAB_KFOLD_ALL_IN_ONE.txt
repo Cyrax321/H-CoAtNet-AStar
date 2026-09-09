@@ -29,7 +29,7 @@ HOW TO USE:
 # =============================================================================
 import os, subprocess, sys, time, zipfile, glob, shutil, re
 
-# ⚠️  ROTATE THIS KEY AFTER USE - currently exposed in git history
+# ROTATE THIS KEY AFTER USE - currently exposed in git history
 KEY        = "gXuxxWEMFJ8nK73o7pN7"
 REPO       = "/content/H-CoAtNet-AStar"
 DRIVE_RUN  = "/content/drive/MyDrive/HCoAtNet_KFOLD_RUN"
@@ -38,7 +38,6 @@ REPO_RESULTS = f"{REPO}/results/kfold"             # local copy for paper
 LOG        = "/content/kfold_run.log"
 
 # Models to run (4 essential: proposed + 3 closest baselines)
-# H-CoAtNet = proposed; CoAtNet = beats proposed on single split; CNN = ablation A0 (beats proposed); GFT = 3rd best
 MODELS     = "H-CoAtNet,CoAtNet,CNN,GFT"
 
 def sh(cmd, **kw):
@@ -59,23 +58,59 @@ print("    ->", DRIVE_RUN)
 print("    ->", REPO_RESULTS, "(local copy for paper)")
 
 print("[2/7] Code + requirements")
-if os.path.exists(REPO):
-    print("   ", sh(f"cd {REPO} && git pull origin main").stdout.strip() or "already up to date")
+if os.path.exists(os.path.join(REPO, ".git")):
+    gp = sh(f"cd {REPO} && git pull origin main")
+    print("    git pull stdout:", (gp.stdout or "").strip() or "(empty)")
+    if gp.stderr.strip():
+        print("    git pull stderr:", gp.stderr.strip()[-500:])
+    if gp.returncode != 0:
+        raise RuntimeError("git pull FAILED - screenshot the stderr above")
+elif os.path.exists(REPO):
+    raise RuntimeError(
+        f"{REPO} exists but is NOT a git repo (stale upload?). "
+        f"Delete it and re-run: !rm -rf {REPO}")
 else:
-    print("   ", sh(f"git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git {REPO}").stdout.strip())
-# Install torch/torchvision first (Colab may have mismatched versions)
-sh(f"pip install -q torch==2.1.2 torchvision==0.16.2 --index-url https://download.pytorch.org/whl/cu121")
+    gc = sh(f"git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git {REPO}")
+    print("    clone:", (gc.stdout or "").strip()[-200:] or "(see stderr)")
+    if gc.stderr.strip():
+        print("    clone stderr:", gc.stderr.strip()[-500:])
+    if gc.returncode != 0:
+        raise RuntimeError("git clone FAILED - check network / URL")
+# Keep Colab's preinstalled torch (do NOT force-downgrade); install the rest
 i = sh(f"cd {REPO} && pip install -q -r requirements.txt")
 if i.returncode != 0:
-    sh(f"cd {REPO} && pip install -q timm==1.0.28 scikit-learn scipy matplotlib pillow numpy roboface pandas tqdm")
+    print("    requirements.txt failed, installing core pkgs directly")
+    print("    pip stderr:", (i.stderr or "").strip()[-500:])
+    j = sh(f"cd {REPO} && pip install -q timm==1.0.28 scikit-learn scipy matplotlib pillow numpy roboflow pandas tqdm")
+    if j.returncode != 0:
+        raise RuntimeError("pip install FAILED: " + (j.stderr or "").strip()[-500:])
 print("    requirements OK")
+
+# --- locate kfold.py (single source of truth for steps 4/5/6) ---
+_CANDIDATES = [
+    f"{REPO}/H-CoAtNet/tools/kfold/kfold.py",
+    f"{REPO}/tools/kfold/kfold.py",
+]
+KFOLD_PY = next((p for p in _CANDIDATES if os.path.isfile(p)), None)
+if KFOLD_PY is None:
+    print("    ✗ kfold.py NOT FOUND. Checked:")
+    for p in _CANDIDATES:
+        print("      -", p)
+    print("    Repo top level contains:")
+    try:
+        for name in sorted(os.listdir(REPO))[:30]:
+            print("      -", name)
+    except Exception as e:
+        print("      (cannot list REPO:", e, ")")
+    raise RuntimeError("kfold.py missing - git clone/pull did not fetch latest main. Screenshot this.")
+print("    kfold.py ->", KFOLD_PY)
 
 print("[3/7] Dataset download (skips if already present)")
 if os.path.exists(f"{REPO}/DATASET_DIR.txt") and os.path.isdir(open(f"{REPO}/DATASET_DIR.txt").read().strip()):
     DS = open(f"{REPO}/DATASET_DIR.txt").read().strip(); print("    reuse:", DS)
 else:
     env = dict(os.environ, ROBOFLOW_API_KEY=KEY)
-    # Use a separate script file to avoid quoting/escaping issues
+    # Separate script file avoids inline -c quoting/escaping issues
     script = f'''from roboflow import Roboflow
 import os
 ds = Roboflow(api_key=os.environ["ROBOFLOW_API_KEY"]) \\
@@ -85,7 +120,10 @@ print("DATASET DOWNLOADED AT:", ds.location)'''
     script_path = f"{REPO}/download_dataset.py"
     open(script_path, "w").write(script)
     r = sh(f'"{sys.executable}" {script_path}', env=env)
-    print("   ", r.stdout.strip() or r.stderr[-400:]); assert r.returncode == 0
+    print("    stdout:", (r.stdout or "").strip()[-300:] or "(empty)")
+    if (r.stderr or "").strip():
+        print("    stderr:", r.stderr.strip()[-500:])
+    assert r.returncode == 0, "dataset download FAILED"
     DS = open(f"{REPO}/DATASET_DIR.txt").read().strip()
 
 # Verify dataset structure
@@ -98,69 +136,46 @@ for split in ["train", "valid", "test"]:
 print("    Dataset structure OK")
 
 print("[4/7] Pre-flight (must be pass=9 fail=0)")
-kfold_path = f"{REPO}/H-CoAtNet/tools/kfold/kfold.py"
-v = sh(f'"{sys.executable}" {kfold_path} --dataset_dir {DS} --validate-only')
-# Print ALL output lines so user can inspect
-print("   Pre-flight output lines:")
-for i, line in enumerate(v.stdout.strip().splitlines()):
-    print(f"   [{i}]: {line}")
-# Robust check for failure count using regex
-all_output = v.stdout.strip()
+v = sh(f'"{sys.executable}" {KFOLD_PY} --dataset_dir {DS} --validate-only')
+print("    --- pre-flight stdout ---")
+for line in (v.stdout or "").strip().splitlines():
+    print("    " + line)
+if (v.stderr or "").strip():
+    print("    --- pre-flight stderr ---")
+    for line in v.stderr.strip().splitlines()[-20:]:
+        print("    " + line)
+if v.returncode != 0:
+    raise RuntimeError(f"pre-flight CRASHED (exit {v.returncode}) - screenshot stdout+stderr above")
+all_output = (v.stdout or "").strip()
 fail_count = None
-# Method 1: look for "fail=N" pattern
 m = re.search(r'fail\s*=\s*(\d+)', all_output, re.IGNORECASE)
 if m:
     fail_count = int(m.group(1))
-# Method 2: count occurrences of "FAIL" or "fail" keyword (case-insensitive)
-if fail_count is None:
-    kw_count = all_output.lower().count('fail')
-    if kw_count > 0:
-        # Try to extract number from lines with fail
-        for line in all_output.splitlines():
-            if 'fail' in line.lower():
-                n = re.search(r'\d+', line)
-                if n:
-                    fail_count = int(n.group(0))
-                    break
-# Method 3: last resort - check if "fail=0" substring exists anywhere
-if fail_count is None:
-    if 'fail=0' in all_output.lower():
-        fail_count = 0
-if fail_count is not None:
-    print(f"  fail count detected: {fail_count}")
-else:
-    print("  (could not parse fail count from output)")
+if fail_count is None and 'fail=0' in all_output.lower():
+    fail_count = 0
 if fail_count == 0:
-    print("  ✓ Pre-flight PASS: no failures detected")
-elif fail_count is not None and fail_count > 0:
-    print(f"  ✗ Pre-flight FAIL: {fail_count} failure(s) detected")
-    print("  Screenshot this output and report. You may proceed if you understand the failures but note they may affect Table 5 validity.")
-    sys.exit(1)
+    print("    PASS: pre-flight reports fail=0")
+elif fail_count is not None:
+    raise RuntimeError(f"pre-flight reports fail={fail_count} - screenshot output above, fix before training")
 else:
-    print("  ⚠ Pre-flight WARNING: could not determine fail count from output")
-    print("  Showing last 15 lines for inspection:")
-    for line in v.stdout.strip().splitlines()[-15:]:
-        print(f"    {line}")
-    # Don't exit - allow user to proceed if they understand the risks
+    raise RuntimeError("pre-flight finished but no 'fail=N' summary found - screenshot output above")
 
 print("[5/7] Smoke test (1 model x 1 fold x 1 epoch, ~2 min)")
-smoke_path = f"{REPO}/tools/kfold/kfold.py"
-s = sh(f'"{sys.executable}" {smoke_path} --dataset_dir {DS} --smoke-test')
-s_lines = s.stdout.strip().splitlines()
-print(f"   Smoke test output lines: {len(s_lines)}")
-# Check for SMOKE OK in any line (not just last 5)
-smoke_ok = any("SMOKE OK" in line for line in s_lines)
-if smoke_ok:
-    print("  ✓ Smoke test PASS")
-else:
-    print("   Smoke test FAIL - checking stderr...")
-    print(f"   stderr: {s.stderr.strip()[:300] if s.stderr else 'none'}")
-    # Don't auto-exit - let user see what happened
-    print("   Continuing despite smoke test issue...")
+s = sh(f'"{sys.executable}" {KFOLD_PY} --dataset_dir {DS} --smoke-test')
+s_lines = (s.stdout or "").strip().splitlines()
+print(f"    smoke stdout lines: {len(s_lines)}")
+for line in s_lines[-8:]:
+    print("    " + line)
+if (s.stderr or "").strip():
+    print("    --- smoke stderr (tail) ---")
+    for line in s.stderr.strip().splitlines()[-10:]:
+        print("    " + line)
+assert any("SMOKE OK" in line for line in s_lines), "SMOKE TEST FAILED - screenshot stdout+stderr above"
+print("    PASS: smoke test OK")
 
 print("[6/7] FULL K-FOLD: 4 models x 5 folds x 30 epochs  (log: kfold_run.log)")
 log = open(LOG, "ab")
-proc = subprocess.Popen([sys.executable, f"{REPO}/tools/kfold/kfold.py",
+proc = subprocess.Popen([sys.executable, KFOLD_PY,
                          "--dataset_dir", DS, "--out", OUT,
                          "--k", "5", "--epochs", "30", "--seed", "42",
                          "--models", MODELS, "--resume"],
@@ -171,10 +186,12 @@ while proc.poll() is None:
     if tick % 5 == 0:                      # live progress every ~5 min
         try:
             last = [l for l in open(LOG, errors="ignore").read().splitlines() if l.strip()][-1]
-            print(f"    [{(time.time()-t0)/3600:5.1f} h] {last[:110]}")
+            print(f"    [{(time.time()-t0)/3600:5.1f} h] {last[:110]}", flush=True)
         except Exception: pass
     if tick % 30 == 0:                     # log backup to Drive every ~30 min
         sh(f"cp {LOG} {DRIVE_RUN}/kfold_run_partial.log")
+if proc.returncode != 0:
+    print(f"    K-FOLD PROCESS EXITED WITH CODE {proc.returncode} - check {DRIVE_RUN}/kfold_run_final.log")
 sh(f"cp {LOG} {DRIVE_RUN}/kfold_run_final.log")
 
 print("[7/7] Sync results to local repo + package zip")
@@ -188,6 +205,8 @@ if os.path.exists(OUT):
         else:
             shutil.copy2(src, dst)
     print(f"    Synced {OUT} -> {REPO_RESULTS}")
+else:
+    print("    WARNING: no output dir found - training produced nothing, check the log")
 
 # Package zip (checkpoints excluded)
 zpath = f"{DRIVE_RUN}/kfold_results_{time.strftime('%Y%m%d_%H%M%S')}.zip"
@@ -199,11 +218,11 @@ with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
             z.write(p, os.path.relpath(p, os.path.dirname(OUT)))
 
 txt = open(LOG, errors="ignore").read()
-n_done = txt.count("DONE")
+n_done = txt.count("FOLD ") if "FOLD " in txt else txt.count("DONE")
 n_fail = txt.upper().count("FAILED")
 
 print("=" * 70)
-print(f"FINISHED in {(time.time()-t0)/3600:.1f} h | folds DONE: {n_done}/20 | FAILED: {n_fail}")
+print(f"FINISHED in {(time.time()-t0)/3600:.1f} h | folds DONE markers: {n_done}/20 | FAILED: {n_fail} | exit={proc.returncode}")
 print(f"ALL RESULTS ON DRIVE -> {DRIVE_RUN}")
 print(f"  zip: {os.path.basename(zpath)}  ({os.path.getsize(zpath)/1e6:.0f} MB)")
 print(f"  local copy: {REPO_RESULTS}")
@@ -213,11 +232,13 @@ print("=" * 70)
 
 # Final verification
 if n_done < 20:
-    print("⚠️  WARNING: expected 20 folds (4 models x 5), got", n_done)
+    print("WARNING: expected 20 folds (4 models x 5), got", n_done)
 if n_fail > 0:
-    print("⚠️  WARNING:", n_fail, "folds failed - check kfold_run_final.log")
+    print("WARNING:", n_fail, "folds failed - check kfold_run_final.log")
+if proc.returncode != 0:
+    raise RuntimeError(f"kfold run exited {proc.returncode} - inspect kfold_run_final.log on Drive")
 
-print("\n✅ NEXT STEPS FOR PAPER:")
+print("\nNEXT STEPS FOR PAPER:")
 print("  1. Download zip from Drive: MyDrive/HCoAtNet_KFOLD_RUN/kfold_results_*.zip")
 print("  2. Unzip -> results/kfold/ has all tables, figures, JSONs")
 print("  3. kfold_table.tex -> paste into paper as Table 6")

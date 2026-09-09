@@ -397,6 +397,130 @@ def compute_brier(probs, y_true, n_classes):
 
 
 # ---------------------------------------------------------------------------
+# Visual progress: per-fold and per-model banners
+# ---------------------------------------------------------------------------
+def print_fold_summary(model_name, fold_idx, k, metrics, test_metrics, elapsed_min):
+    """Print a clear banner after each fold completes."""
+    print("\n" + "=" * 70)
+    print(f"  FOLD {fold_idx+1}/{k} COMPLETE -- {model_name}  ({elapsed_min:.1f} min)")
+    print("=" * 70)
+    t = metrics
+    print(f"  Validation (val-best epoch {t.get('best_epoch', '?')}):")
+    print(f"    Accuracy      : {t['accuracy']*100:.2f}%")
+    print(f"    Balanced Acc  : {t['balanced_accuracy']*100:.2f}%")
+    print(f"    Macro F1      : {t['macro']['f1']*100:.2f}%")
+    print(f"    Kappa         : {t['kappa']:.4f}")
+    print(f"    MCC           : {t['mcc']:.4f}")
+    print(f"    ECE           : {t['ece']:.4f}")
+    if t.get('auroc_macro') is not None:
+        print(f"    AUROC         : {t['auroc_macro']:.4f}")
+    if test_metrics is not None:
+        print(f"  Frozen Test (val-best ckpt, evaluated once):")
+        print(f"    Accuracy      : {test_metrics['accuracy']*100:.2f}%")
+        print(f"    Balanced Acc  : {test_metrics['balanced_accuracy']*100:.2f}%")
+        print(f"    Macro F1      : {test_metrics['macro']['f1']*100:.2f}%")
+        print(f"    Kappa         : {test_metrics['kappa']:.4f}")
+        print(f"    MCC           : {test_metrics['mcc']:.4f}")
+        print(f"    ECE           : {test_metrics['ece']:.4f}")
+        if test_metrics.get('auroc_macro') is not None:
+            print(f"    AUROC         : {test_metrics['auroc_macro']:.4f}")
+    print("=" * 70)
+    sys.stdout.flush()
+
+
+def print_model_summary(model_name, k, fold_results, test_results, elapsed_min):
+    """Print a full summary banner after all k folds of one model."""
+    # Aggregate metrics across folds
+    acc_vals = [f["accuracy"] for f in fold_results if not f.get("failed")]
+    f1_vals  = [f["macro"]["f1"] for f in fold_results if not f.get("failed")]
+    bal_vals = [f["balanced_accuracy"] for f in fold_results if not f.get("failed")]
+    kap_vals = [f["kappa"] for f in fold_results if not f.get("failed")]
+    mcc_vals = [f["mcc"] for f in fold_results if not f.get("failed")]
+    ece_vals = [f["ece"] for f in fold_results if not f.get("failed")]
+    auroc_vals = [f["auroc_macro"] for f in fold_results if not f.get("failed") and f.get("auroc_macro") is not None]
+    test_acc_vals = [f["accuracy"] for f in test_results if not f.get("failed")]
+    test_f1_vals  = [f["macro"]["f1"] for f in test_results if not f.get("failed")]
+    test_kap_vals = [f["kappa"] for f in test_results if not f.get("failed")]
+
+    def _ms(vals, pct=False):
+        if not vals:
+            return "--"
+        a = np.array(vals)
+        m, s = a.mean(), a.std(ddof=1) if len(a) > 1 else 0.0
+        if pct:
+            return f"{m*100:.2f} +/- {s*100:.2f}"
+        return f"{m:.4f} +/- {s:.4f}"
+
+    n_done = len(acc_vals)
+    print("\n" + "#" * 70)
+    print(f"#  MODEL COMPLETE: {model_name}  ({n_done}/{k} folds, {elapsed_min:.1f} min total)")
+    print("#" * 70)
+    print("")
+    print(f"  VALIDATION ACROSS {n_done} FOLDS (val-best checkpoint per fold):")
+    print(f"  {'Metric':<22s} {'Mean +/- SD':<30s} {'Per-fold values'}")
+    print(f"  {'-'*22} {'-'*30} {'-'*30}")
+    fold_accs = [f"{v*100:.1f}" for v in acc_vals]
+    print(f"  {'Accuracy':<22s} {_ms(acc_vals, pct=True):<30s} [{', '.join(fold_accs)}]")
+    fold_f1s = [f"{v*100:.1f}" for v in f1_vals]
+    print(f"  {'Macro F1':<22s} {_ms(f1_vals, pct=True):<30s} [{', '.join(fold_f1s)}]")
+    fold_bals = [f"{v*100:.1f}" for v in bal_vals]
+    print(f"  {'Balanced Acc':<22s} {_ms(bal_vals, pct=True):<30s} [{', '.join(fold_bals)}]")
+    print(f"  {'Kappa':<22s} {_ms(kap_vals):<30s}")
+    print(f"  {'MCC':<22s} {_ms(mcc_vals):<30s}")
+    print(f"  {'ECE (lower=better)':<22s} {_ms(ece_vals):<30s}")
+    if auroc_vals:
+        print(f"  {'AUROC':<22s} {_ms(auroc_vals):<30s}")
+    if test_acc_vals:
+        print("")
+        print(f"  FROZEN TEST ACROSS {len(test_acc_vals)} FOLDS (val-best ckpt per fold):")
+        print(f"  {'Metric':<22s} {'Mean +/- SD':<30s} {'Per-fold values'}")
+        print(f"  {'-'*22} {'-'*30} {'-'*30}")
+        t_accs = [f"{v*100:.1f}" for v in test_acc_vals]
+        print(f"  {'Accuracy':<22s} {_ms(test_acc_vals, pct=True):<30s} [{', '.join(t_accs)}]")
+        t_f1s = [f"{v*100:.1f}" for v in test_f1_vals]
+        print(f"  {'Macro F1':<22s} {_ms(test_f1_vals, pct=True):<30s} [{', '.join(t_f1s)}]")
+        print(f"  {'Kappa':<22s} {_ms(test_kap_vals):<30s}")
+    print("")
+    print("#" * 70)
+    sys.stdout.flush()
+
+
+def print_leaderboard(completed_models, fold_results_per_model, test_results_per_model):
+    """Print a running leaderboard after each model completes."""
+    if not completed_models:
+        return
+    print("\n" + "=" * 70)
+    print("  RUNNING LEADERBOARD (models completed so far)")
+    print("=" * 70)
+    # Header
+    print(f"  {'Model':<18s} {'Val Acc (%)':<20s} {'Test Acc (%)':<20s} {'Val F1 (%)':<20s}")
+    print(f"  {'-'*18} {'-'*20} {'-'*20} {'-'*20}")
+    rows = []
+    for m in completed_models:
+        fr = fold_results_per_model.get(m, [])
+        tr = test_results_per_model.get(m, [])
+        fr_good = [f for f in fr if not f.get("failed")]
+        tr_good = [f for f in tr if not f.get("failed")]
+        if not fr_good:
+            continue
+        val_acc = np.mean([f["accuracy"] for f in fr_good]) * 100
+        val_sd = np.std([f["accuracy"] for f in fr_good], ddof=1) * 100 if len(fr_good) > 1 else 0
+        val_f1 = np.mean([f["macro"]["f1"] for f in fr_good]) * 100
+        test_acc = np.mean([f["accuracy"] for f in tr_good]) * 100 if tr_good else float('nan')
+        test_sd = np.std([f["accuracy"] for f in tr_good], ddof=1) * 100 if len(tr_good) > 1 else 0
+        rows.append((m, val_acc, val_sd, test_acc, test_sd, val_f1))
+    # Sort by val accuracy descending
+    rows.sort(key=lambda r: r[1], reverse=True)
+    for i, (m, va, vsd, ta, tsd, vf) in enumerate(rows):
+        rank = f"{i+1}."
+        test_str = f"{ta:.1f}+/-{tsd:.1f}" if not np.isnan(ta) else "pending"
+        marker = " <-- proposed" if m == "H-CoAtNet" else ""
+        print(f"  {rank} {m:<16s} {va:.1f}+/-{vsd:.1f}      {test_str:<20s} {vf:.1f}{marker}")
+    print("=" * 70)
+    sys.stdout.flush()
+
+
+# ---------------------------------------------------------------------------
 # Train + eval one fold
 # ---------------------------------------------------------------------------
 def seed_everything(seed=42):
@@ -493,7 +617,9 @@ def make_loaders(files, labels, train_idx, val_idx, batch_size, train_t, val_t,
 def train_one_epoch(model, loader, criterion, optimizer, device):
     model.train()
     tot, n, correct = 0.0, 0, 0
-    for x, y in loader:
+    n_batches = len(loader)
+    start = time.time()
+    for i, (x, y) in enumerate(loader, 1):
         x = x.to(device, non_blocking=True)
         y = y.to(device, non_blocking=True)
         optimizer.zero_grad()
@@ -504,6 +630,9 @@ def train_one_epoch(model, loader, criterion, optimizer, device):
         tot += loss.item() * x.size(0)
         correct += (logits.argmax(1) == y).sum().item()
         n += x.size(0)
+        if i == n_batches:
+            elapsed = time.time() - start
+            print(f"  Training 100% {n_batches}/{n_batches} batches [{elapsed:.1f}s]", flush=True)
     return tot / max(1, n), correct / max(1, n)
 
 
@@ -511,7 +640,9 @@ def train_one_epoch(model, loader, criterion, optimizer, device):
 def evaluate(model, loader, device, criterion=None, return_probs=True):
     model.eval()
     ys, yps, yprs = [], [], []
-    for x, y in loader:
+    n_batches = len(loader)
+    start = time.time()
+    for i, (x, y) in enumerate(loader, 1):
         x = x.to(device, non_blocking=True)
         y = y.to(device, non_blocking=True)
         logits = model(x)
@@ -519,6 +650,9 @@ def evaluate(model, loader, device, criterion=None, return_probs=True):
         yps.extend(logits.argmax(1).cpu().numpy().tolist())
         if return_probs:
             yprs.extend(F.softmax(logits, dim=1).cpu().numpy().tolist())
+        if i == n_batches:
+            elapsed = time.time() - start
+            print(f"  Validating 100% {n_batches}/{n_batches} batches [{elapsed:.1f}s]", flush=True)
     if not return_probs:
         return np.asarray(ys), np.asarray(yps)
     return np.asarray(ys), np.asarray(yps), np.asarray(yprs)
@@ -577,18 +711,24 @@ def run_one_fold(model_name, fold_idx, files, labels, train_idx, val_idx,
                "val_loss": [], "val_acc": []}
     best_val, best_state, best_epoch = -1.0, None, -1
     for ep in range(epochs):
+        print(f"\n--- Epoch {ep+1:2d}/{epochs} [{model_name} fold {fold_idx+1}] ---")
         tl, ta = train_one_epoch(model, train_loader, criterion, optimizer, device)
         # Validation pass (with proper loss + accuracy)
         model.eval()
         vl_sum, vl_n, v_correct = 0.0, 0, 0
+        val_start = time.time()
+        n_val_batches = len(val_loader)
         with torch.no_grad():
-            for x, y in val_loader:
+            for vi, (x, y) in enumerate(val_loader, 1):
                 x = x.to(device, non_blocking=True)
                 y = y.to(device, non_blocking=True)
                 logits = model(x)
                 vl_sum += criterion(logits, y).item() * x.size(0)
                 v_correct += (logits.argmax(1) == y).sum().item()
                 vl_n += x.size(0)
+                if vi == n_val_batches:
+                    val_elapsed = time.time() - val_start
+                    print(f"  Validating 100% {n_val_batches}/{n_val_batches} batches [{val_elapsed:.1f}s]", flush=True)
         vl = vl_sum / max(1, vl_n)
         va = v_correct / max(1, vl_n)
         scheduler.step()
@@ -596,10 +736,14 @@ def run_one_fold(model_name, fold_idx, files, labels, train_idx, val_idx,
         history["train_acc"].append(ta)
         history["val_loss"].append(vl)
         history["val_acc"].append(va)
-        if va > best_val:
+        is_best = va > best_val
+        if is_best:
             best_val = va
             best_epoch = ep + 1
             best_state = deepcopy(model.state_dict())
+        # Per-epoch logging (match ablation study format)
+        best_tag = f"\n  [NEW BEST] epoch {ep+1} val {va:.4f}" if is_best else ""
+        print(f"  Epoch {ep+1:2d}/{epochs}: train acc {ta:.4f} loss {tl:.4f} | val acc {va:.4f} loss {vl:.4f}{best_tag}", flush=True)
     history["best_epoch"] = best_epoch
     # Restore the validation-selected checkpoint (protocol: val-best model
     # selection, matching the single-split benchmark). All final metrics --
@@ -611,6 +755,7 @@ def run_one_fold(model_name, fold_idx, files, labels, train_idx, val_idx,
                ckpt_path)
 
     # Final validation metrics + raw preds
+    print(f"  Restoring best checkpoint (epoch {best_epoch}, val_acc {best_val:.4f})...", flush=True)
     yv, ypv, ypv_p = evaluate(model, val_loader, device)
     metrics = compute_all_metrics(yv, ypv, ypv_p, n_classes)
     metrics["best_val_acc"] = float(best_val)
@@ -618,10 +763,10 @@ def run_one_fold(model_name, fold_idx, files, labels, train_idx, val_idx,
     metrics["device"] = device.type
 
     # Frozen-test evaluation, ONCE per fold, from the val-best checkpoint.
-    # The test set never influences training, selection, or thresholds.
     test_metrics = None
     ytst = ypst = ypst_p = None
     if test_data is not None:
+        print(f"  --- Frozen Test (held-out, val-best ckpt, fold {fold_idx+1}) ---", flush=True)
         t_files, t_labels = test_data
         test_ds = FileListDataset(t_files, t_labels, list(range(len(t_files))), val_t)
         test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False,
@@ -629,6 +774,7 @@ def run_one_fold(model_name, fold_idx, files, labels, train_idx, val_idx,
                                  pin_memory=torch.cuda.is_available())
         ytst, ypst, ypst_p = evaluate(model, test_loader, device)
         test_metrics = compute_all_metrics(ytst, ypst, ypst_p, n_classes)
+        print(f"  Frozen test accuracy: {test_metrics['accuracy']*100:.2f}% (n={len(ytst)})", flush=True)
         del test_loader, test_ds
 
     # Free memory (state dict kept on CPU for Colab RAM safety)
@@ -1641,6 +1787,13 @@ def run_full(args):
             print(f"  WARNING: unknown model {model_name}, skipping")
             continue
         model_start = time.time()
+        factory, lr, bs, pretrained = MODEL_REGISTRY[model_name]
+        recipe = MODEL_RECIPE[model_name]
+        print("\n" + "*" * 70)
+        print(f"*  TRAINING: {model_name}")
+        print(f"*  lr={lr}, batch={bs}, pretrained={pretrained}, aug={'strong' if recipe['strong_aug'] else 'color' if recipe['color_aug'] else 'base'}, ls={recipe['label_smoothing']}")
+        print(f"*  {args.k} folds x {args.epochs} epochs")
+        print("*" * 70)
         for fold_idx, (train_idx, val_idx) in enumerate(folds):
             ckpt_path = KFOLD_DIR / "checkpoints" / model_name / f"fold{fold_idx+1}_best.pth"
             # Resume: skip folds already completed in a previous session
@@ -1659,9 +1812,8 @@ def run_full(args):
                     len(class_names), ckpt_path, args.seed, args.epochs,
                     test_data=(test_files, test_labels))
                 elapsed = (time.time() - t0) / 60
-                print(f"  [{model_name} fold {fold_idx+1}/{args.k}] DONE in {elapsed:.1f} min, "
-                      f"val_acc={metrics['accuracy']:.4f} macro_f1={metrics['macro']['f1']:.4f}"
-                      + (f" test_acc={test_metrics['accuracy']:.4f}" if test_metrics else ""))
+                # Immediately print fold summary banner
+                print_fold_summary(model_name, fold_idx, args.k, metrics, test_metrics, elapsed)
                 # Save per-fold metrics + predictions
                 fold_metrics = dict(metrics)
                 fold_metrics["fold"] = fold_idx + 1
@@ -1736,9 +1888,68 @@ def run_full(args):
                     json.dumps(fold_results_per_model, indent=2))
                 continue
         model_elapsed = (time.time() - model_start) / 60
-        print(f"  [{model_name}] all folds done in {model_elapsed:.1f} min")
+        # Print full model summary after all folds
+        print_model_summary(model_name, args.k,
+                           fold_results_per_model[model_name],
+                           test_results_per_model[model_name],
+                           model_elapsed)
+        # Print running leaderboard after each model
+        completed_so_far = [m for m in selected
+                            if len(fold_results_per_model.get(m, [])) >= args.k
+                            and not any(f.get("failed") for f in fold_results_per_model.get(m, []))]
+        print_leaderboard(completed_so_far, fold_results_per_model, test_results_per_model)
     overall_min = (time.time() - overall_start) / 60
-    print(f"\nALL DONE. Total: {overall_min:.1f} min")
+    print(f"\nALL MODELS TRAINED. Total time: {overall_min:.1f} min")
+
+    # =========================================================================
+    # FINAL OVERALL SUMMARY BANNER
+    # =========================================================================
+    print("\n" + "#" * 70)
+    print("#  FINAL RESULTS -- ALL MODELS")
+    print("#" * 70)
+    print(f"")
+    print(f"  Dataset: {args.dataset_dir}")
+    print(f"  Dev pool: {len(dev_files)} images | Frozen test: {len(test_files)} images")
+    print(f"  Folds: {args.k} | Epochs: {args.epochs} | Seed: {args.seed}")
+    print(f"")
+    # Build summary rows for the final table
+    _final_rows = []
+    for m in selected:
+        fr = fold_results_per_model.get(m, [])
+        tr = test_results_per_model.get(m, [])
+        fr_good = [f for f in fr if not f.get("failed")]
+        tr_good = [f for f in tr if not f.get("failed")]
+        if not fr_good:
+            continue
+        _final_rows.append({
+            "model": m, "n_folds": len(fr_good),
+            "val_acc": np.mean([f["accuracy"] for f in fr_good]),
+            "val_acc_sd": np.std([f["accuracy"] for f in fr_good], ddof=1) if len(fr_good) > 1 else 0,
+            "val_f1": np.mean([f["macro"]["f1"] for f in fr_good]),
+            "val_f1_sd": np.std([f["macro"]["f1"] for f in fr_good], ddof=1) if len(fr_good) > 1 else 0,
+            "val_kappa": np.mean([f["kappa"] for f in fr_good]),
+            "val_ece": np.mean([f["ece"] for f in fr_good]),
+            "test_acc": np.mean([f["accuracy"] for f in tr_good]) if tr_good else None,
+            "test_acc_sd": np.std([f["accuracy"] for f in tr_good], ddof=1) if tr_good and len(tr_good) > 1 else 0,
+            "test_f1": np.mean([f["macro"]["f1"] for f in tr_good]) if tr_good else None,
+            "test_kappa": np.mean([f["kappa"] for f in tr_good]) if tr_good else None,
+        })
+    # Sort by test accuracy (descending), fallback to val accuracy
+    _final_rows.sort(key=lambda r: r["test_acc"] if r["test_acc"] is not None else r["val_acc"], reverse=True)
+    print(f"  {'Rank':<5s} {'Model':<18s} {'Val Acc (mean+/-SD)':<24s} {'Val F1 (mean+/-SD)':<24s} {'Test Acc (mean+/-SD)':<24s}")
+    print(f"  {'-'*5} {'-'*18} {'-'*24} {'-'*24} {'-'*24}")
+    for i, r in enumerate(_final_rows, 1):
+        marker = " *" if r["model"] == "H-CoAtNet" else ""
+        test_str = f"{r['test_acc']*100:.1f}+/-{r['test_acc_sd']*100:.1f}" if r["test_acc"] is not None else "--"
+        print(f"  {i:<5d} {r['model']:<18s} "
+              f"{r['val_acc']*100:.1f}+/-{r['val_acc_sd']*100:.1f}      "
+              f"{r['val_f1']*100:.1f}+/-{r['val_f1_sd']*100:.1f}      "
+              f"{test_str}{marker}")
+    print(f"")
+    print(f"  * = proposed model")
+    print(f"  Output: {KFOLD_DIR}")
+    print("#" * 70)
+    sys.stdout.flush()
 
     # Aggregate
     summary = aggregate(fold_results_per_model)
