@@ -8,7 +8,7 @@ Results land in Drive: MyDrive/HCoAtNet_KFOLD_RUN/
 ================================================================================
 
 # H-CoAtNet K-FOLD — MINIMAL CELL (Colab T4, ~4-5h). Re-run to resume.
-import os, subprocess, sys, time, zipfile, shutil
+import os, re, subprocess, sys, time, zipfile, shutil
 KEY, REPO = "gXuxxWEMFJ8nK73o7pN7", "/content/H-CoAtNet-AStar"
 DRIVE_RUN = "/content/drive/MyDrive/HCoAtNet_KFOLD_RUN"
 OUT = DRIVE_RUN + "/results/kfold"
@@ -34,13 +34,22 @@ else:
     r = sh(f"git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git {REPO}")
     assert r.returncode == 0, (r.stderr or "")[-500:]
 
-r = sh(f"cd {REPO} && pip install -q -r requirements.txt")
-if r.returncode != 0:  # no torch==2.2.0 wheel on Colab: keep its torch, install rest
-    pkgs = [l.strip() for l in open(f"{REPO}/requirements.txt")
-            if l.strip() and not l.startswith("#")
-            and not l.lower().startswith(("torch==", "torchvision=="))]
+r = sh(f"cd {REPO} && timeout 100 pip install -q -r requirements.txt")
+if r.returncode != 0:  # pinned torch has no Colab wheel AND pinned pkgs hang the resolver:
+    # keep Colab torch, install the rest UNPINNED (names only -> fast resolve).
+    # Paper pins stay untouched in requirements.txt for reproducibility.
+    pkgs = []
+    for l in open(f"{REPO}/requirements.txt"):
+        l = l.strip()
+        if not l or l.startswith("#"):
+            continue
+        name = re.split(r"[=<>!~\[]", l, 1)[0].strip().lower()
+        if name in ("torch", "torchvision"):
+            continue
+        pkgs.append(name)
+    print("installing (unpinned):", " ".join(pkgs))
     r = sh("pip install -q " + " ".join(pkgs))
-    assert r.returncode == 0, (r.stderr or "")[-500:]
+    assert r.returncode == 0, (r.stderr or "")[-800:]
 print("deps OK")
 
 KF = next((p for p in [f"{REPO}/H-CoAtNet/tools/kfold/kfold.py", f"{REPO}/tools/kfold/kfold.py"] if os.path.isfile(p)), None)
