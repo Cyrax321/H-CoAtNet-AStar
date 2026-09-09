@@ -53,9 +53,10 @@ from google.colab import drive
 if not os.path.ismount("/content/drive"):
     drive.mount("/content/drive")
 os.makedirs(DRIVE_RUN, exist_ok=True)
-os.makedirs(REPO_RESULTS, exist_ok=True)
 print("    ->", DRIVE_RUN)
-print("    ->", REPO_RESULTS, "(local copy for paper)")
+# NOTE: REPO_RESULTS is created in step [2/7] AFTER clone/pull, because
+# makedirs here would create /content/H-CoAtNet-AStar itself and trip the
+# stale-dir check below on fresh runtimes.
 
 print("[2/7] Code + requirements")
 if os.path.exists(os.path.join(REPO, ".git")):
@@ -85,6 +86,8 @@ if i.returncode != 0:
     if j.returncode != 0:
         raise RuntimeError("pip install FAILED: " + (j.stderr or "").strip()[-500:])
 print("    requirements OK")
+os.makedirs(REPO_RESULTS, exist_ok=True)
+print("    ->", REPO_RESULTS, "(local copy for paper)")
 
 # --- locate kfold.py (single source of truth for steps 4/5/6) ---
 _CANDIDATES = [
