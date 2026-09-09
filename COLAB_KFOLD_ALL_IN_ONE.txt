@@ -1,8 +1,8 @@
 ================================================================================
 H-CoAtNet K-FOLD — ALL-IN-ONE COLAB CELL (T4)                        [R2-4]
 One cell does everything: Drive mount, clone, requirements, dataset download
-(key embedded), pre-flight, 7-model x 5-fold training, results saved to Drive,
-auto-zip, resume-safe on disconnect.
+(key embedded), pre-flight, 4-model x 5-fold training, results saved to Drive,
+auto-zip, resume-safe on disconnect, sync to local repo for paper.
 --------------------------------------------------------------------------------
 HOW TO USE:
 1. colab.research.google.com -> New notebook
@@ -11,10 +11,10 @@ HOW TO USE:
 4. Authorize Google Drive when asked
 5. Pre-flight MUST print: VALIDATION SUMMARY: pass=9 warn=0 fail=0
    (any FAIL -> stop and screenshot the output)
-6. Keep the tab open ~8-12 h. Progress prints every ~5 min.
+6. Keep the tab open ~4-5 h. Progress prints every ~5 min.
 7. If Colab disconnects overnight: new session -> T4 -> paste the SAME cell
    -> Run again. It resumes from the last completed fold (nothing is redone).
-8. Morning check: last line prints  folds DONE: 35/35 | FAILED: 0
+8. Morning check: last line prints folds DONE: 20/20 | FAILED: 0
    Then take everything from Drive: MyDrive/HCoAtNet_KFOLD_RUN/
    - kfold_results_<stamp>.zip   (all CSVs, Table 6 LaTeX, 13 figures, stats)
    - kfold_run_final.log         (complete training log)
@@ -24,43 +24,53 @@ HOW TO USE:
 # =============================================================================
 # H-CoAtNet K-FOLD — ALL-IN-ONE COLAB CELL (T4)          [R2-4, seed 42]
 # BEFORE RUNNING: Runtime -> Change runtime type -> T4 GPU
-# Keep this tab open while it runs (~8-12 h).
+# Keep this tab open while it runs (~4-5 h).
 # If Colab disconnects: re-run THIS SAME CELL -> it resumes automatically.
 # =============================================================================
-import os, subprocess, sys, time, zipfile, glob
+import os, subprocess, sys, time, zipfile, glob, shutil
 
+# ⚠️  ROTATE THIS KEY AFTER USE - currently exposed in git history
 KEY        = "gXuxxWEMFJ8nK73o7pN7"
 REPO       = "/content/H-CoAtNet-AStar"
 DRIVE_RUN  = "/content/drive/MyDrive/HCoAtNet_KFOLD_RUN"
 OUT        = f"{DRIVE_RUN}/results/kfold"          # results live ON Drive -> resume-safe
+REPO_RESULTS = f"{REPO}/results/kfold"             # local copy for paper
 LOG        = "/content/kfold_run.log"
+
+# Models to run (4 essential: proposed + 3 closest baselines)
+# H-CoAtNet = proposed; CoAtNet = beats proposed on single split; CNN = ablation A0 (beats proposed); GFT = 3rd best
+MODELS     = "H-CoAtNet,CoAtNet,CNN,GFT"
 
 def sh(cmd, **kw):
     return subprocess.run(cmd, shell=True, text=True, capture_output=True, **kw)
 
 print("=" * 70)
-print("[0/6] GPU check")
+print("[0/7] GPU check")
 r = sh("nvidia-smi --query-gpu=name,memory.total --format=csv,noheader")
 print("   ", r.stdout.strip() if r.returncode == 0 else "NO GPU! Runtime -> T4 GPU, then re-run."); assert r.returncode == 0
 
-print("[1/6] Mounting Google Drive")
+print("[1/7] Mounting Google Drive")
 from google.colab import drive
 if not os.path.ismount("/content/drive"):
     drive.mount("/content/drive")
 os.makedirs(DRIVE_RUN, exist_ok=True)
+os.makedirs(REPO_RESULTS, exist_ok=True)
 print("    ->", DRIVE_RUN)
+print("    ->", REPO_RESULTS, "(local copy for paper)")
 
-print("[2/6] Code + requirements")
+print("[2/7] Code + requirements")
 if os.path.exists(REPO):
     print("   ", sh(f"cd {REPO} && git pull origin main").stdout.strip() or "already up to date")
 else:
     print("   ", sh(f"git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git {REPO}").stdout.strip())
+# Install torch/torchvision first (Colab may have mismatched versions)
+sh(f"pip install -q torch==2.1.2 torchvision==0.16.2 --index-url https://download.pytorch.org/whl/cu121")
 i = sh(f"cd {REPO} && pip install -q -r requirements.txt")
 if i.returncode != 0:
-    sh(f"cd {REPO} && pip install -q torch torchvision timm scikit-learn scipy matplotlib pillow numpy roboflow pandas tqdm")
+    sh(f"cd {REPO} && pip install -q timm==1.0.28 scikit-learn scipy matplotlib pillow numpy roboflow pandas tqdm")
 print("    requirements OK")
 
-print("[3/6] Dataset download (skips if already present)")
+print("[3/7] Dataset download (skips if already present)")
 if os.path.exists(f"{REPO}/DATASET_DIR.txt") and os.path.isdir(open(f"{REPO}/DATASET_DIR.txt").read().strip()):
     DS = open(f"{REPO}/DATASET_DIR.txt").read().strip(); print("    reuse:", DS)
 else:
@@ -74,17 +84,31 @@ else:
     print("   ", r.stdout.strip() or r.stderr[-400:]); assert r.returncode == 0
     DS = open(f"{REPO}/DATASET_DIR.txt").read().strip()
 
-print("[4/6] Pre-flight (must be pass=9 fail=0)")
+# Verify dataset structure
+for split in ["train", "valid", "test"]:
+    split_path = os.path.join(DS, split)
+    if not os.path.isdir(split_path):
+        raise RuntimeError(f"Missing {split_path} - dataset not extracted properly")
+    n = sum(1 for _ in os.listdir(split_path) if os.path.isdir(os.path.join(split_path, _)))
+    print(f"    {split}/: {n} class folders")
+print("    Dataset structure OK")
+
+print("[4/7] Pre-flight (must be pass=9 fail=0)")
 v = sh(f'"{sys.executable}" {REPO}/H-CoAtNet/tools/kfold/kfold.py --dataset_dir {DS} --validate-only')
-print("\n".join(v.stdout.strip().splitlines()[-12:]))
+print("\n".join(v.stdout.strip().splitlines()[-15:]))
 assert "fail=0" in v.stdout, "PRE-FLIGHT FAILED - screenshot this output"
 
-print("[5/6] FULL K-FOLD: 7 models x 5 folds x 30 epochs  (log: kfold_run.log)")
+print("[5/7] Smoke test (1 model x 1 fold x 1 epoch, ~2 min)")
+s = sh(f'"{sys.executable}" {REPO}/H-CoAtNet/tools/kfold/kfold.py --dataset_dir {DS} --smoke-test')
+print(s.stdout.strip().splitlines()[-5:])
+assert "SMOKE OK" in s.stdout, "SMOKE TEST FAILED"
+
+print("[6/7] FULL K-FOLD: 4 models x 5 folds x 30 epochs  (log: kfold_run.log)")
 log = open(LOG, "ab")
 proc = subprocess.Popen([sys.executable, f"{REPO}/H-CoAtNet/tools/kfold/kfold.py",
                          "--dataset_dir", DS, "--out", OUT,
                          "--k", "5", "--epochs", "30", "--seed", "42",
-                         "--models", "all", "--resume"],
+                         "--models", MODELS, "--resume"],
                         stdout=log, stderr=subprocess.STDOUT, cwd=REPO)
 t0, tick = time.time(), 0
 while proc.poll() is None:
@@ -97,10 +121,20 @@ while proc.poll() is None:
     if tick % 30 == 0:                     # log backup to Drive every ~30 min
         sh(f"cp {LOG} {DRIVE_RUN}/kfold_run_partial.log")
 sh(f"cp {LOG} {DRIVE_RUN}/kfold_run_final.log")
-txt = open(LOG, errors="ignore").read()
-n_done, n_fail = txt.count("DONE"), txt.upper().count("FAILED")
 
-print("[6/6] Packaging zip (checkpoints excluded)")
+print("[7/7] Sync results to local repo + package zip")
+# Sync Drive -> local repo (for paper figures/tables)
+if os.path.exists(OUT):
+    for item in os.listdir(OUT):
+        src = os.path.join(OUT, item)
+        dst = os.path.join(REPO_RESULTS, item)
+        if os.path.isdir(src):
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+        else:
+            shutil.copy2(src, dst)
+    print(f"    Synced {OUT} -> {REPO_RESULTS}")
+
+# Package zip (checkpoints excluded)
 zpath = f"{DRIVE_RUN}/kfold_results_{time.strftime('%Y%m%d_%H%M%S')}.zip"
 with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
     for root, dirs, files in os.walk(OUT):
@@ -108,10 +142,33 @@ with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
         for f in files:
             p = os.path.join(root, f)
             z.write(p, os.path.relpath(p, os.path.dirname(OUT)))
+
+txt = open(LOG, errors="ignore").read()
+n_done = txt.count("DONE")
+n_fail = txt.upper().count("FAILED")
+
 print("=" * 70)
-print(f"FINISHED in {(time.time()-t0)/3600:.1f} h | folds DONE: {n_done}/35 | FAILED: {n_fail}")
+print(f"FINISHED in {(time.time()-t0)/3600:.1f} h | folds DONE: {n_done}/20 | FAILED: {n_fail}")
 print(f"ALL RESULTS ON DRIVE -> {DRIVE_RUN}")
 print(f"  zip: {os.path.basename(zpath)}  ({os.path.getsize(zpath)/1e6:.0f} MB)")
+print(f"  local copy: {REPO_RESULTS}")
 print("  top files: kfold_test_summary.csv, kfold_summary.csv, kfold_table.tex,")
 print("             kfold_per_class_summary.csv, kfold_friedman_nemenyi.json, figures/")
+print("=" * 70)
+
+# Final verification
+if n_done < 20:
+    print("⚠️  WARNING: expected 20 folds (4 models x 5), got", n_done)
+if n_fail > 0:
+    print("⚠️  WARNING:", n_fail, "folds failed - check kfold_run_final.log")
+
+print("\n✅ NEXT STEPS FOR PAPER:")
+print("  1. Download zip from Drive: MyDrive/HCoAtNet_KFOLD_RUN/kfold_results_*.zip")
+print("  2. Unzip -> results/kfold/ has all tables, figures, JSONs")
+print("  3. kfold_table.tex -> paste into paper as Table 6")
+print("  4. kfold_test_summary.csv -> supplementary Table SX")
+print("  5. figures/fig_kfold_test_accuracy_mean_sd.png -> rebuttal figure")
+print("  6. kfold_paired_tests.json + kfold_friedman_nemenyi.json -> statistics")
+print("  7. If H-CoAtNet ranks #1 on frozen test: accuracy narrative holds")
+print("  8. If not: pivot to calibration (ECE) + efficiency narrative")
 print("=" * 70)

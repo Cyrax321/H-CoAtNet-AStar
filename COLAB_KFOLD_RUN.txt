@@ -1,7 +1,14 @@
 ================================================================================
 K-FOLD EVALUATION — RUN INSTRUCTIONS (R2-4)
-Copy-paste each block in order. Total runtime on T4: ~8-12 h (overnight).
-On a faster GPU (A100/4090): ~3-5 h. Interrupt-safe: just re-run Step 5.
+Copy-paste each block in order. Total runtime on T4: ~4-5 h (overnight).
+On a faster GPU (A100/4090): ~1.5-2.5 h. Interrupt-safe: just re-run Step 5.
+--------------------------------------------------------------------------------
+4 MODELS (essential): H-CoAtNet, CoAtNet, CNN, GFT
+  H-CoAtNet = proposed model
+  CoAtNet   = beats proposed on single split (90.51% vs 89.87%)
+  CNN       = ablation A0, also beats proposed (90.51%)
+  GFT       = 3rd best transformer baseline (85.44%)
+Excluded (significantly worse, p<0.001): Swin, ViT, EfficientNet-B0
 ================================================================================
 
 !!! READ BEFORE PASTING ON A MAC !!!
@@ -11,25 +18,25 @@ causes 'zsh: ==== not found' errors. On a Mac use the comment-free blocks
 sent separately, or the all-in-one Colab cell (COLAB_KFOLD_ALL_IN_ONE.txt).
 ================================================================================
 
-STEP 0 — (DONE 2026-09-09) fixed code pushed to GitHub as commit 2b0f3a4.
+STEP 0 — Code is on GitHub (main branch).
 --------------------------------------------------------------------------------
 No action needed - `git pull` in Step 1 gets everything.
 
-STEP 1 — (COLLABORATOR) pull the latest code:
+STEP 1 — Pull the latest code:
 --------------------------------------------------------------------------------
 git clone https://github.com/Cyrax321/H-CoAtNet-AStar.git H-CoAtNet-AStar   # only if not cloned yet
 cd H-CoAtNet-AStar
 git pull origin main                                                       # if already cloned
 
-STEP 2 — install requirements (GPU box / RunPod pytorch image):
+STEP 2 — Install requirements (GPU box / RunPod pytorch image):
 --------------------------------------------------------------------------------
 pip install -r requirements.txt
-# Sanity check (must print torch 2.2.0 and cuda True):
+# Sanity check (must print torch 2.x and cuda True):
 python -c "import torch, timm, sklearn, scipy; print(torch.__version__, torch.cuda.is_available())"
 
-STEP 3 — get the dataset (Roboflow folder export: train/ valid/ test/<class>/):
+STEP 3 — Get the dataset (Roboflow folder export: train/ valid/ test/<class>/):
 --------------------------------------------------------------------------------
-# Option A: Roboflow download (needs the API key, passed env-only):
+# Option A: Roboflow download (needs API key, passed env-only):
 export ROBOFLOW_API_KEY="<key>"
 python - <<'EOF'
 import os
@@ -38,23 +45,27 @@ ds = Roboflow(api_key=os.environ["ROBOFLOW_API_KEY"]) \
         .workspace("hi-l9ueo").project("ich-s-7lnsj").version(1).download("folder")
 print("DATASET_DIR =", ds.location)
 EOF
+# Save the path for reuse:
+echo "$ds" > DATASET_DIR.txt
 
-# Option B: upload the dataset zip from Drive and unzip, e.g.:
+# Option B: Upload dataset zip from Drive and unzip:
 # unzip dataset.zip -d /workspace/dataset
 # -> dataset must contain train/, valid/, test/ subfolders with class dirs.
 
-STEP 4 — pre-flight checks (2 min; must print 9/9 PASS):
+STEP 4 — Pre-flight checks (2 min; must print 9/9 PASS):
 --------------------------------------------------------------------------------
 python H-CoAtNet/tools/kfold/kfold.py --dataset_dir <DATASET_DIR> --validate-only
 
-# Optional 5-min sanity: one model, one fold, one epoch
+# Optional 2-min sanity: one model, one fold, one epoch
 python H-CoAtNet/tools/kfold/kfold.py --dataset_dir <DATASET_DIR> --smoke-test
 
 STEP 5 — FULL OVERNIGHT RUN (nohup keeps it alive after disconnect):
 --------------------------------------------------------------------------------
 nohup python H-CoAtNet/tools/kfold/kfold.py \
     --dataset_dir <DATASET_DIR> \
-    --k 5 --epochs 30 --seed 42 --models all --resume \
+    --k 5 --epochs 30 --seed 42 \
+    --models H-CoAtNet,CoAtNet,CNN,GFT \
+    --resume \
     > kfold_run.log 2>&1 &
 echo $! > kfold_train.pid          # PID saved for the auto-backup watcher
 
@@ -76,14 +87,14 @@ nohup bash -c '
       || echo "[BACKUP] zip failed - run Step 6 manually" >> kfold_run.log
 ' > kfold_backup.log 2>&1 &
 
-# Include the 35 checkpoints too (~3 GB archive)? Use this instead:
+# Include the 20 checkpoints too (~1.7 GB archive)? Use this instead:
 #   zip -rq "kfold_results_FULL.zip" results/kfold
 # If zip is not installed:  apt-get install -y zip
 # (tar fallback:  tar czf kfold_results.tar.gz results/kfold --exclude="results/kfold/checkpoints" )
 
-STEP 6 — (morning) verify completion and collect results:
+STEP 6 — (Morning) Verify completion and collect results:
 --------------------------------------------------------------------------------
-grep -c "DONE" kfold_run.log          # expect 35 (7 models x 5 folds)
+grep -c "DONE" kfold_run.log          # expect 20 (4 models x 5 folds)
 grep -i "FAILED" kfold_run.log        # expect none
 grep "BACKUP" kfold_run.log           # expect: saved kfold_results_<stamp>.zip
 # No zip? Create it manually:
