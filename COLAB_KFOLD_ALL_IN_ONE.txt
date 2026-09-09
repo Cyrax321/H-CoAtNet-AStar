@@ -75,12 +75,16 @@ if os.path.exists(f"{REPO}/DATASET_DIR.txt") and os.path.isdir(open(f"{REPO}/DAT
     DS = open(f"{REPO}/DATASET_DIR.txt").read().strip(); print("    reuse:", DS)
 else:
     env = dict(os.environ, ROBOFLOW_API_KEY=KEY)
-    code = ('from roboflow import Roboflow\n'
-            'ds = Roboflow(api_key=__import__("os").environ["ROBOFLOW_API_KEY"])'
-            '.workspace("hi-l9ueo").project("ich-s-7lnsj").version(1).download("folder")\n'
-            f'open("{REPO}/DATASET_DIR.txt","w").write(ds.location)\n'
-            'print("DATASET DOWNLOADED AT:", ds.location)')
-    r = sh(f'"{sys.executable}" -c {code!r}', env=env)
+    # Use a separate script file to avoid quoting/escaping issues
+    script = f'''from roboflow import Roboflow
+import os
+ds = Roboflow(api_key=os.environ["ROBOFLOW_API_KEY"]) \\
+        .workspace("hi-l9ueo").project("ich-s-7lnsj").version(1).download("folder")
+open("{REPO}/DATASET_DIR.txt", "w").write(ds.location)
+print("DATASET DOWNLOADED AT:", ds.location)'''
+    script_path = f"{REPO}/download_dataset.py"
+    open(script_path, "w").write(script)
+    r = sh(f'"{sys.executable}" {script_path}', env=env)
     print("   ", r.stdout.strip() or r.stderr[-400:]); assert r.returncode == 0
     DS = open(f"{REPO}/DATASET_DIR.txt").read().strip()
 
