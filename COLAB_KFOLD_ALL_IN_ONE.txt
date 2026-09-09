@@ -82,9 +82,22 @@ else:
 # Keep Colab's preinstalled torch (do NOT force-downgrade); install the rest
 i = sh(f"cd {REPO} && pip install -q -r requirements.txt")
 if i.returncode != 0:
-    print("    requirements.txt failed, installing core pkgs directly")
-    print("    pip stderr:", (i.stderr or "").strip()[-500:])
-    j = sh(f"cd {REPO} && pip install -q timm==1.0.28 scikit-learn scipy matplotlib pillow numpy roboflow pandas tqdm")
+    # Pinned torch (2.2.0) doesn't exist for Colab's Python: keep Colab's
+    # torch and install every OTHER pinned package (torchinfo, thop, ...).
+    print("    requirements.txt failed (torch pin), installing all non-torch pins")
+    print("    pip stderr:", (i.stderr or "").strip()[-300:])
+    pkgs = []
+    for _line in open(f"{REPO}/requirements.txt"):
+        _line = _line.strip()
+        if not _line or _line.startswith("#"):
+            continue
+        if _line.lower().startswith(("torch==", "torchvision==")):
+            continue
+        pkgs.append(_line)
+    print("    installing:", " ".join(pkgs))
+    j = sh("pip install -q " + " ".join(pkgs))
+    if (j.stderr or "").strip():
+        print("    pip stderr:", j.stderr.strip()[-500:])
     if j.returncode != 0:
         raise RuntimeError("pip install FAILED: " + (j.stderr or "").strip()[-500:])
 print("    requirements OK")
