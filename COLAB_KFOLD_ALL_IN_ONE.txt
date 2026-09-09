@@ -27,7 +27,7 @@ HOW TO USE:
 # Keep this tab open while it runs (~4-5 h).
 # If Colab disconnects: re-run THIS SAME CELL -> it resumes automatically.
 # =============================================================================
-import os, subprocess, sys, time, zipfile, glob, shutil
+import os, subprocess, sys, time, zipfile, glob, shutil, re
 
 # ⚠️  ROTATE THIS KEY AFTER USE - currently exposed in git history
 KEY        = "gXuxxWEMFJ8nK73o7pN7"
@@ -98,16 +98,16 @@ for split in ["train", "valid", "test"]:
 print("    Dataset structure OK")
 
 print("[4/7] Pre-flight (must be pass=9 fail=0)")
-v = sh(f'"{sys.executable}" {REPO}/H-CoAtNet/tools/kfold/kfold.py --dataset_dir {DS} --validate-only')
+kfold_path = f"{REPO}/H-CoAtNet/tools/kfold/kfold.py"
+v = sh(f'"{sys.executable}" {kfold_path} --dataset_dir {DS} --validate-only')
 # Print ALL output lines so user can inspect
 print("   Pre-flight output lines:")
 for i, line in enumerate(v.stdout.strip().splitlines()):
     print(f"   [{i}]: {line}")
-# Robust check for failure count
+# Robust check for failure count using regex
 all_output = v.stdout.strip()
 fail_count = None
 # Method 1: look for "fail=N" pattern
-import re
 m = re.search(r'fail\s*=\s*(\d+)', all_output, re.IGNORECASE)
 if m:
     fail_count = int(m.group(1))
@@ -144,24 +144,23 @@ else:
     # Don't exit - allow user to proceed if they understand the risks
 
 print("[5/7] Smoke test (1 model x 1 fold x 1 epoch, ~2 min)")
-s = sh(f'"{sys.executable}" {REPO}/H-CoAtNet/tools/kfold/kfold.py --dataset_dir {DS} --smoke-test')
+smoke_path = f"{REPO}/tools/kfold/kfold.py"
+s = sh(f'"{sys.executable}" {smoke_path} --dataset_dir {DS} --smoke-test')
 s_lines = s.stdout.strip().splitlines()
-print("   Smoke test output lines:", len(s_lines))
-for i, line in enumerate(s_lines[-5:]):
-    print(f"   [{i}]: {line}")
-# Check for SMOKE OK in any line
+print(f"   Smoke test output lines: {len(s_lines)}")
+# Check for SMOKE OK in any line (not just last 5)
 smoke_ok = any("SMOKE OK" in line for line in s_lines)
 if smoke_ok:
     print("  ✓ Smoke test PASS")
 else:
-    print("  ✗ Smoke test FAIL - checking stderr...")
-    print("   stderr:", s.stderr.strip()[:300] if s.stderr else "none")
+    print("   Smoke test FAIL - checking stderr...")
+    print(f"   stderr: {s.stderr.strip()[:300] if s.stderr else 'none'}")
     # Don't auto-exit - let user see what happened
-    print("  Continuing despite smoke test issue...")
+    print("   Continuing despite smoke test issue...")
 
 print("[6/7] FULL K-FOLD: 4 models x 5 folds x 30 epochs  (log: kfold_run.log)")
 log = open(LOG, "ab")
-proc = subprocess.Popen([sys.executable, f"{REPO}/H-CoAtNet/tools/kfold/kfold.py",
+proc = subprocess.Popen([sys.executable, f"{REPO}/tools/kfold/kfold.py",
                          "--dataset_dir", DS, "--out", OUT,
                          "--k", "5", "--epochs", "30", "--seed", "42",
                          "--models", MODELS, "--resume"],
