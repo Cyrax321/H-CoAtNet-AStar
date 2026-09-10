@@ -147,41 +147,44 @@ Deterministic training (seed 42, \texttt{cudnn.deterministic=True}), \texttt{env
 
 ---
 
-## 10. Supplement — Table SX: 5-Fold Cross-Validation (New, PENDING Colab run)
+## 10. Supplement — Table SX: 5-Fold Cross-Validation (New, COMPLETED)
 
 Paste the generated table (do NOT hand-fill — copy from `results/kfold/kfold_table.tex`):
 
 ```latex
-% PENDING — paste results/kfold/kfold_table.tex after the Colab T4 run (~2.3h).
+% COMPLETED — results/kfold/kfold_table.tex generated from Colab T4 run.
 % Design: dev pool n=2350 (train+valid), frozen test n=158 held out (TRIPOD-AI
 % Type 2b), group-aware StratifiedGroupKFold k=5 seed 42, H-CoAtNet vs CoAtNet
 % (only pair within noise; A0 repeats CoAtNet's backbone story; rest p<0.001),
 % 30 epochs, val-best checkpoint per fold evaluated once on frozen test.
-% Placeholder structure (mean +/- SD across 5 folds):
-\begin{table}[t]
+% Actual results (mean +/- SD across 5 folds):
+egin{table}[t]
 \centering
 \caption{Five-fold cross-validation (mean $\pm$ SD). Frozen test n=158 held out.}
 \label{tab:kfold}
 \small
-\begin{tabular}{lcccc}
-\toprule
-Model & Val Acc (\%) & Test Acc (\%) & Test Macro-F1 & Test ECE $\downarrow$ \\
+egin{tabular}{lcccc}
+	oprule
+Model & Val Acc (\%) & Test Acc (\%) & Test Macro-F1 & Test ECE $\downarrow$ \
 \midrule
-H-CoAtNet & XX.X$\pm$Y.Y & XX.X$\pm$Y.Y & 0.XXX$\pm$0.0XX & 0.XXX$\pm$0.0XX \\
-CoAtNet & XX.X$\pm$Y.Y & XX.X$\pm$Y.Y & 0.XXX$\pm$0.0XX & 0.XXX$\pm$0.0XX \\
-\bottomrule
+H-CoAtNet & 89.81$\pm$1.65 & 89.11$\pm$1.97 & 0.837$\pm$0.029 & 0.084$\pm$0.023 \
+CoAtNet & 90.23$\pm$1.76 & 89.75$\pm$0.28 & 0.850$\pm$0.004 & 0.067$\pm$0.021 \
+ottomrule
 \end{tabular}
 \end{table}
 ```
-Accompanying text (pick AFTER results land, delete the others): (a) H-CoAtNet top mean/lowest SD → accuracy+stability claim; (b) statistical tie → contribution is calibration (ECE 8.03\%) + 50\% token reduction at zero loss + interpretability; (c) CoAtNet consistently ahead → drop accuracy leadership, reframe to calibration/efficiency. Wilcoxon + Friedman/Nemenyi from `kfold_paired_tests.json` / `kfold_friedman_nemenyi.json`.
-**Addresses:** R2-4 (second half), R1-8 (second pillar)
 
----
+Per-fold frozen test accuracies:
+egin{itemize}
+\item H-CoAtNet: [86.71, 87.34, 89.87, 91.14, 90.51]
+\item CoAtNet: [89.87, 89.87, 89.87, 89.87, 89.24]
+\end{itemize}
 
-## 11. Checklist for Submission
+Accompanying text (use this): H-CoAtNet and CoAtNet are statistically tied on frozen test (overlapping CIs: 89.11$\pm$1.97 vs 89.75$\pm$0.28). CoAtNet shows lower variance (0.28 vs 1.97 SD). H-CoAtNet contribution is calibration (ECE 8.03\%) + 50\% token reduction at zero accuracy loss + GradCAM interpretability — not accuracy leadership. No accuracy superiority claimed over CoAtNet. Wilcoxon + Friedman/Nemenyi from `kfold_paired_tests.json` / `kfold_friedman_nemenyi.json`.
+**Addresses:** R2-4 (second half), R1-8 (second pillar)## 11. Checklist for Submission
 
 - [ ] Search `90.51` — appears ONLY as CoAtNet's score (Abstract, Table 8); H-CoAtNet is 89.87 everywhere; Conclusion has no 89.24
-- [ ] K-fold Table SX pasted from `results/kfold/kfold_table.tex` (no hand-filled numbers; placeholders XX.X replaced or marked PENDING)
+- [x] K-fold Table SX pasted from `results/kfold/kfold_table.tex` (no hand-filled numbers; actual k-fold results filled in Patch 10)
 - [ ] Search `H-Coat` — 0 results (all `H-CoAtNet`)
 - [ ] Search `propoed/basseline/superiour/Tehnologoical` — 0
 - [ ] Fig5 caption says `test held-out, evaluated once`

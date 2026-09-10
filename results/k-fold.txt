@@ -1,0 +1,3922 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+============================================================
+KFOLD PRE-FLIGHT VALIDATION
+============================================================
+  [PASS] imports: all seven model modules import
+  [PASS] instantiate: all seven models instantiate and forward (1,3,224,224)
+  [PASS] transform_parity: MODEL_RECIPE, make_transforms, init and loss all match the hardcoded Table 3 golden table for all 7 models
+  [PASS] parity: H-CoAtNet param count matches proposed (29,012,165)
+  [PASS] pool: development pool=2350 test=158 classes=['Harlequin ichthyosis', 'Healthy skin', 'Ichthyosis vulgaris ', 'Lamellar ichthyosis', 'Netherton syndrome']
+  [PASS] test_isolation: no overlap between dev (2350) and test (158)
+  [PASS] groups: groups=806 classes=5 k=5
+  [PASS] folds: 5 folds sizes (train/val): [(1876, 474), (1904, 446), (1860, 490), (1897, 453), (1863, 487)]
+  [WARN] output_dir: /content/drive/MyDrive/HCoAtNet_KFOLD_RUN/results/kfold already has kfold results; use --resume to continue an interrupted run, or --out <dir> for a fresh one
+
+VALIDATION SUMMARY: pass=8 warn=1 fail=0
+============================================================
+K-FOLD CV (k=5) -- 7-model benchmark
+============================================================
+  device      = cuda
+============================================================
+  dataset_dir = /content/ich-s-1
+  k           = 5
+  epochs      = 30
+  seed        = 42
+  models      = H-CoAtNet,CoAtNet,CNN,GFT
+
+[1/4] gathering pool...
+      dev = 2350  test = 158  classes = ['Harlequin ichthyosis', 'Healthy skin', 'Ichthyosis vulgaris ', 'Lamellar ichthyosis', 'Netherton syndrome']
+      per-class dev counts: {0: 452, 1: 548, 2: 758, 3: 352, 4: 240}
+      per-class test counts: {0: 32, 1: 45, 2: 46, 3: 22, 4: 13}
+[2/4] building group-aware folds...
+      fold 1: train=1876 ({0: 355, 1: 443, 2: 596, 3: 287, 4: 195})  val=474 ({0: 97, 1: 105, 2: 162, 3: 65, 4: 45})
+      fold 2: train=1904 ({0: 372, 1: 433, 2: 629, 3: 290, 4: 180})  val=446 ({0: 80, 1: 115, 2: 129, 3: 62, 4: 60})
+      fold 3: train=1860 ({0: 361, 1: 449, 2: 580, 3: 271, 4: 199})  val=490 ({0: 91, 1: 99, 2: 178, 3: 81, 4: 41})
+      fold 4: train=1897 ({0: 359, 1: 433, 2: 619, 3: 291, 4: 195})  val=453 ({0: 93, 1: 115, 2: 139, 3: 61, 4: 45})
+      fold 5: train=1863 ({0: 361, 1: 434, 2: 608, 3: 269, 4: 191})  val=487 ({0: 91, 1: 114, 2: 150, 3: 83, 4: 49})
+[3/4] saving kfold_splits.json...
+[4/4] training all (model x fold) combinations...
+
+**********************************************************************
+*  TRAINING: H-CoAtNet
+*  lr=5e-05, batch=24, pretrained=True, aug=strong, ls=0.1
+*  5 folds x 30 epochs
+**********************************************************************
+  [H-CoAtNet fold 1/5] train=1876 val=474 ...
+
+--- Epoch  1/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [56.6s]
+  Validating 100% 20/20 batches [7.0s]
+  Epoch  1/30: train acc 0.4440 loss 1.4374 | val acc 0.6456 loss 1.1701
+  [NEW BEST] epoch 1 val 0.6456
+
+--- Epoch  2/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [46.7s]
+  Validating 100% 20/20 batches [3.2s]
+  Epoch  2/30: train acc 0.6647 loss 1.1067 | val acc 0.6814 loss 1.1248
+  [NEW BEST] epoch 2 val 0.6814
+
+--- Epoch  3/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [46.9s]
+  Validating 100% 20/20 batches [3.8s]
+  Epoch  3/30: train acc 0.7894 loss 0.8767 | val acc 0.7574 loss 0.9227
+  [NEW BEST] epoch 3 val 0.7574
+
+--- Epoch  4/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.0s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch  4/30: train acc 0.8491 loss 0.7600 | val acc 0.7911 loss 0.9116
+  [NEW BEST] epoch 4 val 0.7911
+
+--- Epoch  5/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [46.9s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch  5/30: train acc 0.9025 loss 0.6604 | val acc 0.8143 loss 0.8739
+  [NEW BEST] epoch 5 val 0.8143
+
+--- Epoch  6/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [46.7s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch  6/30: train acc 0.9222 loss 0.5994 | val acc 0.8376 loss 0.8491
+  [NEW BEST] epoch 6 val 0.8376
+
+--- Epoch  7/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.5s]
+  Validating 100% 20/20 batches [3.2s]
+  Epoch  7/30: train acc 0.9360 loss 0.5733 | val acc 0.8671 loss 0.7654
+  [NEW BEST] epoch 7 val 0.8671
+
+--- Epoch  8/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.1s]
+  Validating 100% 20/20 batches [4.4s]
+  Epoch  8/30: train acc 0.9595 loss 0.5337 | val acc 0.8608 loss 0.7661
+
+--- Epoch  9/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.5s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch  9/30: train acc 0.9654 loss 0.5247 | val acc 0.8608 loss 0.7744
+
+--- Epoch 10/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.0s]
+  Validating 100% 20/20 batches [4.1s]
+  Epoch 10/30: train acc 0.9686 loss 0.5073 | val acc 0.8544 loss 0.7646
+
+--- Epoch 11/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [46.8s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch 11/30: train acc 0.9691 loss 0.5096 | val acc 0.8882 loss 0.7375
+  [NEW BEST] epoch 11 val 0.8882
+
+--- Epoch 12/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.0s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch 12/30: train acc 0.9776 loss 0.4895 | val acc 0.9072 loss 0.7010
+  [NEW BEST] epoch 12 val 0.9072
+
+--- Epoch 13/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [46.9s]
+  Validating 100% 20/20 batches [3.5s]
+  Epoch 13/30: train acc 0.9851 loss 0.4725 | val acc 0.8966 loss 0.7127
+
+--- Epoch 14/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.3s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch 14/30: train acc 0.9845 loss 0.4716 | val acc 0.9072 loss 0.6740
+
+--- Epoch 15/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.1s]
+  Validating 100% 20/20 batches [4.4s]
+  Epoch 15/30: train acc 0.9835 loss 0.4750 | val acc 0.8903 loss 0.7023
+
+--- Epoch 16/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [46.9s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch 16/30: train acc 0.9883 loss 0.4683 | val acc 0.8797 loss 0.7239
+
+--- Epoch 17/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.0s]
+  Validating 100% 20/20 batches [4.4s]
+  Epoch 17/30: train acc 0.9824 loss 0.4796 | val acc 0.8882 loss 0.7265
+
+--- Epoch 18/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.1s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch 18/30: train acc 0.9904 loss 0.4627 | val acc 0.9051 loss 0.7028
+
+--- Epoch 19/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [46.9s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch 19/30: train acc 0.9867 loss 0.4700 | val acc 0.8840 loss 0.7321
+
+--- Epoch 20/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [46.8s]
+  Validating 100% 20/20 batches [3.7s]
+  Epoch 20/30: train acc 0.9904 loss 0.4564 | val acc 0.8945 loss 0.7130
+
+--- Epoch 21/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.2s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch 21/30: train acc 0.9925 loss 0.4553 | val acc 0.8882 loss 0.7267
+
+--- Epoch 22/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.0s]
+  Validating 100% 20/20 batches [4.7s]
+  Epoch 22/30: train acc 0.9936 loss 0.4517 | val acc 0.8882 loss 0.7199
+
+--- Epoch 23/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [46.8s]
+  Validating 100% 20/20 batches [3.2s]
+  Epoch 23/30: train acc 0.9936 loss 0.4503 | val acc 0.8924 loss 0.7404
+
+--- Epoch 24/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [46.9s]
+  Validating 100% 20/20 batches [3.7s]
+  Epoch 24/30: train acc 0.9915 loss 0.4549 | val acc 0.8924 loss 0.7170
+
+--- Epoch 25/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [46.9s]
+  Validating 100% 20/20 batches [3.2s]
+  Epoch 25/30: train acc 0.9931 loss 0.4522 | val acc 0.8966 loss 0.7036
+
+--- Epoch 26/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.3s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch 26/30: train acc 0.9952 loss 0.4489 | val acc 0.8987 loss 0.7051
+
+--- Epoch 27/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.0s]
+  Validating 100% 20/20 batches [4.5s]
+  Epoch 27/30: train acc 0.9941 loss 0.4541 | val acc 0.8966 loss 0.7016
+
+--- Epoch 28/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.5s]
+  Validating 100% 20/20 batches [3.2s]
+  Epoch 28/30: train acc 0.9957 loss 0.4473 | val acc 0.8966 loss 0.7022
+
+--- Epoch 29/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.2s]
+  Validating 100% 20/20 batches [4.2s]
+  Epoch 29/30: train acc 0.9947 loss 0.4484 | val acc 0.8987 loss 0.7014
+
+--- Epoch 30/30 [H-CoAtNet fold 1] ---
+  Training 100% 79/79 batches [47.1s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch 30/30: train acc 0.9931 loss 0.4499 | val acc 0.8987 loss 0.7018
+  Restoring best checkpoint (epoch 12, val_acc 0.9072)...
+  Validating 100% 20/20 batches [4.8s]
+  --- Frozen Test (held-out, val-best ckpt, fold 1) ---
+  Validating 100% 7/7 batches [4.0s]
+  Frozen test accuracy: 86.71% (n=158)
+
+======================================================================
+  FOLD 1/5 COMPLETE -- H-CoAtNet  (25.8 min)
+======================================================================
+  Validation (val-best epoch 12):
+    Accuracy      : 90.72%
+    Balanced Acc  : 88.00%
+    Macro F1      : 88.66%
+    Kappa         : 0.8781
+    MCC           : 0.8782
+    ECE           : 0.1043
+    AUROC         : 0.9835
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 86.71%
+    Balanced Acc  : 80.67%
+    Macro F1      : 80.62%
+    Kappa         : 0.8257
+    MCC           : 0.8273
+    ECE           : 0.1149
+    AUROC         : 0.9582
+======================================================================
+  [H-CoAtNet fold 2/5] train=1904 val=446 ...
+
+--- Epoch  1/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [51.0s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch  1/30: train acc 0.3650 loss 1.5139 | val acc 0.5830 loss 1.2182
+  [NEW BEST] epoch 1 val 0.5830
+
+--- Epoch  2/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.2s]
+  Validating 100% 19/19 batches [4.3s]
+  Epoch  2/30: train acc 0.6465 loss 1.1299 | val acc 0.7511 loss 1.0203
+  [NEW BEST] epoch 2 val 0.7511
+
+--- Epoch  3/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.3s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch  3/30: train acc 0.7358 loss 0.9770 | val acc 0.7713 loss 0.9424
+  [NEW BEST] epoch 3 val 0.7713
+
+--- Epoch  4/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.3s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch  4/30: train acc 0.7999 loss 0.8441 | val acc 0.8296 loss 0.8316
+  [NEW BEST] epoch 4 val 0.8296
+
+--- Epoch  5/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.5s]
+  Validating 100% 19/19 batches [3.7s]
+  Epoch  5/30: train acc 0.8745 loss 0.7187 | val acc 0.7130 loss 1.0837
+
+--- Epoch  6/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [48.1s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch  6/30: train acc 0.8918 loss 0.6704 | val acc 0.8767 loss 0.7689
+  [NEW BEST] epoch 6 val 0.8767
+
+--- Epoch  7/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.6s]
+  Validating 100% 19/19 batches [3.9s]
+  Epoch  7/30: train acc 0.9428 loss 0.5756 | val acc 0.8386 loss 0.8566
+
+--- Epoch  8/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.7s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch  8/30: train acc 0.9559 loss 0.5493 | val acc 0.8341 loss 0.8204
+
+--- Epoch  9/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.9s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch  9/30: train acc 0.9664 loss 0.5194 | val acc 0.8565 loss 0.7770
+
+--- Epoch 10/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.9s]
+  Validating 100% 19/19 batches [4.5s]
+  Epoch 10/30: train acc 0.9727 loss 0.5186 | val acc 0.8744 loss 0.7836
+
+--- Epoch 11/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [48.4s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 11/30: train acc 0.9795 loss 0.5034 | val acc 0.8587 loss 0.8028
+
+--- Epoch 12/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [48.1s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch 12/30: train acc 0.9800 loss 0.5060 | val acc 0.8408 loss 0.8584
+
+--- Epoch 13/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.7s]
+  Validating 100% 19/19 batches [4.7s]
+  Epoch 13/30: train acc 0.9863 loss 0.4926 | val acc 0.8520 loss 0.8023
+
+--- Epoch 14/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.6s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 14/30: train acc 0.9905 loss 0.4787 | val acc 0.8610 loss 0.8224
+
+--- Epoch 15/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.7s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 15/30: train acc 0.9821 loss 0.4840 | val acc 0.8587 loss 0.8366
+
+--- Epoch 16/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.5s]
+  Validating 100% 19/19 batches [4.0s]
+  Epoch 16/30: train acc 0.9911 loss 0.4699 | val acc 0.8744 loss 0.7944
+
+--- Epoch 17/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.6s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch 17/30: train acc 0.9890 loss 0.4765 | val acc 0.8677 loss 0.7811
+
+--- Epoch 18/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.6s]
+  Validating 100% 19/19 batches [3.4s]
+  Epoch 18/30: train acc 0.9926 loss 0.4659 | val acc 0.8700 loss 0.7902
+
+--- Epoch 19/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.7s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch 19/30: train acc 0.9895 loss 0.4696 | val acc 0.8543 loss 0.7809
+
+--- Epoch 20/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.8s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 20/30: train acc 0.9879 loss 0.4684 | val acc 0.8857 loss 0.7511
+  [NEW BEST] epoch 20 val 0.8857
+
+--- Epoch 21/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [46.5s]
+  Validating 100% 19/19 batches [4.5s]
+  Epoch 21/30: train acc 0.9937 loss 0.4627 | val acc 0.8722 loss 0.7634
+
+--- Epoch 22/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [46.8s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 22/30: train acc 0.9911 loss 0.4635 | val acc 0.8834 loss 0.7809
+
+--- Epoch 23/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [46.9s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch 23/30: train acc 0.9963 loss 0.4582 | val acc 0.8789 loss 0.7470
+
+--- Epoch 24/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [46.7s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 24/30: train acc 0.9947 loss 0.4609 | val acc 0.8879 loss 0.7446
+  [NEW BEST] epoch 24 val 0.8879
+
+--- Epoch 25/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.4s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 25/30: train acc 0.9963 loss 0.4565 | val acc 0.8812 loss 0.7590
+
+--- Epoch 26/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [46.9s]
+  Validating 100% 19/19 batches [4.1s]
+  Epoch 26/30: train acc 0.9984 loss 0.4554 | val acc 0.8812 loss 0.7492
+
+--- Epoch 27/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.2s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 27/30: train acc 0.9963 loss 0.4574 | val acc 0.8879 loss 0.7518
+
+--- Epoch 28/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.5s]
+  Validating 100% 19/19 batches [3.6s]
+  Epoch 28/30: train acc 0.9947 loss 0.4580 | val acc 0.8857 loss 0.7522
+
+--- Epoch 29/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.3s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 29/30: train acc 0.9947 loss 0.4573 | val acc 0.8857 loss 0.7537
+
+--- Epoch 30/30 [H-CoAtNet fold 2] ---
+  Training 100% 80/80 batches [47.5s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 30/30: train acc 0.9974 loss 0.4581 | val acc 0.8834 loss 0.7529
+  Restoring best checkpoint (epoch 24, val_acc 0.8879)...
+  Validating 100% 19/19 batches [3.1s]
+  --- Frozen Test (held-out, val-best ckpt, fold 2) ---
+  Validating 100% 7/7 batches [1.7s]
+  Frozen test accuracy: 87.34% (n=158)
+
+======================================================================
+  FOLD 2/5 COMPLETE -- H-CoAtNet  (25.7 min)
+======================================================================
+  Validation (val-best epoch 24):
+    Accuracy      : 88.79%
+    Balanced Acc  : 87.02%
+    Macro F1      : 87.10%
+    Kappa         : 0.8563
+    MCC           : 0.8568
+    ECE           : 0.0613
+    AUROC         : 0.9669
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 87.34%
+    Balanced Acc  : 80.46%
+    Macro F1      : 80.44%
+    Kappa         : 0.8344
+    MCC           : 0.8353
+    ECE           : 0.1034
+    AUROC         : 0.9751
+======================================================================
+  [H-CoAtNet fold 3/5] train=1860 val=490 ...
+
+--- Epoch  1/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [49.8s]
+  Validating 100% 21/21 batches [6.7s]
+  Epoch  1/30: train acc 0.4043 loss 1.4645 | val acc 0.6184 loss 1.1870
+  [NEW BEST] epoch 1 val 0.6184
+
+--- Epoch  2/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.2s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch  2/30: train acc 0.6468 loss 1.1153 | val acc 0.7224 loss 1.0178
+  [NEW BEST] epoch 2 val 0.7224
+
+--- Epoch  3/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [45.9s]
+  Validating 100% 21/21 batches [4.3s]
+  Epoch  3/30: train acc 0.7306 loss 0.9835 | val acc 0.7918 loss 0.9265
+  [NEW BEST] epoch 3 val 0.7918
+
+--- Epoch  4/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.4s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch  4/30: train acc 0.8215 loss 0.8110 | val acc 0.8429 loss 0.8461
+  [NEW BEST] epoch 4 val 0.8429
+
+--- Epoch  5/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.4s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch  5/30: train acc 0.8796 loss 0.6850 | val acc 0.8429 loss 0.8826
+
+--- Epoch  6/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.4s]
+  Validating 100% 21/21 batches [4.0s]
+  Epoch  6/30: train acc 0.9172 loss 0.6229 | val acc 0.8367 loss 0.8565
+
+--- Epoch  7/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.7s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch  7/30: train acc 0.9124 loss 0.6179 | val acc 0.8429 loss 0.8645
+
+--- Epoch  8/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [5.0s]
+  Epoch  8/30: train acc 0.9468 loss 0.5515 | val acc 0.8816 loss 0.7886
+  [NEW BEST] epoch 8 val 0.8816
+
+--- Epoch  9/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch  9/30: train acc 0.9645 loss 0.5154 | val acc 0.8653 loss 0.8012
+
+--- Epoch 10/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.2s]
+  Validating 100% 21/21 batches [4.2s]
+  Epoch 10/30: train acc 0.9651 loss 0.5141 | val acc 0.8612 loss 0.8405
+
+--- Epoch 11/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.4s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch 11/30: train acc 0.9785 loss 0.4902 | val acc 0.8837 loss 0.8292
+  [NEW BEST] epoch 11 val 0.8837
+
+--- Epoch 12/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch 12/30: train acc 0.9758 loss 0.4893 | val acc 0.8510 loss 0.8551
+
+--- Epoch 13/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch 13/30: train acc 0.9753 loss 0.4954 | val acc 0.8531 loss 0.8398
+
+--- Epoch 14/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.5s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch 14/30: train acc 0.9812 loss 0.4786 | val acc 0.8694 loss 0.8321
+
+--- Epoch 15/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.2s]
+  Validating 100% 21/21 batches [3.9s]
+  Epoch 15/30: train acc 0.9860 loss 0.4723 | val acc 0.8714 loss 0.8091
+
+--- Epoch 16/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch 16/30: train acc 0.9876 loss 0.4656 | val acc 0.8673 loss 0.8469
+
+--- Epoch 17/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.1s]
+  Validating 100% 21/21 batches [4.9s]
+  Epoch 17/30: train acc 0.9860 loss 0.4612 | val acc 0.8571 loss 0.8486
+
+--- Epoch 18/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [45.9s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch 18/30: train acc 0.9860 loss 0.4619 | val acc 0.8735 loss 0.8114
+
+--- Epoch 19/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.2s]
+  Validating 100% 21/21 batches [4.6s]
+  Epoch 19/30: train acc 0.9909 loss 0.4523 | val acc 0.8510 loss 0.8585
+
+--- Epoch 20/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.2s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch 20/30: train acc 0.9930 loss 0.4549 | val acc 0.8755 loss 0.8250
+
+--- Epoch 21/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.4s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch 21/30: train acc 0.9952 loss 0.4469 | val acc 0.8776 loss 0.8229
+
+--- Epoch 22/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.1s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch 22/30: train acc 0.9952 loss 0.4468 | val acc 0.8633 loss 0.8277
+
+--- Epoch 23/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.4s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 23/30: train acc 0.9952 loss 0.4471 | val acc 0.8612 loss 0.8447
+
+--- Epoch 24/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.1s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch 24/30: train acc 0.9957 loss 0.4476 | val acc 0.8837 loss 0.8165
+
+--- Epoch 25/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.5s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 25/30: train acc 0.9968 loss 0.4431 | val acc 0.8816 loss 0.8116
+
+--- Epoch 26/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [4.3s]
+  Epoch 26/30: train acc 0.9952 loss 0.4490 | val acc 0.8898 loss 0.8033
+  [NEW BEST] epoch 26 val 0.8898
+
+--- Epoch 27/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.7s]
+  Validating 100% 21/21 batches [3.5s]
+  Epoch 27/30: train acc 0.9978 loss 0.4426 | val acc 0.8837 loss 0.8104
+
+--- Epoch 28/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.2s]
+  Validating 100% 21/21 batches [4.6s]
+  Epoch 28/30: train acc 0.9946 loss 0.4475 | val acc 0.8796 loss 0.8135
+
+--- Epoch 29/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.7s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch 29/30: train acc 0.9973 loss 0.4440 | val acc 0.8796 loss 0.8144
+
+--- Epoch 30/30 [H-CoAtNet fold 3] ---
+  Training 100% 78/78 batches [46.4s]
+  Validating 100% 21/21 batches [3.5s]
+  Epoch 30/30: train acc 0.9973 loss 0.4434 | val acc 0.8796 loss 0.8153
+  Restoring best checkpoint (epoch 26, val_acc 0.8898)...
+  Validating 100% 21/21 batches [3.4s]
+  --- Frozen Test (held-out, val-best ckpt, fold 3) ---
+  Validating 100% 7/7 batches [1.7s]
+  Frozen test accuracy: 89.87% (n=158)
+
+======================================================================
+  FOLD 3/5 COMPLETE -- H-CoAtNet  (25.3 min)
+======================================================================
+  Validation (val-best epoch 26):
+    Accuracy      : 88.98%
+    Balanced Acc  : 86.12%
+    Macro F1      : 87.19%
+    Kappa         : 0.8537
+    MCC           : 0.8543
+    ECE           : 0.0579
+    AUROC         : 0.9311
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 89.87%
+    Balanced Acc  : 85.81%
+    Macro F1      : 85.06%
+    Kappa         : 0.8678
+    MCC           : 0.8692
+    ECE           : 0.0835
+    AUROC         : 0.9461
+======================================================================
+  [H-CoAtNet fold 4/5] train=1897 val=453 ...
+
+--- Epoch  1/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [51.2s]
+  Validating 100% 19/19 batches [6.0s]
+  Epoch  1/30: train acc 0.3490 loss 1.5410 | val acc 0.4547 loss 1.3716
+  [NEW BEST] epoch 1 val 0.4547
+
+--- Epoch  2/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.4s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch  2/30: train acc 0.5930 loss 1.2198 | val acc 0.6976 loss 1.0447
+  [NEW BEST] epoch 2 val 0.6976
+
+--- Epoch  3/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.2s]
+  Validating 100% 19/19 batches [4.3s]
+  Epoch  3/30: train acc 0.7153 loss 1.0089 | val acc 0.7947 loss 0.8825
+  [NEW BEST] epoch 3 val 0.7947
+
+--- Epoch  4/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.6s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch  4/30: train acc 0.7849 loss 0.8852 | val acc 0.8035 loss 0.8636
+  [NEW BEST] epoch 4 val 0.8035
+
+--- Epoch  5/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.6s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch  5/30: train acc 0.8382 loss 0.7675 | val acc 0.8411 loss 0.7936
+  [NEW BEST] epoch 5 val 0.8411
+
+--- Epoch  6/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.1s]
+  Validating 100% 19/19 batches [3.9s]
+  Epoch  6/30: train acc 0.8877 loss 0.6719 | val acc 0.8698 loss 0.7753
+  [NEW BEST] epoch 6 val 0.8698
+
+--- Epoch  7/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.5s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch  7/30: train acc 0.9172 loss 0.6373 | val acc 0.8808 loss 0.7578
+  [NEW BEST] epoch 7 val 0.8808
+
+--- Epoch  8/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.2s]
+  Validating 100% 19/19 batches [4.2s]
+  Epoch  8/30: train acc 0.9378 loss 0.5756 | val acc 0.8852 loss 0.7560
+  [NEW BEST] epoch 8 val 0.8852
+
+--- Epoch  9/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.1s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch  9/30: train acc 0.9615 loss 0.5366 | val acc 0.9051 loss 0.7139
+  [NEW BEST] epoch 9 val 0.9051
+
+--- Epoch 10/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.3s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 10/30: train acc 0.9647 loss 0.5270 | val acc 0.9007 loss 0.7094
+
+--- Epoch 11/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.1s]
+  Validating 100% 19/19 batches [3.7s]
+  Epoch 11/30: train acc 0.9731 loss 0.5048 | val acc 0.9095 loss 0.7323
+  [NEW BEST] epoch 11 val 0.9095
+
+--- Epoch 12/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.5s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 12/30: train acc 0.9810 loss 0.4890 | val acc 0.9029 loss 0.7279
+
+--- Epoch 13/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.2s]
+  Validating 100% 19/19 batches [4.0s]
+  Epoch 13/30: train acc 0.9810 loss 0.4811 | val acc 0.9117 loss 0.7095
+  [NEW BEST] epoch 13 val 0.9117
+
+--- Epoch 14/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.5s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 14/30: train acc 0.9847 loss 0.4761 | val acc 0.8874 loss 0.7481
+
+--- Epoch 15/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.0s]
+  Validating 100% 19/19 batches [4.7s]
+  Epoch 15/30: train acc 0.9842 loss 0.4766 | val acc 0.9073 loss 0.7145
+
+--- Epoch 16/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [46.9s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 16/30: train acc 0.9736 loss 0.4960 | val acc 0.8852 loss 0.7513
+
+--- Epoch 17/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.1s]
+  Validating 100% 19/19 batches [3.8s]
+  Epoch 17/30: train acc 0.9847 loss 0.4690 | val acc 0.8896 loss 0.7524
+
+--- Epoch 18/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.3s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 18/30: train acc 0.9884 loss 0.4676 | val acc 0.9051 loss 0.7347
+
+--- Epoch 19/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.5s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 19/30: train acc 0.9926 loss 0.4563 | val acc 0.9161 loss 0.7179
+  [NEW BEST] epoch 19 val 0.9161
+
+--- Epoch 20/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.3s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch 20/30: train acc 0.9910 loss 0.4562 | val acc 0.9007 loss 0.7183
+
+--- Epoch 21/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.6s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch 21/30: train acc 0.9889 loss 0.4569 | val acc 0.9095 loss 0.6965
+
+--- Epoch 22/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.1s]
+  Validating 100% 19/19 batches [4.0s]
+  Epoch 22/30: train acc 0.9926 loss 0.4594 | val acc 0.9007 loss 0.7172
+
+--- Epoch 23/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.4s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 23/30: train acc 0.9947 loss 0.4523 | val acc 0.9183 loss 0.6841
+  [NEW BEST] epoch 23 val 0.9183
+
+--- Epoch 24/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.1s]
+  Validating 100% 19/19 batches [4.3s]
+  Epoch 24/30: train acc 0.9921 loss 0.4559 | val acc 0.9227 loss 0.6843
+  [NEW BEST] epoch 24 val 0.9227
+
+--- Epoch 25/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.3s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 25/30: train acc 0.9926 loss 0.4535 | val acc 0.9227 loss 0.6945
+
+--- Epoch 26/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.4s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 26/30: train acc 0.9889 loss 0.4573 | val acc 0.9183 loss 0.6882
+
+--- Epoch 27/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.2s]
+  Validating 100% 19/19 batches [3.5s]
+  Epoch 27/30: train acc 0.9953 loss 0.4494 | val acc 0.9205 loss 0.6851
+
+--- Epoch 28/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.5s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 28/30: train acc 0.9974 loss 0.4486 | val acc 0.9205 loss 0.6920
+
+--- Epoch 29/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.1s]
+  Validating 100% 19/19 batches [4.4s]
+  Epoch 29/30: train acc 0.9931 loss 0.4548 | val acc 0.9205 loss 0.6911
+
+--- Epoch 30/30 [H-CoAtNet fold 4] ---
+  Training 100% 80/80 batches [47.4s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 30/30: train acc 0.9947 loss 0.4500 | val acc 0.9205 loss 0.6893
+  Restoring best checkpoint (epoch 24, val_acc 0.9227)...
+  Validating 100% 19/19 batches [3.5s]
+  --- Frozen Test (held-out, val-best ckpt, fold 4) ---
+  Validating 100% 7/7 batches [2.2s]
+  Frozen test accuracy: 91.14% (n=158)
+
+======================================================================
+  FOLD 4/5 COMPLETE -- H-CoAtNet  (25.7 min)
+======================================================================
+  Validation (val-best epoch 24):
+    Accuracy      : 92.27%
+    Balanced Acc  : 89.55%
+    Macro F1      : 89.70%
+    Kappa         : 0.8992
+    MCC           : 0.9018
+    ECE           : 0.0886
+    AUROC         : 0.9757
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 91.14%
+    Balanced Acc  : 87.50%
+    Macro F1      : 86.58%
+    Kappa         : 0.8841
+    MCC           : 0.8870
+    ECE           : 0.0870
+    AUROC         : 0.9679
+======================================================================
+  [H-CoAtNet fold 5/5] train=1863 val=487 ...
+
+--- Epoch  1/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [50.0s]
+  Validating 100% 21/21 batches [7.1s]
+  Epoch  1/30: train acc 0.3661 loss 1.5133 | val acc 0.5791 loss 1.3061
+  [NEW BEST] epoch 1 val 0.5791
+
+--- Epoch  2/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.8s]
+  Validating 100% 21/21 batches [3.5s]
+  Epoch  2/30: train acc 0.6012 loss 1.2041 | val acc 0.7207 loss 1.0526
+  [NEW BEST] epoch 2 val 0.7207
+
+--- Epoch  3/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.9s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch  3/30: train acc 0.7236 loss 1.0078 | val acc 0.7844 loss 0.9297
+  [NEW BEST] epoch 3 val 0.7844
+
+--- Epoch  4/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.5s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch  4/30: train acc 0.8132 loss 0.8288 | val acc 0.7967 loss 0.9006
+  [NEW BEST] epoch 4 val 0.7967
+
+--- Epoch  5/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [3.5s]
+  Epoch  5/30: train acc 0.8712 loss 0.7176 | val acc 0.8255 loss 0.8636
+  [NEW BEST] epoch 5 val 0.8255
+
+--- Epoch  6/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.4s]
+  Validating 100% 21/21 batches [3.5s]
+  Epoch  6/30: train acc 0.8900 loss 0.6665 | val acc 0.8337 loss 0.8052
+  [NEW BEST] epoch 6 val 0.8337
+
+--- Epoch  7/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.2s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch  7/30: train acc 0.9141 loss 0.6255 | val acc 0.8296 loss 0.8377
+
+--- Epoch  8/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.0s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch  8/30: train acc 0.9479 loss 0.5545 | val acc 0.8337 loss 0.8556
+
+--- Epoch  9/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.1s]
+  Validating 100% 21/21 batches [4.1s]
+  Epoch  9/30: train acc 0.9474 loss 0.5536 | val acc 0.8357 loss 0.8360
+  [NEW BEST] epoch 9 val 0.8357
+
+--- Epoch 10/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.4s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch 10/30: train acc 0.9597 loss 0.5216 | val acc 0.8583 loss 0.8185
+  [NEW BEST] epoch 10 val 0.8583
+
+--- Epoch 11/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [45.8s]
+  Validating 100% 21/21 batches [3.9s]
+  Epoch 11/30: train acc 0.9716 loss 0.5115 | val acc 0.8522 loss 0.8312
+
+--- Epoch 12/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [45.9s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 12/30: train acc 0.9785 loss 0.4924 | val acc 0.8337 loss 0.8542
+
+--- Epoch 13/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [45.6s]
+  Validating 100% 21/21 batches [4.2s]
+  Epoch 13/30: train acc 0.9823 loss 0.4826 | val acc 0.8830 loss 0.7626
+  [NEW BEST] epoch 13 val 0.8830
+
+--- Epoch 14/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 14/30: train acc 0.9919 loss 0.4641 | val acc 0.8686 loss 0.8003
+
+--- Epoch 15/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [4.1s]
+  Epoch 15/30: train acc 0.9850 loss 0.4783 | val acc 0.8686 loss 0.8034
+
+--- Epoch 16/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.0s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 16/30: train acc 0.9877 loss 0.4701 | val acc 0.8563 loss 0.8139
+
+--- Epoch 17/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.1s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch 17/30: train acc 0.9850 loss 0.4715 | val acc 0.8604 loss 0.8012
+
+--- Epoch 18/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.1s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 18/30: train acc 0.9909 loss 0.4626 | val acc 0.8665 loss 0.7980
+
+--- Epoch 19/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.1s]
+  Validating 100% 21/21 batches [4.2s]
+  Epoch 19/30: train acc 0.9909 loss 0.4606 | val acc 0.8624 loss 0.7957
+
+--- Epoch 20/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.2s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 20/30: train acc 0.9919 loss 0.4585 | val acc 0.8706 loss 0.7803
+
+--- Epoch 21/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch 21/30: train acc 0.9914 loss 0.4575 | val acc 0.8665 loss 0.7984
+
+--- Epoch 22/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 22/30: train acc 0.9946 loss 0.4566 | val acc 0.8604 loss 0.8009
+
+--- Epoch 23/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.2s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 23/30: train acc 0.9941 loss 0.4553 | val acc 0.8645 loss 0.7827
+
+--- Epoch 24/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.2s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 24/30: train acc 0.9946 loss 0.4523 | val acc 0.8727 loss 0.7995
+
+--- Epoch 25/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.4s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 25/30: train acc 0.9930 loss 0.4540 | val acc 0.8624 loss 0.8063
+
+--- Epoch 26/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.2s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch 26/30: train acc 0.9941 loss 0.4530 | val acc 0.8645 loss 0.8063
+
+--- Epoch 27/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.1s]
+  Validating 100% 21/21 batches [3.5s]
+  Epoch 27/30: train acc 0.9973 loss 0.4509 | val acc 0.8542 loss 0.8110
+
+--- Epoch 28/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 28/30: train acc 0.9936 loss 0.4547 | val acc 0.8604 loss 0.8117
+
+--- Epoch 29/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [47.0s]
+  Validating 100% 21/21 batches [3.4s]
+  Epoch 29/30: train acc 0.9925 loss 0.4561 | val acc 0.8604 loss 0.8099
+
+--- Epoch 30/30 [H-CoAtNet fold 5] ---
+  Training 100% 78/78 batches [46.3s]
+  Validating 100% 21/21 batches [3.5s]
+  Epoch 30/30: train acc 0.9946 loss 0.4493 | val acc 0.8604 loss 0.8083
+  Restoring best checkpoint (epoch 13, val_acc 0.8830)...
+  Validating 100% 21/21 batches [4.5s]
+  --- Frozen Test (held-out, val-best ckpt, fold 5) ---
+  Validating 100% 7/7 batches [1.7s]
+  Frozen test accuracy: 90.51% (n=158)
+
+======================================================================
+  FOLD 5/5 COMPLETE -- H-CoAtNet  (25.2 min)
+======================================================================
+  Validation (val-best epoch 13):
+    Accuracy      : 88.30%
+    Balanced Acc  : 85.67%
+    Macro F1      : 86.16%
+    Kappa         : 0.8483
+    MCC           : 0.8495
+    ECE           : 0.1057
+    AUROC         : 0.9630
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 90.51%
+    Balanced Acc  : 87.69%
+    Macro F1      : 85.75%
+    Kappa         : 0.8762
+    MCC           : 0.8794
+    ECE           : 0.1019
+    AUROC         : 0.9270
+======================================================================
+
+######################################################################
+#  MODEL COMPLETE: H-CoAtNet  (5/5 folds, 127.9 min total)
+######################################################################
+
+  VALIDATION ACROSS 5 FOLDS (val-best checkpoint per fold):
+  Metric                 Mean +/- SD                    Per-fold values
+  ---------------------- ------------------------------ ------------------------------
+  Accuracy               89.81 +/- 1.65                 [90.7, 88.8, 89.0, 92.3, 88.3]
+  Macro F1               87.76 +/- 1.40                 [88.7, 87.1, 87.2, 89.7, 86.2]
+  Balanced Acc           87.27 +/- 1.56                 [88.0, 87.0, 86.1, 89.5, 85.7]
+  Kappa                  0.8671 +/- 0.0212
+  MCC                    0.8681 +/- 0.0218
+  ECE (lower=better)     0.0836 +/- 0.0229
+  AUROC                  0.9640 +/- 0.0200
+
+  FROZEN TEST ACROSS 5 FOLDS (val-best ckpt per fold):
+  Metric                 Mean +/- SD                    Per-fold values
+  ---------------------- ------------------------------ ------------------------------
+  Accuracy               89.11 +/- 1.97                 [86.7, 87.3, 89.9, 91.1, 90.5]
+  Macro F1               83.69 +/- 2.94                 [80.6, 80.4, 85.1, 86.6, 85.7]
+  Kappa                  0.8576 +/- 0.0260
+
+######################################################################
+
+======================================================================
+  RUNNING LEADERBOARD (models completed so far)
+======================================================================
+  Model              Val Acc (%)          Test Acc (%)         Val F1 (%)
+  ------------------ -------------------- -------------------- --------------------
+  1. H-CoAtNet        89.8+/-1.7      89.1+/-2.0           87.8 <-- proposed
+======================================================================
+
+**********************************************************************
+*  TRAINING: CoAtNet
+*  lr=5e-05, batch=24, pretrained=True, aug=color, ls=0.0
+*  5 folds x 30 epochs
+**********************************************************************
+  [CoAtNet fold 1/5] train=1876 val=474 ...
+
+--- Epoch  1/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.5s]
+  Validating 100% 20/20 batches [3.2s]
+  Epoch  1/30: train acc 0.7735 loss 0.6655 | val acc 0.8629 loss 0.3868
+  [NEW BEST] epoch 1 val 0.8629
+
+--- Epoch  2/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.2s]
+  Validating 100% 20/20 batches [3.1s]
+  Epoch  2/30: train acc 0.9318 loss 0.1914 | val acc 0.9072 loss 0.2857
+  [NEW BEST] epoch 2 val 0.9072
+
+--- Epoch  3/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.3s]
+  Validating 100% 20/20 batches [3.1s]
+  Epoch  3/30: train acc 0.9547 loss 0.1349 | val acc 0.8840 loss 0.3575
+
+--- Epoch  4/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.5s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch  4/30: train acc 0.9792 loss 0.0749 | val acc 0.8734 loss 0.3602
+
+--- Epoch  5/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.4s]
+  Validating 100% 20/20 batches [3.4s]
+  Epoch  5/30: train acc 0.9808 loss 0.0516 | val acc 0.8713 loss 0.3726
+
+--- Epoch  6/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.6s]
+  Validating 100% 20/20 batches [3.2s]
+  Epoch  6/30: train acc 0.9765 loss 0.0647 | val acc 0.9030 loss 0.3568
+
+--- Epoch  7/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.6s]
+  Validating 100% 20/20 batches [3.2s]
+  Epoch  7/30: train acc 0.9947 loss 0.0236 | val acc 0.9008 loss 0.3193
+
+--- Epoch  8/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.8s]
+  Validating 100% 20/20 batches [3.3s]
+  Epoch  8/30: train acc 0.9835 loss 0.0495 | val acc 0.8797 loss 0.4545
+
+--- Epoch  9/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.4s]
+  Validating 100% 20/20 batches [3.4s]
+  Epoch  9/30: train acc 0.9883 loss 0.0480 | val acc 0.9072 loss 0.2920
+
+--- Epoch 10/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.1s]
+  Validating 100% 20/20 batches [3.9s]
+  Epoch 10/30: train acc 0.9936 loss 0.0141 | val acc 0.8987 loss 0.3015
+
+--- Epoch 11/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.4s]
+  Validating 100% 20/20 batches [3.7s]
+  Epoch 11/30: train acc 0.9957 loss 0.0100 | val acc 0.9030 loss 0.3175
+
+--- Epoch 12/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.7s]
+  Validating 100% 20/20 batches [4.1s]
+  Epoch 12/30: train acc 0.9963 loss 0.0069 | val acc 0.9008 loss 0.2648
+
+--- Epoch 13/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.7s]
+  Validating 100% 20/20 batches [4.2s]
+  Epoch 13/30: train acc 0.9957 loss 0.0080 | val acc 0.8966 loss 0.2729
+
+--- Epoch 14/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.6s]
+  Validating 100% 20/20 batches [4.0s]
+  Epoch 14/30: train acc 0.9968 loss 0.0060 | val acc 0.9135 loss 0.3052
+  [NEW BEST] epoch 14 val 0.9135
+
+--- Epoch 15/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.7s]
+  Validating 100% 20/20 batches [4.0s]
+  Epoch 15/30: train acc 0.9963 loss 0.0050 | val acc 0.9051 loss 0.3011
+
+--- Epoch 16/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.4s]
+  Validating 100% 20/20 batches [4.4s]
+  Epoch 16/30: train acc 0.9979 loss 0.0061 | val acc 0.9030 loss 0.3111
+
+--- Epoch 17/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.5s]
+  Validating 100% 20/20 batches [4.6s]
+  Epoch 17/30: train acc 0.9973 loss 0.0044 | val acc 0.9051 loss 0.2945
+
+--- Epoch 18/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.5s]
+  Validating 100% 20/20 batches [4.1s]
+  Epoch 18/30: train acc 0.9957 loss 0.0060 | val acc 0.9072 loss 0.2920
+
+--- Epoch 19/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.5s]
+  Validating 100% 20/20 batches [3.8s]
+  Epoch 19/30: train acc 0.9968 loss 0.0078 | val acc 0.9072 loss 0.2926
+
+--- Epoch 20/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.6s]
+  Validating 100% 20/20 batches [3.9s]
+  Epoch 20/30: train acc 0.9973 loss 0.0043 | val acc 0.9051 loss 0.2963
+
+--- Epoch 21/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.5s]
+  Validating 100% 20/20 batches [3.9s]
+  Epoch 21/30: train acc 0.9979 loss 0.0049 | val acc 0.9135 loss 0.2933
+
+--- Epoch 22/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.2s]
+  Validating 100% 20/20 batches [4.0s]
+  Epoch 22/30: train acc 0.9979 loss 0.0052 | val acc 0.9177 loss 0.2929
+  [NEW BEST] epoch 22 val 0.9177
+
+--- Epoch 23/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.5s]
+  Validating 100% 20/20 batches [3.8s]
+  Epoch 23/30: train acc 0.9979 loss 0.0037 | val acc 0.9177 loss 0.2885
+
+--- Epoch 24/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.2s]
+  Validating 100% 20/20 batches [3.7s]
+  Epoch 24/30: train acc 1.0000 loss 0.0022 | val acc 0.9177 loss 0.2879
+
+--- Epoch 25/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.5s]
+  Validating 100% 20/20 batches [3.7s]
+  Epoch 25/30: train acc 0.9984 loss 0.0034 | val acc 0.9114 loss 0.2899
+
+--- Epoch 26/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.3s]
+  Validating 100% 20/20 batches [3.8s]
+  Epoch 26/30: train acc 0.9984 loss 0.0035 | val acc 0.9135 loss 0.2877
+
+--- Epoch 27/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.4s]
+  Validating 100% 20/20 batches [3.7s]
+  Epoch 27/30: train acc 0.9995 loss 0.0033 | val acc 0.9135 loss 0.2870
+
+--- Epoch 28/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.1s]
+  Validating 100% 20/20 batches [3.6s]
+  Epoch 28/30: train acc 0.9995 loss 0.0025 | val acc 0.9177 loss 0.2865
+
+--- Epoch 29/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.2s]
+  Validating 100% 20/20 batches [3.7s]
+  Epoch 29/30: train acc 0.9995 loss 0.0025 | val acc 0.9156 loss 0.2862
+
+--- Epoch 30/30 [CoAtNet fold 1] ---
+  Training 100% 79/79 batches [39.5s]
+  Validating 100% 20/20 batches [3.8s]
+  Epoch 30/30: train acc 0.9995 loss 0.0020 | val acc 0.9156 loss 0.2862
+  Restoring best checkpoint (epoch 22, val_acc 0.9177)...
+  Validating 100% 20/20 batches [3.1s]
+  --- Frozen Test (held-out, val-best ckpt, fold 1) ---
+  Validating 100% 7/7 batches [1.5s]
+  Frozen test accuracy: 89.87% (n=158)
+
+======================================================================
+  FOLD 1/5 COMPLETE -- CoAtNet  (21.8 min)
+======================================================================
+  Validation (val-best epoch 22):
+    Accuracy      : 91.77%
+    Balanced Acc  : 89.15%
+    Macro F1      : 89.04%
+    Kappa         : 0.8925
+    MCC           : 0.8927
+    ECE           : 0.0511
+    AUROC         : 0.9909
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 89.87%
+    Balanced Acc  : 85.99%
+    Macro F1      : 85.35%
+    Kappa         : 0.8677
+    MCC           : 0.8692
+    ECE           : 0.0911
+    AUROC         : 0.9836
+======================================================================
+  [CoAtNet fold 2/5] train=1904 val=446 ...
+
+--- Epoch  1/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [40.8s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch  1/30: train acc 0.7826 loss 0.6066 | val acc 0.8430 loss 0.4399
+  [NEW BEST] epoch 1 val 0.8430
+
+--- Epoch  2/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [40.6s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch  2/30: train acc 0.9364 loss 0.1792 | val acc 0.8565 loss 0.4938
+  [NEW BEST] epoch 2 val 0.8565
+
+--- Epoch  3/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [40.1s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch  3/30: train acc 0.9632 loss 0.1069 | val acc 0.8318 loss 0.5139
+
+--- Epoch  4/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.8s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch  4/30: train acc 0.9779 loss 0.0755 | val acc 0.8812 loss 0.3811
+  [NEW BEST] epoch 4 val 0.8812
+
+--- Epoch  5/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.7s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch  5/30: train acc 0.9874 loss 0.0343 | val acc 0.8610 loss 0.5238
+
+--- Epoch  6/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.5s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch  6/30: train acc 0.9958 loss 0.0162 | val acc 0.8700 loss 0.4319
+
+--- Epoch  7/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.5s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch  7/30: train acc 0.9916 loss 0.0197 | val acc 0.8857 loss 0.4476
+  [NEW BEST] epoch 7 val 0.8857
+
+--- Epoch  8/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.6s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch  8/30: train acc 0.9979 loss 0.0092 | val acc 0.8789 loss 0.5158
+
+--- Epoch  9/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [40.0s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch  9/30: train acc 0.9989 loss 0.0033 | val acc 0.8834 loss 0.5095
+
+--- Epoch 10/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.8s]
+  Validating 100% 19/19 batches [3.4s]
+  Epoch 10/30: train acc 0.9979 loss 0.0090 | val acc 0.8677 loss 0.5521
+
+--- Epoch 11/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.8s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 11/30: train acc 0.9979 loss 0.0053 | val acc 0.8767 loss 0.5343
+
+--- Epoch 12/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.5s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 12/30: train acc 0.9974 loss 0.0069 | val acc 0.8834 loss 0.5031
+
+--- Epoch 13/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.6s]
+  Validating 100% 19/19 batches [3.7s]
+  Epoch 13/30: train acc 0.9984 loss 0.0036 | val acc 0.8857 loss 0.5040
+
+--- Epoch 14/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.9s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 14/30: train acc 0.9989 loss 0.0041 | val acc 0.8700 loss 0.5100
+
+--- Epoch 15/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.8s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 15/30: train acc 0.9989 loss 0.0021 | val acc 0.8812 loss 0.5739
+
+--- Epoch 16/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.7s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 16/30: train acc 0.9984 loss 0.0060 | val acc 0.8744 loss 0.5492
+
+--- Epoch 17/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.7s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 17/30: train acc 0.9984 loss 0.0045 | val acc 0.8789 loss 0.5619
+
+--- Epoch 18/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.8s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 18/30: train acc 0.9989 loss 0.0031 | val acc 0.8857 loss 0.5399
+
+--- Epoch 19/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.6s]
+  Validating 100% 19/19 batches [3.4s]
+  Epoch 19/30: train acc 0.9989 loss 0.0028 | val acc 0.8857 loss 0.5250
+
+--- Epoch 20/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.6s]
+  Validating 100% 19/19 batches [3.5s]
+  Epoch 20/30: train acc 0.9989 loss 0.0022 | val acc 0.8879 loss 0.5277
+  [NEW BEST] epoch 20 val 0.8879
+
+--- Epoch 21/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [40.0s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 21/30: train acc 0.9984 loss 0.0024 | val acc 0.8834 loss 0.5449
+
+--- Epoch 22/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [40.1s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch 22/30: train acc 0.9989 loss 0.0017 | val acc 0.8834 loss 0.5477
+
+--- Epoch 23/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.9s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch 23/30: train acc 0.9989 loss 0.0023 | val acc 0.8857 loss 0.5346
+
+--- Epoch 24/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [40.0s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch 24/30: train acc 0.9995 loss 0.0015 | val acc 0.8879 loss 0.5288
+
+--- Epoch 25/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.9s]
+  Validating 100% 19/19 batches [3.5s]
+  Epoch 25/30: train acc 0.9995 loss 0.0018 | val acc 0.8879 loss 0.5408
+
+--- Epoch 26/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [40.0s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch 26/30: train acc 0.9995 loss 0.0011 | val acc 0.8857 loss 0.5445
+
+--- Epoch 27/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [40.1s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch 27/30: train acc 0.9995 loss 0.0010 | val acc 0.8857 loss 0.5457
+
+--- Epoch 28/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [40.2s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch 28/30: train acc 1.0000 loss 0.0009 | val acc 0.8857 loss 0.5468
+
+--- Epoch 29/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [39.9s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 29/30: train acc 1.0000 loss 0.0012 | val acc 0.8857 loss 0.5474
+
+--- Epoch 30/30 [CoAtNet fold 2] ---
+  Training 100% 80/80 batches [40.4s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch 30/30: train acc 1.0000 loss 0.0009 | val acc 0.8857 loss 0.5474
+  Restoring best checkpoint (epoch 20, val_acc 0.8879)...
+  Validating 100% 19/19 batches [2.9s]
+  --- Frozen Test (held-out, val-best ckpt, fold 2) ---
+  Validating 100% 7/7 batches [1.5s]
+  Frozen test accuracy: 89.87% (n=158)
+
+======================================================================
+  FOLD 2/5 COMPLETE -- CoAtNet  (21.7 min)
+======================================================================
+  Validation (val-best epoch 20):
+    Accuracy      : 88.79%
+    Balanced Acc  : 86.16%
+    Macro F1      : 86.46%
+    Kappa         : 0.8560
+    MCC           : 0.8562
+    ECE           : 0.0843
+    AUROC         : 0.9788
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 89.87%
+    Balanced Acc  : 84.42%
+    Macro F1      : 84.84%
+    Kappa         : 0.8668
+    MCC           : 0.8690
+    ECE           : 0.0845
+    AUROC         : 0.9810
+======================================================================
+  [CoAtNet fold 3/5] train=1860 val=490 ...
+
+--- Epoch  1/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.8s]
+  Validating 100% 21/21 batches [3.2s]
+  Epoch  1/30: train acc 0.7651 loss 0.6631 | val acc 0.8286 loss 0.5131
+  [NEW BEST] epoch 1 val 0.8286
+
+--- Epoch  2/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.7s]
+  Validating 100% 21/21 batches [3.2s]
+  Epoch  2/30: train acc 0.9177 loss 0.2386 | val acc 0.8653 loss 0.4304
+  [NEW BEST] epoch 2 val 0.8653
+
+--- Epoch  3/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.4s]
+  Validating 100% 21/21 batches [3.2s]
+  Epoch  3/30: train acc 0.9758 loss 0.0834 | val acc 0.8531 loss 0.7124
+
+--- Epoch  4/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.0s]
+  Validating 100% 21/21 batches [3.2s]
+  Epoch  4/30: train acc 0.9957 loss 0.0269 | val acc 0.8551 loss 0.6914
+
+--- Epoch  5/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.2s]
+  Validating 100% 21/21 batches [3.2s]
+  Epoch  5/30: train acc 0.9957 loss 0.0212 | val acc 0.8816 loss 0.6104
+  [NEW BEST] epoch 5 val 0.8816
+
+--- Epoch  6/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.6s]
+  Validating 100% 21/21 batches [3.2s]
+  Epoch  6/30: train acc 0.9973 loss 0.0083 | val acc 0.8776 loss 0.6985
+
+--- Epoch  7/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.3s]
+  Validating 100% 21/21 batches [3.2s]
+  Epoch  7/30: train acc 0.9957 loss 0.0113 | val acc 0.8592 loss 0.6977
+
+--- Epoch  8/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.3s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch  8/30: train acc 0.9892 loss 0.0359 | val acc 0.8143 loss 0.8138
+
+--- Epoch  9/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [38.9s]
+  Validating 100% 21/21 batches [4.1s]
+  Epoch  9/30: train acc 0.9710 loss 0.0906 | val acc 0.8612 loss 0.6635
+
+--- Epoch 10/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.4s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch 10/30: train acc 0.9978 loss 0.0089 | val acc 0.8612 loss 0.8138
+
+--- Epoch 11/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.0s]
+  Validating 100% 21/21 batches [4.0s]
+  Epoch 11/30: train acc 0.9925 loss 0.0197 | val acc 0.8735 loss 0.7437
+
+--- Epoch 12/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.2s]
+  Validating 100% 21/21 batches [4.0s]
+  Epoch 12/30: train acc 0.9946 loss 0.0143 | val acc 0.8857 loss 0.7125
+  [NEW BEST] epoch 12 val 0.8857
+
+--- Epoch 13/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.3s]
+  Validating 100% 21/21 batches [4.2s]
+  Epoch 13/30: train acc 0.9973 loss 0.0069 | val acc 0.8918 loss 0.6218
+  [NEW BEST] epoch 13 val 0.8918
+
+--- Epoch 14/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.4s]
+  Validating 100% 21/21 batches [4.2s]
+  Epoch 14/30: train acc 0.9989 loss 0.0026 | val acc 0.8898 loss 0.6813
+
+--- Epoch 15/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.4s]
+  Validating 100% 21/21 batches [4.2s]
+  Epoch 15/30: train acc 0.9995 loss 0.0024 | val acc 0.8837 loss 0.7071
+
+--- Epoch 16/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.2s]
+  Validating 100% 21/21 batches [4.1s]
+  Epoch 16/30: train acc 0.9978 loss 0.0054 | val acc 0.8837 loss 0.6827
+
+--- Epoch 17/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.2s]
+  Validating 100% 21/21 batches [3.9s]
+  Epoch 17/30: train acc 0.9973 loss 0.0058 | val acc 0.8837 loss 0.6882
+
+--- Epoch 18/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [3.9s]
+  Epoch 18/30: train acc 0.9995 loss 0.0016 | val acc 0.8857 loss 0.7213
+
+--- Epoch 19/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.4s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch 19/30: train acc 0.9995 loss 0.0010 | val acc 0.8878 loss 0.7226
+
+--- Epoch 20/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.3s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 20/30: train acc 1.0000 loss 0.0010 | val acc 0.8878 loss 0.7306
+
+--- Epoch 21/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [3.9s]
+  Epoch 21/30: train acc 1.0000 loss 0.0008 | val acc 0.8898 loss 0.7273
+
+--- Epoch 22/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.2s]
+  Validating 100% 21/21 batches [4.0s]
+  Epoch 22/30: train acc 1.0000 loss 0.0005 | val acc 0.8837 loss 0.7379
+
+--- Epoch 23/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.0s]
+  Validating 100% 21/21 batches [3.9s]
+  Epoch 23/30: train acc 1.0000 loss 0.0005 | val acc 0.8837 loss 0.7403
+
+--- Epoch 24/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.5s]
+  Validating 100% 21/21 batches [3.9s]
+  Epoch 24/30: train acc 0.9995 loss 0.0006 | val acc 0.8816 loss 0.7452
+
+--- Epoch 25/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.5s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch 25/30: train acc 0.9995 loss 0.0009 | val acc 0.8837 loss 0.7454
+
+--- Epoch 26/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.4s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch 26/30: train acc 1.0000 loss 0.0006 | val acc 0.8837 loss 0.7435
+
+--- Epoch 27/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.2s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch 27/30: train acc 1.0000 loss 0.0006 | val acc 0.8816 loss 0.7444
+
+--- Epoch 28/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.0s]
+  Validating 100% 21/21 batches [3.9s]
+  Epoch 28/30: train acc 1.0000 loss 0.0003 | val acc 0.8816 loss 0.7444
+
+--- Epoch 29/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [39.3s]
+  Validating 100% 21/21 batches [3.5s]
+  Epoch 29/30: train acc 0.9995 loss 0.0007 | val acc 0.8816 loss 0.7449
+
+--- Epoch 30/30 [CoAtNet fold 3] ---
+  Training 100% 78/78 batches [38.9s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 30/30: train acc 1.0000 loss 0.0004 | val acc 0.8816 loss 0.7449
+  Restoring best checkpoint (epoch 13, val_acc 0.8918)...
+  Validating 100% 21/21 batches [3.2s]
+  --- Frozen Test (held-out, val-best ckpt, fold 3) ---
+  Validating 100% 7/7 batches [1.6s]
+  Frozen test accuracy: 89.87% (n=158)
+
+======================================================================
+  FOLD 3/5 COMPLETE -- CoAtNet  (21.7 min)
+======================================================================
+  Validation (val-best epoch 13):
+    Accuracy      : 89.18%
+    Balanced Acc  : 85.45%
+    Macro F1      : 86.61%
+    Kappa         : 0.8567
+    MCC           : 0.8571
+    ECE           : 0.0792
+    AUROC         : 0.9658
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 89.87%
+    Balanced Acc  : 84.07%
+    Macro F1      : 84.97%
+    Kappa         : 0.8669
+    MCC           : 0.8683
+    ECE           : 0.0814
+    AUROC         : 0.9847
+======================================================================
+  [CoAtNet fold 4/5] train=1897 val=453 ...
+
+--- Epoch  1/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [40.2s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch  1/30: train acc 0.7549 loss 0.6706 | val acc 0.8190 loss 0.4824
+  [NEW BEST] epoch 1 val 0.8190
+
+--- Epoch  2/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.8s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch  2/30: train acc 0.9357 loss 0.1897 | val acc 0.8852 loss 0.3251
+  [NEW BEST] epoch 2 val 0.8852
+
+--- Epoch  3/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.8s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch  3/30: train acc 0.9578 loss 0.1238 | val acc 0.9249 loss 0.2587
+  [NEW BEST] epoch 3 val 0.9249
+
+--- Epoch  4/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.6s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch  4/30: train acc 0.9926 loss 0.0250 | val acc 0.8830 loss 0.5184
+
+--- Epoch  5/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.9s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch  5/30: train acc 0.9953 loss 0.0179 | val acc 0.9007 loss 0.4009
+
+--- Epoch  6/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.8s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch  6/30: train acc 0.9974 loss 0.0071 | val acc 0.9183 loss 0.3079
+
+--- Epoch  7/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.4s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch  7/30: train acc 0.9974 loss 0.0071 | val acc 0.9249 loss 0.3810
+
+--- Epoch  8/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.8s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch  8/30: train acc 0.9974 loss 0.0070 | val acc 0.8940 loss 0.5436
+
+--- Epoch  9/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.7s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch  9/30: train acc 0.9873 loss 0.0351 | val acc 0.8962 loss 0.3386
+
+--- Epoch 10/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.3s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch 10/30: train acc 0.9847 loss 0.0494 | val acc 0.8962 loss 0.4104
+
+--- Epoch 11/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.8s]
+  Validating 100% 19/19 batches [3.5s]
+  Epoch 11/30: train acc 0.9742 loss 0.0851 | val acc 0.8808 loss 0.4950
+
+--- Epoch 12/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.4s]
+  Validating 100% 19/19 batches [3.8s]
+  Epoch 12/30: train acc 0.9942 loss 0.0172 | val acc 0.8962 loss 0.4150
+
+--- Epoch 13/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.7s]
+  Validating 100% 19/19 batches [3.8s]
+  Epoch 13/30: train acc 0.9947 loss 0.0111 | val acc 0.9029 loss 0.4566
+
+--- Epoch 14/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.4s]
+  Validating 100% 19/19 batches [3.6s]
+  Epoch 14/30: train acc 0.9989 loss 0.0041 | val acc 0.9139 loss 0.3767
+
+--- Epoch 15/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.5s]
+  Validating 100% 19/19 batches [3.8s]
+  Epoch 15/30: train acc 0.9984 loss 0.0036 | val acc 0.9161 loss 0.4230
+
+--- Epoch 16/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.5s]
+  Validating 100% 19/19 batches [4.1s]
+  Epoch 16/30: train acc 0.9989 loss 0.0025 | val acc 0.9095 loss 0.4536
+
+--- Epoch 17/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.6s]
+  Validating 100% 19/19 batches [4.1s]
+  Epoch 17/30: train acc 0.9989 loss 0.0029 | val acc 0.8896 loss 0.6215
+
+--- Epoch 18/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.6s]
+  Validating 100% 19/19 batches [3.8s]
+  Epoch 18/30: train acc 0.9995 loss 0.0023 | val acc 0.9095 loss 0.4633
+
+--- Epoch 19/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.4s]
+  Validating 100% 19/19 batches [3.6s]
+  Epoch 19/30: train acc 0.9989 loss 0.0015 | val acc 0.9095 loss 0.4789
+
+--- Epoch 20/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.7s]
+  Validating 100% 19/19 batches [3.4s]
+  Epoch 20/30: train acc 0.9989 loss 0.0019 | val acc 0.9183 loss 0.4351
+
+--- Epoch 21/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.3s]
+  Validating 100% 19/19 batches [3.4s]
+  Epoch 21/30: train acc 0.9979 loss 0.0042 | val acc 0.9139 loss 0.4226
+
+--- Epoch 22/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.9s]
+  Validating 100% 19/19 batches [3.4s]
+  Epoch 22/30: train acc 0.9989 loss 0.0016 | val acc 0.9183 loss 0.4482
+
+--- Epoch 23/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.5s]
+  Validating 100% 19/19 batches [3.5s]
+  Epoch 23/30: train acc 1.0000 loss 0.0010 | val acc 0.9161 loss 0.4447
+
+--- Epoch 24/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.7s]
+  Validating 100% 19/19 batches [3.4s]
+  Epoch 24/30: train acc 1.0000 loss 0.0010 | val acc 0.9183 loss 0.4506
+
+--- Epoch 25/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.8s]
+  Validating 100% 19/19 batches [3.5s]
+  Epoch 25/30: train acc 1.0000 loss 0.0013 | val acc 0.9139 loss 0.4448
+
+--- Epoch 26/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.5s]
+  Validating 100% 19/19 batches [3.5s]
+  Epoch 26/30: train acc 0.9989 loss 0.0016 | val acc 0.9161 loss 0.4477
+
+--- Epoch 27/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.7s]
+  Validating 100% 19/19 batches [3.4s]
+  Epoch 27/30: train acc 1.0000 loss 0.0008 | val acc 0.9161 loss 0.4482
+
+--- Epoch 28/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.5s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 28/30: train acc 0.9989 loss 0.0015 | val acc 0.9161 loss 0.4493
+
+--- Epoch 29/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.7s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch 29/30: train acc 1.0000 loss 0.0011 | val acc 0.9161 loss 0.4498
+
+--- Epoch 30/30 [CoAtNet fold 4] ---
+  Training 100% 80/80 batches [39.4s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 30/30: train acc 0.9989 loss 0.0021 | val acc 0.9161 loss 0.4492
+  Restoring best checkpoint (epoch 3, val_acc 0.9249)...
+  Validating 100% 19/19 batches [3.0s]
+  --- Frozen Test (held-out, val-best ckpt, fold 4) ---
+  Validating 100% 7/7 batches [1.5s]
+  Frozen test accuracy: 89.87% (n=158)
+
+======================================================================
+  FOLD 4/5 COMPLETE -- CoAtNet  (21.7 min)
+======================================================================
+  Validation (val-best epoch 3):
+    Accuracy      : 92.49%
+    Balanced Acc  : 91.10%
+    Macro F1      : 90.71%
+    Kappa         : 0.9025
+    MCC           : 0.9038
+    ECE           : 0.0391
+    AUROC         : 0.9875
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 89.87%
+    Balanced Acc  : 87.29%
+    Macro F1      : 85.40%
+    Kappa         : 0.8686
+    MCC           : 0.8710
+    ECE           : 0.0719
+    AUROC         : 0.9848
+======================================================================
+  [CoAtNet fold 5/5] train=1863 val=487 ...
+
+--- Epoch  1/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.4s]
+  Validating 100% 21/21 batches [3.2s]
+  Epoch  1/30: train acc 0.7756 loss 0.6235 | val acc 0.8193 loss 0.5399
+  [NEW BEST] epoch 1 val 0.8193
+
+--- Epoch  2/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.2s]
+  Validating 100% 21/21 batches [3.1s]
+  Epoch  2/30: train acc 0.9372 loss 0.1822 | val acc 0.8850 loss 0.4332
+  [NEW BEST] epoch 2 val 0.8850
+
+--- Epoch  3/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.3s]
+  Validating 100% 21/21 batches [3.1s]
+  Epoch  3/30: train acc 0.9710 loss 0.0879 | val acc 0.8830 loss 0.3691
+
+--- Epoch  4/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.0s]
+  Validating 100% 21/21 batches [3.2s]
+  Epoch  4/30: train acc 0.9753 loss 0.0639 | val acc 0.8850 loss 0.4626
+
+--- Epoch  5/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.5s]
+  Validating 100% 21/21 batches [3.1s]
+  Epoch  5/30: train acc 0.9796 loss 0.0531 | val acc 0.8727 loss 0.3950
+
+--- Epoch  6/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.4s]
+  Validating 100% 21/21 batches [3.2s]
+  Epoch  6/30: train acc 0.9919 loss 0.0290 | val acc 0.8706 loss 0.4842
+
+--- Epoch  7/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.2s]
+  Validating 100% 21/21 batches [3.2s]
+  Epoch  7/30: train acc 0.9936 loss 0.0112 | val acc 0.8809 loss 0.4525
+
+--- Epoch  8/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch  8/30: train acc 0.9962 loss 0.0072 | val acc 0.8789 loss 0.5351
+
+--- Epoch  9/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch  9/30: train acc 0.9952 loss 0.0089 | val acc 0.8891 loss 0.5236
+  [NEW BEST] epoch 9 val 0.8891
+
+--- Epoch 10/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.0s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch 10/30: train acc 0.9979 loss 0.0058 | val acc 0.8850 loss 0.5571
+
+--- Epoch 11/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [4.0s]
+  Epoch 11/30: train acc 0.9882 loss 0.0331 | val acc 0.8624 loss 0.5093
+
+--- Epoch 12/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 12/30: train acc 0.9887 loss 0.0250 | val acc 0.8645 loss 0.6145
+
+--- Epoch 13/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.2s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 13/30: train acc 0.9957 loss 0.0164 | val acc 0.8830 loss 0.5234
+
+--- Epoch 14/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [38.9s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 14/30: train acc 0.9973 loss 0.0056 | val acc 0.8850 loss 0.5266
+
+--- Epoch 15/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [38.8s]
+  Validating 100% 21/21 batches [4.0s]
+  Epoch 15/30: train acc 0.9973 loss 0.0069 | val acc 0.8891 loss 0.5510
+
+--- Epoch 16/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [38.7s]
+  Validating 100% 21/21 batches [4.2s]
+  Epoch 16/30: train acc 0.9973 loss 0.0069 | val acc 0.8850 loss 0.5450
+
+--- Epoch 17/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [4.1s]
+  Epoch 17/30: train acc 0.9968 loss 0.0052 | val acc 0.8891 loss 0.5659
+
+--- Epoch 18/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [4.0s]
+  Epoch 18/30: train acc 0.9973 loss 0.0049 | val acc 0.8850 loss 0.5608
+
+--- Epoch 19/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 19/30: train acc 0.9989 loss 0.0030 | val acc 0.8871 loss 0.5571
+
+--- Epoch 20/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.2s]
+  Validating 100% 21/21 batches [4.0s]
+  Epoch 20/30: train acc 0.9979 loss 0.0041 | val acc 0.8830 loss 0.5561
+
+--- Epoch 21/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.4s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 21/30: train acc 0.9979 loss 0.0029 | val acc 0.8891 loss 0.5891
+
+--- Epoch 22/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.3s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 22/30: train acc 0.9984 loss 0.0029 | val acc 0.8891 loss 0.5789
+
+--- Epoch 23/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.4s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch 23/30: train acc 0.9979 loss 0.0037 | val acc 0.8871 loss 0.5892
+
+--- Epoch 24/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.2s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch 24/30: train acc 0.9989 loss 0.0028 | val acc 0.8871 loss 0.5842
+
+--- Epoch 25/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch 25/30: train acc 0.9995 loss 0.0022 | val acc 0.8871 loss 0.5902
+
+--- Epoch 26/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch 26/30: train acc 0.9989 loss 0.0028 | val acc 0.8871 loss 0.5877
+
+--- Epoch 27/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.0s]
+  Validating 100% 21/21 batches [3.5s]
+  Epoch 27/30: train acc 0.9979 loss 0.0030 | val acc 0.8850 loss 0.5893
+
+--- Epoch 28/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch 28/30: train acc 0.9984 loss 0.0022 | val acc 0.8830 loss 0.5943
+
+--- Epoch 29/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch 29/30: train acc 0.9995 loss 0.0019 | val acc 0.8830 loss 0.5952
+
+--- Epoch 30/30 [CoAtNet fold 5] ---
+  Training 100% 78/78 batches [39.1s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch 30/30: train acc 0.9989 loss 0.0025 | val acc 0.8830 loss 0.5952
+  Restoring best checkpoint (epoch 9, val_acc 0.8891)...
+  Validating 100% 21/21 batches [3.2s]
+  --- Frozen Test (held-out, val-best ckpt, fold 5) ---
+  Validating 100% 7/7 batches [1.5s]
+  Frozen test accuracy: 89.24% (n=158)
+
+======================================================================
+  FOLD 5/5 COMPLETE -- CoAtNet  (21.6 min)
+======================================================================
+  Validation (val-best epoch 9):
+    Accuracy      : 88.91%
+    Balanced Acc  : 85.57%
+    Macro F1      : 86.13%
+    Kappa         : 0.8563
+    MCC           : 0.8571
+    ECE           : 0.0832
+    AUROC         : 0.9754
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 89.24%
+    Balanced Acc  : 84.45%
+    Macro F1      : 84.53%
+    Kappa         : 0.8591
+    MCC           : 0.8599
+    ECE           : 0.0980
+    AUROC         : 0.9830
+======================================================================
+
+######################################################################
+#  MODEL COMPLETE: CoAtNet  (5/5 folds, 108.5 min total)
+######################################################################
+
+  VALIDATION ACROSS 5 FOLDS (val-best checkpoint per fold):
+  Metric                 Mean +/- SD                    Per-fold values
+  ---------------------- ------------------------------ ------------------------------
+  Accuracy               90.23 +/- 1.76                 [91.8, 88.8, 89.2, 92.5, 88.9]
+  Macro F1               87.79 +/- 2.00                 [89.0, 86.5, 86.6, 90.7, 86.1]
+  Balanced Acc           87.49 +/- 2.52                 [89.2, 86.2, 85.5, 91.1, 85.6]
+  Kappa                  0.8728 +/- 0.0228
+  MCC                    0.8734 +/- 0.0230
+  ECE (lower=better)     0.0674 +/- 0.0209
+  AUROC                  0.9797 +/- 0.0100
+
+  FROZEN TEST ACROSS 5 FOLDS (val-best ckpt per fold):
+  Metric                 Mean +/- SD                    Per-fold values
+  ---------------------- ------------------------------ ------------------------------
+  Accuracy               89.75 +/- 0.28                 [89.9, 89.9, 89.9, 89.9, 89.2]
+  Macro F1               85.02 +/- 0.36                 [85.3, 84.8, 85.0, 85.4, 84.5]
+  Kappa                  0.8658 +/- 0.0038
+
+######################################################################
+
+======================================================================
+  RUNNING LEADERBOARD (models completed so far)
+======================================================================
+  Model              Val Acc (%)          Test Acc (%)         Val F1 (%)
+  ------------------ -------------------- -------------------- --------------------
+  1. CoAtNet          90.2+/-1.8      89.7+/-0.3           87.8
+  2. H-CoAtNet        89.8+/-1.7      89.1+/-2.0           87.8 <-- proposed
+======================================================================
+
+**********************************************************************
+*  TRAINING: CNN
+*  lr=0.0003, batch=24, pretrained=False, aug=base, ls=0.0
+*  5 folds x 30 epochs
+**********************************************************************
+  [CNN fold 1/5] train=1876 val=474 ...
+
+--- Epoch  1/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [17.4s]
+  Validating 100% 20/20 batches [3.6s]
+  Epoch  1/30: train acc 0.4371 loss 1.3493 | val acc 0.5021 loss 1.2702
+  [NEW BEST] epoch 1 val 0.5021
+
+--- Epoch  2/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.6s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch  2/30: train acc 0.5229 loss 1.1996 | val acc 0.4578 loss 1.2824
+
+--- Epoch  3/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.6s]
+  Validating 100% 20/20 batches [3.7s]
+  Epoch  3/30: train acc 0.5773 loss 1.1274 | val acc 0.5717 loss 1.1232
+  [NEW BEST] epoch 3 val 0.5717
+
+--- Epoch  4/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [17.1s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch  4/30: train acc 0.5757 loss 1.1025 | val acc 0.5696 loss 1.1258
+
+--- Epoch  5/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.5s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch  5/30: train acc 0.5943 loss 1.0519 | val acc 0.4515 loss 1.2525
+
+--- Epoch  6/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.9s]
+  Validating 100% 20/20 batches [4.1s]
+  Epoch  6/30: train acc 0.6157 loss 1.0104 | val acc 0.5886 loss 1.0224
+  [NEW BEST] epoch 6 val 0.5886
+
+--- Epoch  7/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.5s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch  7/30: train acc 0.6199 loss 0.9937 | val acc 0.5464 loss 1.1366
+
+--- Epoch  8/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.5s]
+  Validating 100% 20/20 batches [3.6s]
+  Epoch  8/30: train acc 0.6317 loss 0.9623 | val acc 0.5527 loss 1.1296
+
+--- Epoch  9/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [17.2s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch  9/30: train acc 0.6519 loss 0.9414 | val acc 0.6139 loss 0.9598
+  [NEW BEST] epoch 9 val 0.6139
+
+--- Epoch 10/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.5s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch 10/30: train acc 0.6615 loss 0.9207 | val acc 0.6456 loss 0.9138
+  [NEW BEST] epoch 10 val 0.6456
+
+--- Epoch 11/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.9s]
+  Validating 100% 20/20 batches [4.3s]
+  Epoch 11/30: train acc 0.6636 loss 0.8999 | val acc 0.5949 loss 1.0399
+
+--- Epoch 12/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.5s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch 12/30: train acc 0.6695 loss 0.8855 | val acc 0.6456 loss 0.9725
+
+--- Epoch 13/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.6s]
+  Validating 100% 20/20 batches [3.4s]
+  Epoch 13/30: train acc 0.6802 loss 0.8589 | val acc 0.6097 loss 0.9600
+
+--- Epoch 14/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [17.4s]
+  Validating 100% 20/20 batches [3.0s]
+  Epoch 14/30: train acc 0.6887 loss 0.8471 | val acc 0.5949 loss 1.0592
+
+--- Epoch 15/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.6s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch 15/30: train acc 0.6898 loss 0.8549 | val acc 0.5844 loss 1.0497
+
+--- Epoch 16/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [17.1s]
+  Validating 100% 20/20 batches [4.2s]
+  Epoch 16/30: train acc 0.6962 loss 0.8379 | val acc 0.6181 loss 1.0037
+
+--- Epoch 17/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.8s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch 17/30: train acc 0.7074 loss 0.8077 | val acc 0.6814 loss 0.8318
+  [NEW BEST] epoch 17 val 0.6814
+
+--- Epoch 18/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [17.0s]
+  Validating 100% 20/20 batches [3.9s]
+  Epoch 18/30: train acc 0.7276 loss 0.7861 | val acc 0.6667 loss 0.8647
+
+--- Epoch 19/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [17.6s]
+  Validating 100% 20/20 batches [3.0s]
+  Epoch 19/30: train acc 0.7297 loss 0.7764 | val acc 0.6329 loss 0.9112
+
+--- Epoch 20/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.8s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch 20/30: train acc 0.7271 loss 0.7796 | val acc 0.6582 loss 0.8674
+
+--- Epoch 21/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.8s]
+  Validating 100% 20/20 batches [4.2s]
+  Epoch 21/30: train acc 0.7297 loss 0.7516 | val acc 0.6329 loss 0.9553
+
+--- Epoch 22/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.8s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch 22/30: train acc 0.7383 loss 0.7452 | val acc 0.6392 loss 0.8904
+
+--- Epoch 23/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.7s]
+  Validating 100% 20/20 batches [3.6s]
+  Epoch 23/30: train acc 0.7345 loss 0.7491 | val acc 0.6435 loss 0.8674
+
+--- Epoch 24/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [17.4s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch 24/30: train acc 0.7511 loss 0.7262 | val acc 0.6414 loss 0.8640
+
+--- Epoch 25/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.7s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch 25/30: train acc 0.7548 loss 0.7228 | val acc 0.6751 loss 0.8339
+
+--- Epoch 26/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [17.0s]
+  Validating 100% 20/20 batches [4.3s]
+  Epoch 26/30: train acc 0.7468 loss 0.7311 | val acc 0.6435 loss 0.8584
+
+--- Epoch 27/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.7s]
+  Validating 100% 20/20 batches [3.0s]
+  Epoch 27/30: train acc 0.7393 loss 0.7325 | val acc 0.6540 loss 0.8613
+
+--- Epoch 28/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [17.0s]
+  Validating 100% 20/20 batches [3.6s]
+  Epoch 28/30: train acc 0.7484 loss 0.7320 | val acc 0.6561 loss 0.8462
+
+--- Epoch 29/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [17.6s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch 29/30: train acc 0.7521 loss 0.7124 | val acc 0.6561 loss 0.8452
+
+--- Epoch 30/30 [CNN fold 1] ---
+  Training 100% 79/79 batches [16.7s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch 30/30: train acc 0.7591 loss 0.7036 | val acc 0.6540 loss 0.8524
+  Restoring best checkpoint (epoch 17, val_acc 0.6814)...
+  Validating 100% 20/20 batches [3.6s]
+  --- Frozen Test (held-out, val-best ckpt, fold 1) ---
+  Validating 100% 7/7 batches [1.9s]
+  Frozen test accuracy: 71.52% (n=158)
+
+======================================================================
+  FOLD 1/5 COMPLETE -- CNN  (10.3 min)
+======================================================================
+  Validation (val-best epoch 17):
+    Accuracy      : 68.14%
+    Balanced Acc  : 61.73%
+    Macro F1      : 61.71%
+    Kappa         : 0.5827
+    MCC           : 0.5828
+    ECE           : 0.0508
+    AUROC         : 0.8888
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 71.52%
+    Balanced Acc  : 63.09%
+    Macro F1      : 63.18%
+    Kappa         : 0.6252
+    MCC           : 0.6270
+    ECE           : 0.0960
+    AUROC         : 0.9051
+======================================================================
+  [CNN fold 2/5] train=1904 val=446 ...
+
+--- Epoch  1/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [16.9s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch  1/30: train acc 0.4674 loss 1.2982 | val acc 0.4865 loss 1.2853
+  [NEW BEST] epoch 1 val 0.4865
+
+--- Epoch  2/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.2s]
+  Validating 100% 19/19 batches [4.4s]
+  Epoch  2/30: train acc 0.5520 loss 1.1429 | val acc 0.3924 loss 1.2781
+
+--- Epoch  3/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [16.9s]
+  Validating 100% 19/19 batches [2.7s]
+  Epoch  3/30: train acc 0.5546 loss 1.1062 | val acc 0.4933 loss 1.2051
+  [NEW BEST] epoch 3 val 0.4933
+
+--- Epoch  4/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [16.8s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch  4/30: train acc 0.5867 loss 1.0510 | val acc 0.5157 loss 1.1818
+  [NEW BEST] epoch 4 val 0.5157
+
+--- Epoch  5/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.8s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch  5/30: train acc 0.5898 loss 1.0432 | val acc 0.5695 loss 1.0983
+  [NEW BEST] epoch 5 val 0.5695
+
+--- Epoch  6/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [16.9s]
+  Validating 100% 19/19 batches [2.7s]
+  Epoch  6/30: train acc 0.6266 loss 0.9728 | val acc 0.5022 loss 1.1383
+
+--- Epoch  7/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [4.3s]
+  Epoch  7/30: train acc 0.6255 loss 0.9712 | val acc 0.5314 loss 1.1591
+
+--- Epoch  8/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch  8/30: train acc 0.6402 loss 0.9624 | val acc 0.5673 loss 1.0423
+
+--- Epoch  9/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [16.9s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch  9/30: train acc 0.6387 loss 0.9328 | val acc 0.5785 loss 1.0339
+  [NEW BEST] epoch 9 val 0.5785
+
+--- Epoch 10/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.8s]
+  Validating 100% 19/19 batches [2.7s]
+  Epoch 10/30: train acc 0.6450 loss 0.9150 | val acc 0.5426 loss 1.0576
+
+--- Epoch 11/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [2.7s]
+  Epoch 11/30: train acc 0.6812 loss 0.8636 | val acc 0.5919 loss 0.9683
+  [NEW BEST] epoch 11 val 0.5919
+
+--- Epoch 12/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.1s]
+  Validating 100% 19/19 batches [4.1s]
+  Epoch 12/30: train acc 0.6654 loss 0.8714 | val acc 0.5785 loss 1.0175
+
+--- Epoch 13/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch 13/30: train acc 0.6717 loss 0.8591 | val acc 0.6435 loss 0.9339
+  [NEW BEST] epoch 13 val 0.6435
+
+--- Epoch 14/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.2s]
+  Validating 100% 19/19 batches [3.6s]
+  Epoch 14/30: train acc 0.6907 loss 0.8310 | val acc 0.5717 loss 1.0344
+
+--- Epoch 15/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.6s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch 15/30: train acc 0.6933 loss 0.8398 | val acc 0.5987 loss 0.9551
+
+--- Epoch 16/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [16.9s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch 16/30: train acc 0.7059 loss 0.8018 | val acc 0.6323 loss 0.9048
+
+--- Epoch 17/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.3s]
+  Validating 100% 19/19 batches [3.6s]
+  Epoch 17/30: train acc 0.7164 loss 0.7767 | val acc 0.6188 loss 0.9831
+
+--- Epoch 18/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [16.9s]
+  Validating 100% 19/19 batches [2.7s]
+  Epoch 18/30: train acc 0.7143 loss 0.7745 | val acc 0.6726 loss 0.8924
+  [NEW BEST] epoch 18 val 0.6726
+
+--- Epoch 19/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [16.8s]
+  Validating 100% 19/19 batches [3.7s]
+  Epoch 19/30: train acc 0.7248 loss 0.7707 | val acc 0.6368 loss 0.8876
+
+--- Epoch 20/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.3s]
+  Validating 100% 19/19 batches [2.6s]
+  Epoch 20/30: train acc 0.7327 loss 0.7517 | val acc 0.6031 loss 0.9278
+
+--- Epoch 21/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [16.9s]
+  Validating 100% 19/19 batches [2.7s]
+  Epoch 21/30: train acc 0.7369 loss 0.7526 | val acc 0.6323 loss 0.9053
+
+--- Epoch 22/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.1s]
+  Validating 100% 19/19 batches [3.9s]
+  Epoch 22/30: train acc 0.7342 loss 0.7348 | val acc 0.6480 loss 0.8546
+
+--- Epoch 23/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [2.7s]
+  Epoch 23/30: train acc 0.7285 loss 0.7322 | val acc 0.6637 loss 0.8779
+
+--- Epoch 24/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [3.5s]
+  Epoch 24/30: train acc 0.7447 loss 0.7131 | val acc 0.6883 loss 0.8400
+  [NEW BEST] epoch 24 val 0.6883
+
+--- Epoch 25/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.6s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch 25/30: train acc 0.7453 loss 0.7058 | val acc 0.6659 loss 0.8445
+
+--- Epoch 26/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [2.7s]
+  Epoch 26/30: train acc 0.7521 loss 0.6960 | val acc 0.6592 loss 0.8559
+
+--- Epoch 27/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [16.9s]
+  Validating 100% 19/19 batches [4.0s]
+  Epoch 27/30: train acc 0.7721 loss 0.6806 | val acc 0.6794 loss 0.8424
+
+--- Epoch 28/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [2.7s]
+  Epoch 28/30: train acc 0.7584 loss 0.6853 | val acc 0.6525 loss 0.8628
+
+--- Epoch 29/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 29/30: train acc 0.7589 loss 0.6840 | val acc 0.6749 loss 0.8436
+
+--- Epoch 30/30 [CNN fold 2] ---
+  Training 100% 80/80 batches [17.9s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch 30/30: train acc 0.7700 loss 0.6811 | val acc 0.6637 loss 0.8455
+  Restoring best checkpoint (epoch 24, val_acc 0.6883)...
+  Validating 100% 19/19 batches [2.7s]
+  --- Frozen Test (held-out, val-best ckpt, fold 2) ---
+  Validating 100% 7/7 batches [1.4s]
+  Frozen test accuracy: 70.25% (n=158)
+
+======================================================================
+  FOLD 2/5 COMPLETE -- CNN  (10.3 min)
+======================================================================
+  Validation (val-best epoch 24):
+    Accuracy      : 68.83%
+    Balanced Acc  : 64.45%
+    Macro F1      : 64.49%
+    Kappa         : 0.6001
+    MCC           : 0.6018
+    ECE           : 0.0863
+    AUROC         : 0.8969
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 70.25%
+    Balanced Acc  : 62.60%
+    Macro F1      : 62.75%
+    Kappa         : 0.6114
+    MCC           : 0.6126
+    ECE           : 0.0620
+    AUROC         : 0.8983
+======================================================================
+  [CNN fold 3/5] train=1860 val=490 ...
+
+--- Epoch  1/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [17.3s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch  1/30: train acc 0.4694 loss 1.3068 | val acc 0.4469 loss 1.2864
+  [NEW BEST] epoch 1 val 0.4469
+
+--- Epoch  2/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch  2/30: train acc 0.5419 loss 1.1560 | val acc 0.3571 loss 1.5731
+
+--- Epoch  3/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.7s]
+  Validating 100% 21/21 batches [4.3s]
+  Epoch  3/30: train acc 0.5500 loss 1.1415 | val acc 0.5020 loss 1.1754
+  [NEW BEST] epoch 3 val 0.5020
+
+--- Epoch  4/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [17.0s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch  4/30: train acc 0.5699 loss 1.0877 | val acc 0.5204 loss 1.1511
+  [NEW BEST] epoch 4 val 0.5204
+
+--- Epoch  5/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch  5/30: train acc 0.5925 loss 1.0416 | val acc 0.5388 loss 1.1029
+  [NEW BEST] epoch 5 val 0.5388
+
+--- Epoch  6/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [17.2s]
+  Validating 100% 21/21 batches [4.1s]
+  Epoch  6/30: train acc 0.6032 loss 1.0140 | val acc 0.5694 loss 1.0350
+  [NEW BEST] epoch 6 val 0.5694
+
+--- Epoch  7/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.7s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch  7/30: train acc 0.6312 loss 0.9855 | val acc 0.5857 loss 1.0640
+  [NEW BEST] epoch 7 val 0.5857
+
+--- Epoch  8/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [4.5s]
+  Epoch  8/30: train acc 0.6032 loss 1.0003 | val acc 0.6347 loss 0.9559
+  [NEW BEST] epoch 8 val 0.6347
+
+--- Epoch  9/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch  9/30: train acc 0.6403 loss 0.9500 | val acc 0.6592 loss 0.9043
+  [NEW BEST] epoch 9 val 0.6592
+
+--- Epoch 10/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.9s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 10/30: train acc 0.6522 loss 0.9412 | val acc 0.6490 loss 0.9143
+
+--- Epoch 11/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [17.5s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch 11/30: train acc 0.6608 loss 0.8918 | val acc 0.5755 loss 1.0144
+
+--- Epoch 12/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.6s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 12/30: train acc 0.6656 loss 0.8984 | val acc 0.6122 loss 1.0720
+
+--- Epoch 13/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.7s]
+  Validating 100% 21/21 batches [4.1s]
+  Epoch 13/30: train acc 0.6629 loss 0.8892 | val acc 0.6184 loss 0.9345
+
+--- Epoch 14/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [17.1s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 14/30: train acc 0.7005 loss 0.8440 | val acc 0.6367 loss 0.9509
+
+--- Epoch 15/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.9s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 15/30: train acc 0.6946 loss 0.8422 | val acc 0.6510 loss 0.9444
+
+--- Epoch 16/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.9s]
+  Validating 100% 21/21 batches [4.2s]
+  Epoch 16/30: train acc 0.7043 loss 0.8295 | val acc 0.6143 loss 0.9207
+
+--- Epoch 17/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.7s]
+  Validating 100% 21/21 batches [3.1s]
+  Epoch 17/30: train acc 0.6973 loss 0.8210 | val acc 0.6714 loss 0.8904
+  [NEW BEST] epoch 17 val 0.6714
+
+--- Epoch 18/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch 18/30: train acc 0.7097 loss 0.7986 | val acc 0.6571 loss 0.8561
+
+--- Epoch 19/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [17.5s]
+  Validating 100% 21/21 batches [3.1s]
+  Epoch 19/30: train acc 0.7108 loss 0.7969 | val acc 0.6796 loss 0.8483
+  [NEW BEST] epoch 19 val 0.6796
+
+--- Epoch 20/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.7s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 20/30: train acc 0.7199 loss 0.7848 | val acc 0.6633 loss 0.8530
+
+--- Epoch 21/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [4.3s]
+  Epoch 21/30: train acc 0.7323 loss 0.7645 | val acc 0.6898 loss 0.8053
+  [NEW BEST] epoch 21 val 0.6898
+
+--- Epoch 22/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.6s]
+  Validating 100% 21/21 batches [3.1s]
+  Epoch 22/30: train acc 0.7333 loss 0.7476 | val acc 0.6490 loss 0.8571
+
+--- Epoch 23/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.6s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 23/30: train acc 0.7328 loss 0.7472 | val acc 0.6653 loss 0.8231
+
+--- Epoch 24/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [17.2s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 24/30: train acc 0.7344 loss 0.7364 | val acc 0.7102 loss 0.7954
+  [NEW BEST] epoch 24 val 0.7102
+
+--- Epoch 25/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.4s]
+  Validating 100% 21/21 batches [3.1s]
+  Epoch 25/30: train acc 0.7495 loss 0.7178 | val acc 0.7102 loss 0.7862
+
+--- Epoch 26/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [4.3s]
+  Epoch 26/30: train acc 0.7489 loss 0.7339 | val acc 0.6857 loss 0.8017
+
+--- Epoch 27/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.6s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 27/30: train acc 0.7328 loss 0.7258 | val acc 0.7082 loss 0.7971
+
+--- Epoch 28/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.6s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 28/30: train acc 0.7452 loss 0.7171 | val acc 0.7082 loss 0.7987
+
+--- Epoch 29/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [17.2s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 29/30: train acc 0.7516 loss 0.7144 | val acc 0.6918 loss 0.8120
+
+--- Epoch 30/30 [CNN fold 3] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [3.1s]
+  Epoch 30/30: train acc 0.7548 loss 0.7092 | val acc 0.7082 loss 0.7932
+  Restoring best checkpoint (epoch 24, val_acc 0.7102)...
+  Validating 100% 21/21 batches [3.8s]
+  --- Frozen Test (held-out, val-best ckpt, fold 3) ---
+  Validating 100% 7/7 batches [1.8s]
+  Frozen test accuracy: 72.78% (n=158)
+
+======================================================================
+  FOLD 3/5 COMPLETE -- CNN  (10.3 min)
+======================================================================
+  Validation (val-best epoch 24):
+    Accuracy      : 71.02%
+    Balanced Acc  : 68.88%
+    Macro F1      : 67.42%
+    Kappa         : 0.6221
+    MCC           : 0.6230
+    ECE           : 0.0847
+    AUROC         : 0.9036
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 72.78%
+    Balanced Acc  : 66.03%
+    Macro F1      : 65.51%
+    Kappa         : 0.6458
+    MCC           : 0.6464
+    ECE           : 0.0787
+    AUROC         : 0.9008
+======================================================================
+  [CNN fold 4/5] train=1897 val=453 ...
+
+--- Epoch  1/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.2s]
+  Validating 100% 19/19 batches [2.7s]
+  Epoch  1/30: train acc 0.4444 loss 1.3340 | val acc 0.5651 loss 1.1477
+  [NEW BEST] epoch 1 val 0.5651
+
+--- Epoch  2/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [4.4s]
+  Epoch  2/30: train acc 0.5345 loss 1.1727 | val acc 0.5541 loss 1.1436
+
+--- Epoch  3/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.1s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch  3/30: train acc 0.5382 loss 1.1338 | val acc 0.4636 loss 1.3311
+
+--- Epoch  4/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.1s]
+  Validating 100% 19/19 batches [2.7s]
+  Epoch  4/30: train acc 0.5625 loss 1.0894 | val acc 0.6181 loss 1.0454
+  [NEW BEST] epoch 4 val 0.6181
+
+--- Epoch  5/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.7s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch  5/30: train acc 0.5962 loss 1.0543 | val acc 0.6071 loss 0.9985
+
+--- Epoch  6/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [16.9s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch  6/30: train acc 0.6147 loss 1.0127 | val acc 0.6071 loss 0.9974
+
+--- Epoch  7/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [16.9s]
+  Validating 100% 19/19 batches [4.1s]
+  Epoch  7/30: train acc 0.6194 loss 0.9936 | val acc 0.6313 loss 1.0519
+  [NEW BEST] epoch 7 val 0.6313
+
+--- Epoch  8/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch  8/30: train acc 0.6347 loss 0.9662 | val acc 0.5850 loss 1.0741
+
+--- Epoch  9/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [16.7s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch  9/30: train acc 0.6389 loss 0.9501 | val acc 0.6490 loss 1.0015
+  [NEW BEST] epoch 9 val 0.6490
+
+--- Epoch 10/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.8s]
+  Validating 100% 19/19 batches [3.2s]
+  Epoch 10/30: train acc 0.6436 loss 0.9509 | val acc 0.6424 loss 1.0245
+
+--- Epoch 11/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [16.8s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch 11/30: train acc 0.6510 loss 0.9226 | val acc 0.5806 loss 1.0491
+
+--- Epoch 12/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.3s]
+  Validating 100% 19/19 batches [4.4s]
+  Epoch 12/30: train acc 0.6642 loss 0.9068 | val acc 0.6446 loss 0.9351
+
+--- Epoch 13/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch 13/30: train acc 0.6805 loss 0.8721 | val acc 0.6909 loss 0.8543
+  [NEW BEST] epoch 13 val 0.6909
+
+--- Epoch 14/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch 14/30: train acc 0.6900 loss 0.8477 | val acc 0.6181 loss 0.9869
+
+--- Epoch 15/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [18.0s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 15/30: train acc 0.6827 loss 0.8370 | val acc 0.6446 loss 0.9268
+
+--- Epoch 16/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.5s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch 16/30: train acc 0.7022 loss 0.8350 | val acc 0.6578 loss 0.8637
+
+--- Epoch 17/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.4s]
+  Validating 100% 19/19 batches [4.6s]
+  Epoch 17/30: train acc 0.7027 loss 0.8136 | val acc 0.7020 loss 0.8963
+  [NEW BEST] epoch 17 val 0.7020
+
+--- Epoch 18/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.0s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch 18/30: train acc 0.6943 loss 0.8237 | val acc 0.7130 loss 0.8439
+  [NEW BEST] epoch 18 val 0.7130
+
+--- Epoch 19/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.5s]
+  Validating 100% 19/19 batches [3.4s]
+  Epoch 19/30: train acc 0.7127 loss 0.8016 | val acc 0.7064 loss 0.8539
+
+--- Epoch 20/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [18.4s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch 20/30: train acc 0.7153 loss 0.7872 | val acc 0.7174 loss 0.7939
+  [NEW BEST] epoch 20 val 0.7174
+
+--- Epoch 21/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.3s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch 21/30: train acc 0.7206 loss 0.7739 | val acc 0.7351 loss 0.8159
+  [NEW BEST] epoch 21 val 0.7351
+
+--- Epoch 22/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.9s]
+  Validating 100% 19/19 batches [3.9s]
+  Epoch 22/30: train acc 0.7153 loss 0.7857 | val acc 0.7329 loss 0.7954
+
+--- Epoch 23/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.2s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch 23/30: train acc 0.7312 loss 0.7604 | val acc 0.7020 loss 0.8510
+
+--- Epoch 24/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.4s]
+  Validating 100% 19/19 batches [4.3s]
+  Epoch 24/30: train acc 0.7322 loss 0.7406 | val acc 0.7219 loss 0.8099
+
+--- Epoch 25/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.7s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch 25/30: train acc 0.7443 loss 0.7364 | val acc 0.7219 loss 0.8340
+
+--- Epoch 26/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.5s]
+  Validating 100% 19/19 batches [3.6s]
+  Epoch 26/30: train acc 0.7348 loss 0.7434 | val acc 0.7285 loss 0.8097
+
+--- Epoch 27/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [18.3s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch 27/30: train acc 0.7338 loss 0.7253 | val acc 0.7373 loss 0.7993
+  [NEW BEST] epoch 27 val 0.7373
+
+--- Epoch 28/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.4s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch 28/30: train acc 0.7454 loss 0.7338 | val acc 0.7241 loss 0.7901
+
+--- Epoch 29/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [18.2s]
+  Validating 100% 19/19 batches [3.6s]
+  Epoch 29/30: train acc 0.7533 loss 0.7184 | val acc 0.7395 loss 0.7689
+  [NEW BEST] epoch 29 val 0.7395
+
+--- Epoch 30/30 [CNN fold 4] ---
+  Training 100% 80/80 batches [17.2s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch 30/30: train acc 0.7559 loss 0.7216 | val acc 0.7329 loss 0.8021
+  Restoring best checkpoint (epoch 29, val_acc 0.7395)...
+  Validating 100% 19/19 batches [2.9s]
+  --- Frozen Test (held-out, val-best ckpt, fold 4) ---
+  Validating 100% 7/7 batches [1.9s]
+  Frozen test accuracy: 72.78% (n=158)
+
+======================================================================
+  FOLD 4/5 COMPLETE -- CNN  (10.5 min)
+======================================================================
+  Validation (val-best epoch 29):
+    Accuracy      : 73.95%
+    Balanced Acc  : 70.89%
+    Macro F1      : 69.00%
+    Kappa         : 0.6640
+    MCC           : 0.6686
+    ECE           : 0.0785
+    AUROC         : 0.9139
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 72.78%
+    Balanced Acc  : 64.26%
+    Macro F1      : 63.64%
+    Kappa         : 0.6426
+    MCC           : 0.6438
+    ECE           : 0.0721
+    AUROC         : 0.8975
+======================================================================
+  [CNN fold 5/5] train=1863 val=487 ...
+
+--- Epoch  1/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.1s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch  1/30: train acc 0.4541 loss 1.3383 | val acc 0.4312 loss 1.2889
+  [NEW BEST] epoch 1 val 0.4312
+
+--- Epoch  2/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.9s]
+  Validating 100% 21/21 batches [3.9s]
+  Epoch  2/30: train acc 0.5384 loss 1.1764 | val acc 0.5298 loss 1.2028
+  [NEW BEST] epoch 2 val 0.5298
+
+--- Epoch  3/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.5s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch  3/30: train acc 0.5647 loss 1.1189 | val acc 0.4969 loss 1.1974
+
+--- Epoch  4/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.1s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch  4/30: train acc 0.5872 loss 1.0684 | val acc 0.5585 loss 1.1262
+  [NEW BEST] epoch 4 val 0.5585
+
+--- Epoch  5/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.1s]
+  Validating 100% 21/21 batches [4.1s]
+  Epoch  5/30: train acc 0.5888 loss 1.0639 | val acc 0.5072 loss 1.1688
+
+--- Epoch  6/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.9s]
+  Validating 100% 21/21 batches [2.9s]
+  Epoch  6/30: train acc 0.6092 loss 1.0039 | val acc 0.4805 loss 1.2070
+
+--- Epoch  7/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.0s]
+  Validating 100% 21/21 batches [4.1s]
+  Epoch  7/30: train acc 0.6194 loss 0.9797 | val acc 0.5996 loss 1.0263
+  [NEW BEST] epoch 7 val 0.5996
+
+--- Epoch  8/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.3s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch  8/30: train acc 0.6549 loss 0.9342 | val acc 0.6222 loss 0.9811
+  [NEW BEST] epoch 8 val 0.6222
+
+--- Epoch  9/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.1s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch  9/30: train acc 0.6484 loss 0.9225 | val acc 0.6201 loss 0.9109
+
+--- Epoch 10/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.9s]
+  Validating 100% 21/21 batches [4.2s]
+  Epoch 10/30: train acc 0.6479 loss 0.9222 | val acc 0.6242 loss 0.9495
+  [NEW BEST] epoch 10 val 0.6242
+
+--- Epoch 11/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 11/30: train acc 0.6656 loss 0.8745 | val acc 0.6550 loss 0.9265
+  [NEW BEST] epoch 11 val 0.6550
+
+--- Epoch 12/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.7s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch 12/30: train acc 0.6774 loss 0.8644 | val acc 0.6509 loss 0.9351
+
+--- Epoch 13/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.7s]
+  Validating 100% 21/21 batches [3.1s]
+  Epoch 13/30: train acc 0.6688 loss 0.8629 | val acc 0.6756 loss 0.8806
+  [NEW BEST] epoch 13 val 0.6756
+
+--- Epoch 14/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.9s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 14/30: train acc 0.6763 loss 0.8395 | val acc 0.6489 loss 0.8847
+
+--- Epoch 15/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.2s]
+  Validating 100% 21/21 batches [4.1s]
+  Epoch 15/30: train acc 0.6881 loss 0.8123 | val acc 0.5729 loss 0.9995
+
+--- Epoch 16/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [3.1s]
+  Epoch 16/30: train acc 0.6919 loss 0.8113 | val acc 0.6591 loss 0.8849
+
+--- Epoch 17/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.0s]
+  Validating 100% 21/21 batches [3.9s]
+  Epoch 17/30: train acc 0.7091 loss 0.7806 | val acc 0.7043 loss 0.8255
+  [NEW BEST] epoch 17 val 0.7043
+
+--- Epoch 18/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.1s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 18/30: train acc 0.7112 loss 0.7883 | val acc 0.6407 loss 0.8612
+
+--- Epoch 19/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.7s]
+  Validating 100% 21/21 batches [3.1s]
+  Epoch 19/30: train acc 0.7112 loss 0.7804 | val acc 0.6899 loss 0.8103
+
+--- Epoch 20/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.9s]
+  Validating 100% 21/21 batches [4.1s]
+  Epoch 20/30: train acc 0.7257 loss 0.7715 | val acc 0.6448 loss 0.8598
+
+--- Epoch 21/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.7s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 21/30: train acc 0.7289 loss 0.7510 | val acc 0.6817 loss 0.8103
+
+--- Epoch 22/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 22/30: train acc 0.7391 loss 0.7295 | val acc 0.6591 loss 0.8331
+
+--- Epoch 23/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.2s]
+  Validating 100% 21/21 batches [2.9s]
+  Epoch 23/30: train acc 0.7182 loss 0.7444 | val acc 0.6961 loss 0.8274
+
+--- Epoch 24/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 24/30: train acc 0.7472 loss 0.7198 | val acc 0.6920 loss 0.8171
+
+--- Epoch 25/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [4.3s]
+  Epoch 25/30: train acc 0.7450 loss 0.7215 | val acc 0.6940 loss 0.8146
+
+--- Epoch 26/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.9s]
+  Validating 100% 21/21 batches [2.9s]
+  Epoch 26/30: train acc 0.7520 loss 0.7114 | val acc 0.7228 loss 0.7855
+  [NEW BEST] epoch 26 val 0.7228
+
+--- Epoch 27/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.9s]
+  Validating 100% 21/21 batches [3.5s]
+  Epoch 27/30: train acc 0.7488 loss 0.7012 | val acc 0.6961 loss 0.7868
+
+--- Epoch 28/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [17.5s]
+  Validating 100% 21/21 batches [2.9s]
+  Epoch 28/30: train acc 0.7466 loss 0.6970 | val acc 0.6838 loss 0.8111
+
+--- Epoch 29/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.5s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 29/30: train acc 0.7552 loss 0.7063 | val acc 0.7187 loss 0.7844
+
+--- Epoch 30/30 [CNN fold 5] ---
+  Training 100% 78/78 batches [16.8s]
+  Validating 100% 21/21 batches [4.3s]
+  Epoch 30/30: train acc 0.7536 loss 0.6894 | val acc 0.6940 loss 0.7958
+  Restoring best checkpoint (epoch 26, val_acc 0.7228)...
+  Validating 100% 21/21 batches [2.9s]
+  --- Frozen Test (held-out, val-best ckpt, fold 5) ---
+  Validating 100% 7/7 batches [1.4s]
+  Frozen test accuracy: 71.52% (n=158)
+
+======================================================================
+  FOLD 5/5 COMPLETE -- CNN  (10.3 min)
+======================================================================
+  Validation (val-best epoch 26):
+    Accuracy      : 72.28%
+    Balanced Acc  : 69.92%
+    Macro F1      : 68.30%
+    Kappa         : 0.6460
+    MCC           : 0.6490
+    ECE           : 0.0778
+    AUROC         : 0.9069
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 71.52%
+    Balanced Acc  : 63.73%
+    Macro F1      : 63.34%
+    Kappa         : 0.6251
+    MCC           : 0.6268
+    ECE           : 0.0935
+    AUROC         : 0.9018
+======================================================================
+
+######################################################################
+#  MODEL COMPLETE: CNN  (5/5 folds, 51.8 min total)
+######################################################################
+
+  VALIDATION ACROSS 5 FOLDS (val-best checkpoint per fold):
+  Metric                 Mean +/- SD                    Per-fold values
+  ---------------------- ------------------------------ ------------------------------
+  Accuracy               70.85 +/- 2.40                 [68.1, 68.8, 71.0, 74.0, 72.3]
+  Macro F1               66.18 +/- 3.03                 [61.7, 64.5, 67.4, 69.0, 68.3]
+  Balanced Acc           67.18 +/- 3.91                 [61.7, 64.5, 68.9, 70.9, 69.9]
+  Kappa                  0.6230 +/- 0.0330
+  MCC                    0.6250 +/- 0.0346
+  ECE (lower=better)     0.0756 +/- 0.0144
+  AUROC                  0.9020 +/- 0.0096
+
+  FROZEN TEST ACROSS 5 FOLDS (val-best ckpt per fold):
+  Metric                 Mean +/- SD                    Per-fold values
+  ---------------------- ------------------------------ ------------------------------
+  Accuracy               71.77 +/- 1.06                 [71.5, 70.3, 72.8, 72.8, 71.5]
+  Macro F1               63.68 +/- 1.07                 [63.2, 62.7, 65.5, 63.6, 63.3]
+  Kappa                  0.6300 +/- 0.0141
+
+######################################################################
+
+======================================================================
+  RUNNING LEADERBOARD (models completed so far)
+======================================================================
+  Model              Val Acc (%)          Test Acc (%)         Val F1 (%)
+  ------------------ -------------------- -------------------- --------------------
+  1. CoAtNet          90.2+/-1.8      89.7+/-0.3           87.8
+  2. H-CoAtNet        89.8+/-1.7      89.1+/-2.0           87.8 <-- proposed
+  3. CNN              70.8+/-2.4      71.8+/-1.1           66.2
+======================================================================
+
+**********************************************************************
+*  TRAINING: GFT
+*  lr=5e-05, batch=24, pretrained=True, aug=base, ls=0.0
+*  5 folds x 30 epochs
+**********************************************************************
+  [GFT fold 1/5] train=1876 val=474 ...
+
+--- Epoch  1/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [15.7s]
+  Validating 100% 20/20 batches [5.2s]
+  Epoch  1/30: train acc 0.2932 loss 1.6030 | val acc 0.2215 loss 1.5190
+  [NEW BEST] epoch 1 val 0.2215
+
+--- Epoch  2/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [12.9s]
+  Validating 100% 20/20 batches [3.1s]
+  Epoch  2/30: train acc 0.4035 loss 1.4469 | val acc 0.2700 loss 1.5283
+  [NEW BEST] epoch 2 val 0.2700
+
+--- Epoch  3/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.7s]
+  Validating 100% 20/20 batches [2.7s]
+  Epoch  3/30: train acc 0.3209 loss 1.4874 | val acc 0.4072 loss 1.3815
+  [NEW BEST] epoch 3 val 0.4072
+
+--- Epoch  4/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.5s]
+  Validating 100% 20/20 batches [2.8s]
+  Epoch  4/30: train acc 0.3747 loss 1.4374 | val acc 0.2700 loss 1.4026
+
+--- Epoch  5/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.5s]
+  Validating 100% 20/20 batches [2.7s]
+  Epoch  5/30: train acc 0.4094 loss 1.3831 | val acc 0.5844 loss 1.1498
+  [NEW BEST] epoch 5 val 0.5844
+
+--- Epoch  6/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.6s]
+  Validating 100% 20/20 batches [2.6s]
+  Epoch  6/30: train acc 0.4808 loss 1.3779 | val acc 0.4156 loss 1.4264
+
+--- Epoch  7/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.4s]
+  Validating 100% 20/20 batches [2.7s]
+  Epoch  7/30: train acc 0.5416 loss 1.1856 | val acc 0.5316 loss 1.2382
+
+--- Epoch  8/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.4s]
+  Validating 100% 20/20 batches [4.1s]
+  Epoch  8/30: train acc 0.5155 loss 1.2288 | val acc 0.4958 loss 1.4400
+
+--- Epoch  9/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [12.6s]
+  Validating 100% 20/20 batches [3.8s]
+  Epoch  9/30: train acc 0.5922 loss 1.1083 | val acc 0.4747 loss 1.1876
+
+--- Epoch 10/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.6s]
+  Validating 100% 20/20 batches [2.6s]
+  Epoch 10/30: train acc 0.6498 loss 1.0201 | val acc 0.5274 loss 1.2072
+
+--- Epoch 11/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.4s]
+  Validating 100% 20/20 batches [2.7s]
+  Epoch 11/30: train acc 0.5885 loss 1.0832 | val acc 0.6414 loss 1.0879
+  [NEW BEST] epoch 11 val 0.6414
+
+--- Epoch 12/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.8s]
+  Validating 100% 20/20 batches [2.7s]
+  Epoch 12/30: train acc 0.6317 loss 1.0155 | val acc 0.6730 loss 1.0343
+  [NEW BEST] epoch 12 val 0.6730
+
+--- Epoch 13/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.5s]
+  Validating 100% 20/20 batches [2.6s]
+  Epoch 13/30: train acc 0.6407 loss 1.0044 | val acc 0.6055 loss 1.0414
+
+--- Epoch 14/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.6s]
+  Validating 100% 20/20 batches [2.6s]
+  Epoch 14/30: train acc 0.6546 loss 0.9486 | val acc 0.6055 loss 1.0584
+
+--- Epoch 15/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.5s]
+  Validating 100% 20/20 batches [3.0s]
+  Epoch 15/30: train acc 0.6732 loss 0.8836 | val acc 0.6266 loss 1.0203
+
+--- Epoch 16/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.1s]
+  Validating 100% 20/20 batches [4.1s]
+  Epoch 16/30: train acc 0.6999 loss 0.8171 | val acc 0.6435 loss 1.0203
+
+--- Epoch 17/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [12.3s]
+  Validating 100% 20/20 batches [3.8s]
+  Epoch 17/30: train acc 0.6967 loss 0.7976 | val acc 0.6582 loss 0.9588
+
+--- Epoch 18/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.6s]
+  Validating 100% 20/20 batches [2.6s]
+  Epoch 18/30: train acc 0.6999 loss 0.8179 | val acc 0.6835 loss 0.8744
+  [NEW BEST] epoch 18 val 0.6835
+
+--- Epoch 19/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.6s]
+  Validating 100% 20/20 batches [2.7s]
+  Epoch 19/30: train acc 0.7409 loss 0.7281 | val acc 0.6920 loss 0.9034
+  [NEW BEST] epoch 19 val 0.6920
+
+--- Epoch 20/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.6s]
+  Validating 100% 20/20 batches [2.7s]
+  Epoch 20/30: train acc 0.7468 loss 0.6894 | val acc 0.7110 loss 0.7599
+  [NEW BEST] epoch 20 val 0.7110
+
+--- Epoch 21/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.7s]
+  Validating 100% 20/20 batches [2.6s]
+  Epoch 21/30: train acc 0.7649 loss 0.6580 | val acc 0.7236 loss 0.7422
+  [NEW BEST] epoch 21 val 0.7236
+
+--- Epoch 22/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.5s]
+  Validating 100% 20/20 batches [2.6s]
+  Epoch 22/30: train acc 0.7708 loss 0.6283 | val acc 0.7110 loss 0.8067
+
+--- Epoch 23/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.5s]
+  Validating 100% 20/20 batches [2.9s]
+  Epoch 23/30: train acc 0.7724 loss 0.6069 | val acc 0.7046 loss 0.7512
+
+--- Epoch 24/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.2s]
+  Validating 100% 20/20 batches [4.2s]
+  Epoch 24/30: train acc 0.7697 loss 0.5972 | val acc 0.7194 loss 0.8469
+
+--- Epoch 25/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [12.9s]
+  Validating 100% 20/20 batches [3.6s]
+  Epoch 25/30: train acc 0.7916 loss 0.5669 | val acc 0.7215 loss 0.7378
+
+--- Epoch 26/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.6s]
+  Validating 100% 20/20 batches [2.7s]
+  Epoch 26/30: train acc 0.7905 loss 0.5749 | val acc 0.7278 loss 0.7613
+  [NEW BEST] epoch 26 val 0.7278
+
+--- Epoch 27/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.5s]
+  Validating 100% 20/20 batches [2.6s]
+  Epoch 27/30: train acc 0.8097 loss 0.5395 | val acc 0.7468 loss 0.7329
+  [NEW BEST] epoch 27 val 0.7468
+
+--- Epoch 28/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.4s]
+  Validating 100% 20/20 batches [2.7s]
+  Epoch 28/30: train acc 0.8108 loss 0.5268 | val acc 0.7363 loss 0.7461
+
+--- Epoch 29/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.5s]
+  Validating 100% 20/20 batches [2.6s]
+  Epoch 29/30: train acc 0.8108 loss 0.5325 | val acc 0.7321 loss 0.7514
+
+--- Epoch 30/30 [GFT fold 1] ---
+  Training 100% 79/79 batches [13.5s]
+  Validating 100% 20/20 batches [2.8s]
+  Epoch 30/30: train acc 0.8102 loss 0.5184 | val acc 0.7300 loss 0.7516
+  Restoring best checkpoint (epoch 27, val_acc 0.7468)...
+  Validating 100% 20/20 batches [4.1s]
+  --- Frozen Test (held-out, val-best ckpt, fold 1) ---
+  Validating 100% 7/7 batches [2.2s]
+  Frozen test accuracy: 81.01% (n=158)
+
+======================================================================
+  FOLD 1/5 COMPLETE -- GFT  (8.5 min)
+======================================================================
+  Validation (val-best epoch 27):
+    Accuracy      : 74.68%
+    Balanced Acc  : 71.29%
+    Macro F1      : 69.49%
+    Kappa         : 0.6733
+    MCC           : 0.6759
+    ECE           : 0.0534
+    AUROC         : 0.9260
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 81.01%
+    Balanced Acc  : 72.63%
+    Macro F1      : 71.68%
+    Kappa         : 0.7517
+    MCC           : 0.7538
+    ECE           : 0.0910
+    AUROC         : 0.9220
+======================================================================
+  [GFT fold 2/5] train=1904 val=446 ...
+
+--- Epoch  1/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [14.9s]
+  Validating 100% 19/19 batches [2.6s]
+  Epoch  1/30: train acc 0.4217 loss 1.3951 | val acc 0.5987 loss 1.0241
+  [NEW BEST] epoch 1 val 0.5987
+
+--- Epoch  2/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [14.0s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch  2/30: train acc 0.6570 loss 0.9512 | val acc 0.6794 loss 0.8432
+  [NEW BEST] epoch 2 val 0.6794
+
+--- Epoch  3/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.8s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch  3/30: train acc 0.7742 loss 0.6905 | val acc 0.7130 loss 0.7814
+  [NEW BEST] epoch 3 val 0.7130
+
+--- Epoch  4/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.8s]
+  Validating 100% 19/19 batches [3.6s]
+  Epoch  4/30: train acc 0.7558 loss 0.6965 | val acc 0.6861 loss 0.8976
+
+--- Epoch  5/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.0s]
+  Validating 100% 19/19 batches [3.7s]
+  Epoch  5/30: train acc 0.7206 loss 0.7749 | val acc 0.6547 loss 1.0376
+
+--- Epoch  6/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.6s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch  6/30: train acc 0.7143 loss 0.7882 | val acc 0.7713 loss 0.6771
+  [NEW BEST] epoch 6 val 0.7713
+
+--- Epoch  7/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch  7/30: train acc 0.8214 loss 0.5172 | val acc 0.7578 loss 0.6940
+
+--- Epoch  8/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.5s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch  8/30: train acc 0.8493 loss 0.4369 | val acc 0.7780 loss 0.6735
+  [NEW BEST] epoch 8 val 0.7780
+
+--- Epoch  9/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch  9/30: train acc 0.8524 loss 0.3962 | val acc 0.8027 loss 0.6150
+  [NEW BEST] epoch 9 val 0.8027
+
+--- Epoch 10/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 10/30: train acc 0.8718 loss 0.3506 | val acc 0.7668 loss 0.7281
+
+--- Epoch 11/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.9s]
+  Validating 100% 19/19 batches [2.6s]
+  Epoch 11/30: train acc 0.8792 loss 0.3229 | val acc 0.7511 loss 0.7847
+
+--- Epoch 12/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.4s]
+  Validating 100% 19/19 batches [3.7s]
+  Epoch 12/30: train acc 0.8897 loss 0.3081 | val acc 0.7825 loss 0.6650
+
+--- Epoch 13/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [12.8s]
+  Validating 100% 19/19 batches [3.8s]
+  Epoch 13/30: train acc 0.9175 loss 0.2313 | val acc 0.8274 loss 0.7026
+  [NEW BEST] epoch 13 val 0.8274
+
+--- Epoch 14/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.6s]
+  Validating 100% 19/19 batches [2.8s]
+  Epoch 14/30: train acc 0.9133 loss 0.2201 | val acc 0.8206 loss 0.6659
+
+--- Epoch 15/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.6s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 15/30: train acc 0.9359 loss 0.1881 | val acc 0.8117 loss 0.6918
+
+--- Epoch 16/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.6s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 16/30: train acc 0.9485 loss 0.1517 | val acc 0.8004 loss 0.7884
+
+--- Epoch 17/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.6s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 17/30: train acc 0.9401 loss 0.1605 | val acc 0.8251 loss 0.7105
+
+--- Epoch 18/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.8s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 18/30: train acc 0.9475 loss 0.1419 | val acc 0.8206 loss 0.7719
+
+--- Epoch 19/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.8s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 19/30: train acc 0.9569 loss 0.1216 | val acc 0.7982 loss 0.8442
+
+--- Epoch 20/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch 20/30: train acc 0.9585 loss 0.1136 | val acc 0.8027 loss 0.8187
+
+--- Epoch 21/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [12.6s]
+  Validating 100% 19/19 batches [4.0s]
+  Epoch 21/30: train acc 0.9564 loss 0.1124 | val acc 0.8117 loss 0.7789
+
+--- Epoch 22/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.3s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch 22/30: train acc 0.9653 loss 0.0917 | val acc 0.8161 loss 0.8093
+
+--- Epoch 23/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 23/30: train acc 0.9690 loss 0.0846 | val acc 0.8027 loss 0.8504
+
+--- Epoch 24/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.8s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 24/30: train acc 0.9764 loss 0.0814 | val acc 0.8139 loss 0.8203
+
+--- Epoch 25/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [14.0s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 25/30: train acc 0.9748 loss 0.0703 | val acc 0.8139 loss 0.8121
+
+--- Epoch 26/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.9s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 26/30: train acc 0.9790 loss 0.0671 | val acc 0.8072 loss 0.8155
+
+--- Epoch 27/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [3.1s]
+  Epoch 27/30: train acc 0.9795 loss 0.0672 | val acc 0.8206 loss 0.7959
+
+--- Epoch 28/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.1s]
+  Validating 100% 19/19 batches [4.1s]
+  Epoch 28/30: train acc 0.9764 loss 0.0650 | val acc 0.8117 loss 0.8039
+
+--- Epoch 29/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.0s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch 29/30: train acc 0.9795 loss 0.0666 | val acc 0.8094 loss 0.8072
+
+--- Epoch 30/30 [GFT fold 2] ---
+  Training 100% 80/80 batches [13.6s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 30/30: train acc 0.9769 loss 0.0676 | val acc 0.8094 loss 0.8087
+  Restoring best checkpoint (epoch 13, val_acc 0.8274)...
+  Validating 100% 19/19 batches [2.5s]
+  --- Frozen Test (held-out, val-best ckpt, fold 2) ---
+  Validating 100% 7/7 batches [1.2s]
+  Frozen test accuracy: 82.91% (n=158)
+
+======================================================================
+  FOLD 2/5 COMPLETE -- GFT  (8.4 min)
+======================================================================
+  Validation (val-best epoch 13):
+    Accuracy      : 82.74%
+    Balanced Acc  : 79.87%
+    Macro F1      : 79.53%
+    Kappa         : 0.7786
+    MCC           : 0.7808
+    ECE           : 0.0773
+    AUROC         : 0.9380
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 82.91%
+    Balanced Acc  : 77.38%
+    Macro F1      : 75.94%
+    Kappa         : 0.7791
+    MCC           : 0.7808
+    ECE           : 0.1097
+    AUROC         : 0.9433
+======================================================================
+  [GFT fold 3/5] train=1860 val=490 ...
+
+--- Epoch  1/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [14.3s]
+  Validating 100% 21/21 batches [5.0s]
+  Epoch  1/30: train acc 0.3849 loss 1.4343 | val acc 0.3735 loss 1.2648
+  [NEW BEST] epoch 1 val 0.3735
+
+--- Epoch  2/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [12.9s]
+  Validating 100% 21/21 batches [3.7s]
+  Epoch  2/30: train acc 0.4823 loss 1.2356 | val acc 0.5143 loss 1.1745
+  [NEW BEST] epoch 2 val 0.5143
+
+--- Epoch  3/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.8s]
+  Validating 100% 21/21 batches [2.8s]
+  Epoch  3/30: train acc 0.5731 loss 1.1264 | val acc 0.4918 loss 1.2304
+
+--- Epoch  4/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.8s]
+  Validating 100% 21/21 batches [2.8s]
+  Epoch  4/30: train acc 0.6559 loss 0.9862 | val acc 0.6878 loss 0.8516
+  [NEW BEST] epoch 4 val 0.6878
+
+--- Epoch  5/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.4s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch  5/30: train acc 0.7366 loss 0.8056 | val acc 0.6327 loss 0.8982
+
+--- Epoch  6/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.6s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch  6/30: train acc 0.7688 loss 0.7137 | val acc 0.6551 loss 0.8601
+
+--- Epoch  7/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.7s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch  7/30: train acc 0.8000 loss 0.6123 | val acc 0.7510 loss 0.6324
+  [NEW BEST] epoch 7 val 0.7510
+
+--- Epoch  8/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.8s]
+  Validating 100% 21/21 batches [3.6s]
+  Epoch  8/30: train acc 0.8446 loss 0.4832 | val acc 0.7878 loss 0.5722
+  [NEW BEST] epoch 8 val 0.7878
+
+--- Epoch  9/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [12.5s]
+  Validating 100% 21/21 batches [4.2s]
+  Epoch  9/30: train acc 0.8930 loss 0.3667 | val acc 0.7918 loss 0.5641
+  [NEW BEST] epoch 9 val 0.7918
+
+--- Epoch 10/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [12.8s]
+  Validating 100% 21/21 batches [3.2s]
+  Epoch 10/30: train acc 0.8935 loss 0.3527 | val acc 0.8143 loss 0.5331
+  [NEW BEST] epoch 10 val 0.8143
+
+--- Epoch 11/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.6s]
+  Validating 100% 21/21 batches [2.8s]
+  Epoch 11/30: train acc 0.9231 loss 0.2624 | val acc 0.8020 loss 0.6003
+
+--- Epoch 12/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.4s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 12/30: train acc 0.9403 loss 0.2023 | val acc 0.7694 loss 0.7888
+
+--- Epoch 13/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.6s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 13/30: train acc 0.9554 loss 0.1614 | val acc 0.8102 loss 0.7401
+
+--- Epoch 14/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.5s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 14/30: train acc 0.9430 loss 0.1930 | val acc 0.8571 loss 0.5969
+  [NEW BEST] epoch 14 val 0.8571
+
+--- Epoch 15/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.5s]
+  Validating 100% 21/21 batches [2.8s]
+  Epoch 15/30: train acc 0.9489 loss 0.1741 | val acc 0.8306 loss 0.5990
+
+--- Epoch 16/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.4s]
+  Validating 100% 21/21 batches [4.0s]
+  Epoch 16/30: train acc 0.9559 loss 0.1360 | val acc 0.8347 loss 0.5632
+
+--- Epoch 17/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [12.6s]
+  Validating 100% 21/21 batches [3.9s]
+  Epoch 17/30: train acc 0.9618 loss 0.1227 | val acc 0.8327 loss 0.6490
+
+--- Epoch 18/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.1s]
+  Validating 100% 21/21 batches [2.8s]
+  Epoch 18/30: train acc 0.9688 loss 0.1073 | val acc 0.8469 loss 0.5555
+
+--- Epoch 19/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.5s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 19/30: train acc 0.9774 loss 0.0840 | val acc 0.8551 loss 0.5418
+
+--- Epoch 20/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.4s]
+  Validating 100% 21/21 batches [2.8s]
+  Epoch 20/30: train acc 0.9828 loss 0.0685 | val acc 0.8551 loss 0.5682
+
+--- Epoch 21/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.4s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 21/30: train acc 0.9849 loss 0.0567 | val acc 0.8449 loss 0.5789
+
+--- Epoch 22/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.1s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 22/30: train acc 0.9780 loss 0.0728 | val acc 0.8429 loss 0.5778
+
+--- Epoch 23/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.1s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 23/30: train acc 0.9876 loss 0.0523 | val acc 0.8388 loss 0.6071
+
+--- Epoch 24/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [12.7s]
+  Validating 100% 21/21 batches [3.9s]
+  Epoch 24/30: train acc 0.9882 loss 0.0439 | val acc 0.8510 loss 0.5949
+
+--- Epoch 25/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [11.9s]
+  Validating 100% 21/21 batches [4.3s]
+  Epoch 25/30: train acc 0.9903 loss 0.0369 | val acc 0.8367 loss 0.6227
+
+--- Epoch 26/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [12.4s]
+  Validating 100% 21/21 batches [3.5s]
+  Epoch 26/30: train acc 0.9919 loss 0.0344 | val acc 0.8449 loss 0.6485
+
+--- Epoch 27/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.3s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 27/30: train acc 0.9898 loss 0.0406 | val acc 0.8469 loss 0.6555
+
+--- Epoch 28/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.7s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 28/30: train acc 0.9914 loss 0.0344 | val acc 0.8429 loss 0.6549
+
+--- Epoch 29/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.3s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 29/30: train acc 0.9909 loss 0.0356 | val acc 0.8449 loss 0.6463
+
+--- Epoch 30/30 [GFT fold 3] ---
+  Training 100% 78/78 batches [13.3s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 30/30: train acc 0.9898 loss 0.0374 | val acc 0.8429 loss 0.6453
+  Restoring best checkpoint (epoch 14, val_acc 0.8571)...
+  Validating 100% 21/21 batches [2.8s]
+  --- Frozen Test (held-out, val-best ckpt, fold 3) ---
+  Validating 100% 7/7 batches [1.7s]
+  Frozen test accuracy: 86.08% (n=158)
+
+======================================================================
+  FOLD 3/5 COMPLETE -- GFT  (8.4 min)
+======================================================================
+  Validation (val-best epoch 14):
+    Accuracy      : 85.71%
+    Balanced Acc  : 82.08%
+    Macro F1      : 82.38%
+    Kappa         : 0.8106
+    MCC           : 0.8119
+    ECE           : 0.0852
+    AUROC         : 0.9417
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 86.08%
+    Balanced Acc  : 79.59%
+    Macro F1      : 79.60%
+    Kappa         : 0.8180
+    MCC           : 0.8183
+    ECE           : 0.1113
+    AUROC         : 0.9207
+======================================================================
+  [GFT fold 4/5] train=1897 val=453 ...
+
+--- Epoch  1/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.9s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch  1/30: train acc 0.3632 loss 1.4870 | val acc 0.5188 loss 1.2310
+  [NEW BEST] epoch 1 val 0.5188
+
+--- Epoch  2/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.5s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch  2/30: train acc 0.5883 loss 1.0582 | val acc 0.6689 loss 0.9377
+  [NEW BEST] epoch 2 val 0.6689
+
+--- Epoch  3/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.6s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch  3/30: train acc 0.7554 loss 0.6930 | val acc 0.7130 loss 0.7015
+  [NEW BEST] epoch 3 val 0.7130
+
+--- Epoch  4/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.3s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch  4/30: train acc 0.8477 loss 0.4555 | val acc 0.8190 loss 0.4874
+  [NEW BEST] epoch 4 val 0.8190
+
+--- Epoch  5/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.5s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch  5/30: train acc 0.8951 loss 0.3233 | val acc 0.8300 loss 0.4447
+  [NEW BEST] epoch 5 val 0.8300
+
+--- Epoch  6/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.8s]
+  Validating 100% 19/19 batches [3.3s]
+  Epoch  6/30: train acc 0.9262 loss 0.2239 | val acc 0.8300 loss 0.4910
+
+--- Epoch  7/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.0s]
+  Validating 100% 19/19 batches [4.0s]
+  Epoch  7/30: train acc 0.9462 loss 0.1654 | val acc 0.8344 loss 0.4875
+  [NEW BEST] epoch 7 val 0.8344
+
+--- Epoch  8/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.2s]
+  Validating 100% 19/19 batches [2.9s]
+  Epoch  8/30: train acc 0.9568 loss 0.1233 | val acc 0.8499 loss 0.5247
+  [NEW BEST] epoch 8 val 0.8499
+
+--- Epoch  9/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [2.6s]
+  Epoch  9/30: train acc 0.9694 loss 0.0885 | val acc 0.8543 loss 0.4460
+  [NEW BEST] epoch 9 val 0.8543
+
+--- Epoch 10/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.5s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 10/30: train acc 0.9837 loss 0.0508 | val acc 0.8653 loss 0.4669
+  [NEW BEST] epoch 10 val 0.8653
+
+--- Epoch 11/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [2.6s]
+  Epoch 11/30: train acc 0.9926 loss 0.0281 | val acc 0.8675 loss 0.5603
+  [NEW BEST] epoch 11 val 0.8675
+
+--- Epoch 12/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [2.6s]
+  Epoch 12/30: train acc 0.9942 loss 0.0255 | val acc 0.8631 loss 0.4299
+
+--- Epoch 13/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.5s]
+  Validating 100% 19/19 batches [2.6s]
+  Epoch 13/30: train acc 0.9979 loss 0.0138 | val acc 0.8720 loss 0.4315
+  [NEW BEST] epoch 13 val 0.8720
+
+--- Epoch 14/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.4s]
+  Validating 100% 19/19 batches [4.0s]
+  Epoch 14/30: train acc 0.9968 loss 0.0117 | val acc 0.8543 loss 0.6424
+
+--- Epoch 15/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.0s]
+  Validating 100% 19/19 batches [3.5s]
+  Epoch 15/30: train acc 0.9926 loss 0.0203 | val acc 0.8675 loss 0.5240
+
+--- Epoch 16/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 16/30: train acc 0.9979 loss 0.0130 | val acc 0.8786 loss 0.4461
+  [NEW BEST] epoch 16 val 0.8786
+
+--- Epoch 17/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 17/30: train acc 0.9989 loss 0.0088 | val acc 0.8631 loss 0.5804
+
+--- Epoch 18/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.9s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 18/30: train acc 0.9968 loss 0.0099 | val acc 0.8720 loss 0.5045
+
+--- Epoch 19/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.3s]
+  Validating 100% 19/19 batches [2.6s]
+  Epoch 19/30: train acc 0.9984 loss 0.0072 | val acc 0.8653 loss 0.5675
+
+--- Epoch 20/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [2.6s]
+  Epoch 20/30: train acc 0.9979 loss 0.0061 | val acc 0.8675 loss 0.5514
+
+--- Epoch 21/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [3.0s]
+  Epoch 21/30: train acc 0.9989 loss 0.0052 | val acc 0.8653 loss 0.5686
+
+--- Epoch 22/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.2s]
+  Validating 100% 19/19 batches [4.1s]
+  Epoch 22/30: train acc 0.9989 loss 0.0060 | val acc 0.8675 loss 0.5969
+
+--- Epoch 23/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [12.6s]
+  Validating 100% 19/19 batches [3.4s]
+  Epoch 23/30: train acc 0.9989 loss 0.0061 | val acc 0.8742 loss 0.5182
+
+--- Epoch 24/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.6s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 24/30: train acc 0.9995 loss 0.0045 | val acc 0.8720 loss 0.5287
+
+--- Epoch 25/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.6s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 25/30: train acc 0.9984 loss 0.0057 | val acc 0.8742 loss 0.5146
+
+--- Epoch 26/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.7s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 26/30: train acc 0.9989 loss 0.0051 | val acc 0.8742 loss 0.5309
+
+--- Epoch 27/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.3s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 27/30: train acc 0.9989 loss 0.0040 | val acc 0.8720 loss 0.5417
+
+--- Epoch 28/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.6s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 28/30: train acc 1.0000 loss 0.0040 | val acc 0.8720 loss 0.5416
+
+--- Epoch 29/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.5s]
+  Validating 100% 19/19 batches [2.5s]
+  Epoch 29/30: train acc 0.9989 loss 0.0048 | val acc 0.8720 loss 0.5369
+
+--- Epoch 30/30 [GFT fold 4] ---
+  Training 100% 80/80 batches [13.5s]
+  Validating 100% 19/19 batches [3.4s]
+  Epoch 30/30: train acc 1.0000 loss 0.0030 | val acc 0.8742 loss 0.5363
+  Restoring best checkpoint (epoch 16, val_acc 0.8786)...
+  Validating 100% 19/19 batches [3.3s]
+  --- Frozen Test (held-out, val-best ckpt, fold 4) ---
+  Validating 100% 7/7 batches [1.2s]
+  Frozen test accuracy: 86.71% (n=158)
+
+======================================================================
+  FOLD 4/5 COMPLETE -- GFT  (8.3 min)
+======================================================================
+  Validation (val-best epoch 16):
+    Accuracy      : 87.86%
+    Balanced Acc  : 86.12%
+    Macro F1      : 85.88%
+    Kappa         : 0.8427
+    MCC           : 0.8428
+    ECE           : 0.0698
+    AUROC         : 0.9760
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 86.71%
+    Balanced Acc  : 82.09%
+    Macro F1      : 81.46%
+    Kappa         : 0.8273
+    MCC           : 0.8285
+    ECE           : 0.0962
+    AUROC         : 0.9580
+======================================================================
+  [GFT fold 5/5] train=1863 val=487 ...
+
+--- Epoch  1/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [14.2s]
+  Validating 100% 21/21 batches [3.5s]
+  Epoch  1/30: train acc 0.3607 loss 1.5387 | val acc 0.5421 loss 1.2235
+  [NEW BEST] epoch 1 val 0.5421
+
+--- Epoch  2/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.3s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch  2/30: train acc 0.6377 loss 1.0954 | val acc 0.6283 loss 0.9594
+  [NEW BEST] epoch 2 val 0.6283
+
+--- Epoch  3/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.7s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch  3/30: train acc 0.7300 loss 0.7981 | val acc 0.6550 loss 0.9033
+  [NEW BEST] epoch 3 val 0.6550
+
+--- Epoch  4/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [12.5s]
+  Validating 100% 21/21 batches [4.1s]
+  Epoch  4/30: train acc 0.7461 loss 0.7365 | val acc 0.7741 loss 0.6615
+  [NEW BEST] epoch 4 val 0.7741
+
+--- Epoch  5/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [12.1s]
+  Validating 100% 21/21 batches [4.0s]
+  Epoch  5/30: train acc 0.7853 loss 0.6129 | val acc 0.7639 loss 0.6982
+
+--- Epoch  6/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [12.9s]
+  Validating 100% 21/21 batches [3.1s]
+  Epoch  6/30: train acc 0.8154 loss 0.5086 | val acc 0.7844 loss 0.6866
+  [NEW BEST] epoch 6 val 0.7844
+
+--- Epoch  7/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.2s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch  7/30: train acc 0.8363 loss 0.4796 | val acc 0.7864 loss 0.6686
+  [NEW BEST] epoch 7 val 0.7864
+
+--- Epoch  8/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.3s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch  8/30: train acc 0.8739 loss 0.3747 | val acc 0.8255 loss 0.5839
+  [NEW BEST] epoch 8 val 0.8255
+
+--- Epoch  9/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.2s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch  9/30: train acc 0.8991 loss 0.2956 | val acc 0.8316 loss 0.6621
+  [NEW BEST] epoch 9 val 0.8316
+
+--- Epoch 10/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.4s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 10/30: train acc 0.9130 loss 0.2517 | val acc 0.8152 loss 0.6071
+
+--- Epoch 11/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.2s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 11/30: train acc 0.9313 loss 0.2087 | val acc 0.8316 loss 0.5673
+
+--- Epoch 12/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.2s]
+  Validating 100% 21/21 batches [2.8s]
+  Epoch 12/30: train acc 0.9050 loss 0.2633 | val acc 0.8275 loss 0.6092
+
+--- Epoch 13/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.0s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 13/30: train acc 0.9415 loss 0.1650 | val acc 0.8152 loss 0.7256
+
+--- Epoch 14/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [12.6s]
+  Validating 100% 21/21 batches [4.0s]
+  Epoch 14/30: train acc 0.9452 loss 0.1775 | val acc 0.8172 loss 0.6707
+
+--- Epoch 15/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [12.8s]
+  Validating 100% 21/21 batches [3.0s]
+  Epoch 15/30: train acc 0.9646 loss 0.1250 | val acc 0.8316 loss 0.6554
+
+--- Epoch 16/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.3s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 16/30: train acc 0.9764 loss 0.0796 | val acc 0.8131 loss 0.8295
+
+--- Epoch 17/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.4s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 17/30: train acc 0.9785 loss 0.0717 | val acc 0.8460 loss 0.6579
+  [NEW BEST] epoch 17 val 0.8460
+
+--- Epoch 18/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.4s]
+  Validating 100% 21/21 batches [2.6s]
+  Epoch 18/30: train acc 0.9796 loss 0.0696 | val acc 0.8398 loss 0.7075
+
+--- Epoch 19/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.3s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 19/30: train acc 0.9855 loss 0.0610 | val acc 0.8275 loss 0.7170
+
+--- Epoch 20/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.3s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 20/30: train acc 0.9877 loss 0.0435 | val acc 0.8193 loss 0.8101
+
+--- Epoch 21/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.4s]
+  Validating 100% 21/21 batches [3.3s]
+  Epoch 21/30: train acc 0.9871 loss 0.0484 | val acc 0.8255 loss 0.7814
+
+--- Epoch 22/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [12.7s]
+  Validating 100% 21/21 batches [4.3s]
+  Epoch 22/30: train acc 0.9877 loss 0.0430 | val acc 0.8193 loss 0.8088
+
+--- Epoch 23/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [12.0s]
+  Validating 100% 21/21 batches [3.8s]
+  Epoch 23/30: train acc 0.9850 loss 0.0421 | val acc 0.8337 loss 0.7909
+
+--- Epoch 24/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [12.9s]
+  Validating 100% 21/21 batches [2.9s]
+  Epoch 24/30: train acc 0.9903 loss 0.0349 | val acc 0.8316 loss 0.8164
+
+--- Epoch 25/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.4s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 25/30: train acc 0.9903 loss 0.0367 | val acc 0.8357 loss 0.8124
+
+--- Epoch 26/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.4s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 26/30: train acc 0.9925 loss 0.0311 | val acc 0.8234 loss 0.8445
+
+--- Epoch 27/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.3s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 27/30: train acc 0.9941 loss 0.0279 | val acc 0.8316 loss 0.8292
+
+--- Epoch 28/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.4s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 28/30: train acc 0.9914 loss 0.0284 | val acc 0.8234 loss 0.8353
+
+--- Epoch 29/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.3s]
+  Validating 100% 21/21 batches [2.7s]
+  Epoch 29/30: train acc 0.9962 loss 0.0233 | val acc 0.8255 loss 0.8360
+
+--- Epoch 30/30 [GFT fold 5] ---
+  Training 100% 78/78 batches [13.2s]
+  Validating 100% 21/21 batches [2.8s]
+  Epoch 30/30: train acc 0.9941 loss 0.0275 | val acc 0.8275 loss 0.8359
+  Restoring best checkpoint (epoch 17, val_acc 0.8460)...
+  Validating 100% 21/21 batches [4.3s]
+  --- Frozen Test (held-out, val-best ckpt, fold 5) ---
+  Validating 100% 7/7 batches [1.2s]
+  Frozen test accuracy: 86.08% (n=158)
+
+======================================================================
+  FOLD 5/5 COMPLETE -- GFT  (8.3 min)
+======================================================================
+  Validation (val-best epoch 17):
+    Accuracy      : 84.60%
+    Balanced Acc  : 83.01%
+    Macro F1      : 82.34%
+    Kappa         : 0.8020
+    MCC           : 0.8024
+    ECE           : 0.1032
+    AUROC         : 0.9509
+  Frozen Test (val-best ckpt, evaluated once):
+    Accuracy      : 86.08%
+    Balanced Acc  : 82.91%
+    Macro F1      : 81.36%
+    Kappa         : 0.8195
+    MCC           : 0.8206
+    ECE           : 0.0918
+    AUROC         : 0.9465
+======================================================================
+
+######################################################################
+#  MODEL COMPLETE: GFT  (5/5 folds, 42.0 min total)
+######################################################################
+
+  VALIDATION ACROSS 5 FOLDS (val-best checkpoint per fold):
+  Metric                 Mean +/- SD                    Per-fold values
+  ---------------------- ------------------------------ ------------------------------
+  Accuracy               83.12 +/- 5.07                 [74.7, 82.7, 85.7, 87.9, 84.6]
+  Macro F1               79.92 +/- 6.25                 [69.5, 79.5, 82.4, 85.9, 82.3]
+  Balanced Acc           80.47 +/- 5.60                 [71.3, 79.9, 82.1, 86.1, 83.0]
+  Kappa                  0.7814 +/- 0.0647
+  MCC                    0.7828 +/- 0.0637
+  ECE (lower=better)     0.0778 +/- 0.0184
+  AUROC                  0.9465 +/- 0.0187
+
+  FROZEN TEST ACROSS 5 FOLDS (val-best ckpt per fold):
+  Metric                 Mean +/- SD                    Per-fold values
+  ---------------------- ------------------------------ ------------------------------
+  Accuracy               84.56 +/- 2.48                 [81.0, 82.9, 86.1, 86.7, 86.1]
+  Macro F1               78.01 +/- 4.18                 [71.7, 75.9, 79.6, 81.5, 81.4]
+  Kappa                  0.7991 +/- 0.0325
+
+######################################################################
+
+======================================================================
+  RUNNING LEADERBOARD (models completed so far)
+======================================================================
+  Model              Val Acc (%)          Test Acc (%)         Val F1 (%)
+  ------------------ -------------------- -------------------- --------------------
+  1. CoAtNet          90.2+/-1.8      89.7+/-0.3           87.8
+  2. H-CoAtNet        89.8+/-1.7      89.1+/-2.0           87.8 <-- proposed
+  3. GFT              83.1+/-5.1      84.6+/-2.5           79.9
+  4. CNN              70.8+/-2.4      71.8+/-1.1           66.2
+======================================================================
+
+ALL MODELS TRAINED. Total time: 330.2 min
+
+######################################################################
+#  FINAL RESULTS -- ALL MODELS
+######################################################################
+
+  Dataset: /content/ich-s-1
+  Dev pool: 2350 images | Frozen test: 158 images
+  Folds: 5 | Epochs: 30 | Seed: 42
+
+  Rank  Model              Val Acc (mean+/-SD)      Val F1 (mean+/-SD)       Test Acc (mean+/-SD)
+  ----- ------------------ ------------------------ ------------------------ ------------------------
+  1     CoAtNet            90.2+/-1.8      87.8+/-2.0      89.7+/-0.3
+  2     H-CoAtNet          89.8+/-1.7      87.8+/-1.4      89.1+/-2.0 *
+  3     GFT                83.1+/-5.1      79.9+/-6.2      84.6+/-2.5
+  4     CNN                70.8+/-2.4      66.2+/-3.0      71.8+/-1.1
+
+  * = proposed model
+  Output: /content/drive/MyDrive/HCoAtNet_KFOLD_RUN/results/kfold
+######################################################################
+
+Output directory: /content/drive/MyDrive/HCoAtNet_KFOLD_RUN/results/kfold
+exit: 0
